@@ -4,6 +4,7 @@
 import glob
 import copy
 import random
+import datetime
 
 import numpy as np
 import scipy as sp
@@ -198,9 +199,18 @@ def extents(f):
 # File loading defs
 ###############################################################################
 # Load a Thorlabs PM100D logged power series ##################################
-def load_PM100_log(path):
-
-    return
+def load_PM100_log(filepath):
+    a = open(filepath, 'r', encoding='utf-8')
+    data = a.readlines()
+    a.close()
+    t = []
+    P = []
+    for i0, val in enumerate(data[2:]):
+        t_string = val.split("\t")[0]
+        t_datetime = datetime.strptime(t_string, "%d/%m/%Y %H:%M:%S.%f   ")
+        t = np.append(t, t_datetime.timestamp() * 1000)
+        P = np.append(P, float(val.split("\t")[1]))
+    return (t, P)
 
 
 # Load multiple .csvs #########################################################

@@ -60,11 +60,11 @@ Ps1_bar = Ps1 - np.mean(Ps1)
 P1_avg = np.round(1e3 * np.mean(Ps1), 3)
 l1 = ('Avg P = ' + str(P1_avg) + 'mW')
 
-d1 = open(f1, 'r', encoding='utf-8')
-x1 = d1.readlines()
-d1.close()
-dts1 = []
-Ps1 = []
+d2 = open(f2, 'r', encoding='utf-8')
+x2 = d2.readlines()
+d2.close()
+dts2 = []
+Ps2 = []
 for i0, val in enumerate(x1[2:]):
     t = val.split("\t")[0]
     ts1 = datetime.strptime(t, "%d/%m/%Y %H:%M:%S.%f   ")
@@ -74,8 +74,6 @@ dts1 = dts1 - np.min(dts1) + np.max(dts0)
 Ps1_bar = Ps1 - np.mean(Ps1)
 P1_avg = np.round(1e3 * np.mean(Ps1), 3)
 l1 = ('Avg P = ' + str(P1_avg) + 'mW')
-
-
 ##############################################################################
 # Plot some figures
 ##############################################################################
