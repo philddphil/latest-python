@@ -21,18 +21,18 @@ np.set_printoptions(suppress=True)
 
 
 ###############################################################################
-# File & plotting defs
+# Plotting defs
 ###############################################################################
 # Modokai palette for plotting & set rcParams for nice plots ##################
 def palette():
-    colours = {'mdk_purple': [145 / 255, 125 / 255, 240 / 255],
-               'mdk_dgrey': [39 / 255, 40 / 255, 34 / 255],
-               'mdk_lgrey': [96 / 255, 96 / 255, 84 / 255],
-               'mdk_green': [95 / 255, 164 / 255, 44 / 255],
-               'mdk_yellow': [229 / 255, 220 / 255, 90 / 255],
-               'mdk_blue': [75 / 255, 179 / 255, 232 / 255],
-               'mdk_orange': [224 / 255, 134 / 255, 31 / 255],
-               'mdk_pink': [180 / 255, 38 / 255, 86 / 255],
+    colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
+               'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
+               'mnk_lgrey': [96 / 255, 96 / 255, 84 / 255],
+               'mnk_green': [95 / 255, 164 / 255, 44 / 255],
+               'mnk_yellow': [229 / 255, 220 / 255, 90 / 255],
+               'mnk_blue': [75 / 255, 179 / 255, 232 / 255],
+               'mnk_orange': [224 / 255, 134 / 255, 31 / 255],
+               'mnk_pink': [180 / 255, 38 / 255, 86 / 255],
                ####
                'rmp_dblue': [12 / 255, 35 / 255, 218 / 255],
                'rmp_lblue': [46 / 255, 38 / 255, 86 / 255],
@@ -81,53 +81,19 @@ def palette():
     plt.rcParams['legend.fontsize'] = 10
     plt.rcParams['figure.titlesize'] = 8
     plt.rcParams['lines.color'] = 'white'
-    plt.rcParams['text.color'] = colours['mdk_purple']
-    plt.rcParams['axes.labelcolor'] = colours['mdk_yellow']
-    plt.rcParams['xtick.color'] = colours['mdk_purple']
-    plt.rcParams['ytick.color'] = colours['mdk_purple']
-    plt.rcParams['axes.edgecolor'] = colours['mdk_lgrey']
-    plt.rcParams['savefig.edgecolor'] = colours['mdk_lgrey']
-    plt.rcParams['axes.facecolor'] = colours['mdk_dgrey']
-    plt.rcParams['savefig.facecolor'] = colours['mdk_dgrey']
-    plt.rcParams['grid.color'] = colours['mdk_lgrey']
+    plt.rcParams['text.color'] = colours['mnk_purple']
+    plt.rcParams['axes.labelcolor'] = colours['mnk_yellow']
+    plt.rcParams['xtick.color'] = colours['mnk_purple']
+    plt.rcParams['ytick.color'] = colours['mnk_purple']
+    plt.rcParams['axes.edgecolor'] = colours['mnk_lgrey']
+    plt.rcParams['savefig.edgecolor'] = colours['mnk_lgrey']
+    plt.rcParams['axes.facecolor'] = colours['mnk_dgrey']
+    plt.rcParams['savefig.facecolor'] = colours['mnk_dgrey']
+    plt.rcParams['grid.color'] = colours['mnk_lgrey']
     plt.rcParams['grid.linestyle'] = ':'
     plt.rcParams['axes.titlepad'] = 6
 
     return colours
-
-
-# Load multiple .csvs #########################################################
-def load_multicsv(directory):
-    f1 = directory + r'\*.csv'
-    files = glob.glob(f1)
-    data_all = np.array([])
-    for i1, val1 in enumerate(files[0:]):
-        data = np.genfromtxt(val1, delimiter=',')
-        data_all = np.append(data_all, data)
-
-    return data_all
-
-
-# Plot an image from a .csv  (saved by LabVIEW) ###############################
-def img_csv(file, delim=',', sk_head=1):
-    im = np.genfromtxt(file, delimiter=delim, skip_header=sk_head)
-    im_size = np.shape(im)
-    y = np.arange(im_size[0])
-    x = np.arange(im_size[1])
-    X, Y = np.meshgrid(x, y)
-    coords = (X, Y)
-    return (im, coords)
-
-
-# Plot an image from a .txt (saved by labVIEW) ################################
-def img_labVIEW(file):
-    im = np.loadtxt(file)
-    im_size = np.shape(im)
-    y = np.arange(im_size[0])
-    x = np.arange(im_size[1])
-    X, Y = np.meshgrid(x, y)
-    coords = (X, Y)
-    return (im, coords)
 
 
 # Save 3d plot with a colourscheme suitable for ppt, as a png #################
@@ -158,7 +124,6 @@ def PPT_save_2d(fig, ax, name):
     ax.yaxis.label.set_color('xkcd:charcoal grey')
     ax.tick_params(axis='x', colors='xkcd:charcoal grey')
     ax.tick_params(axis='y', colors='xkcd:charcoal grey')
-
     ax.figure.savefig(name)
 
 
@@ -223,10 +188,53 @@ def cross_image(im1, im2):
     return sp.signal.fftconvolve(im1_gray, im2_gray[::-1, ::-1], mode='same')
 
 
-#  For use with extents in imshow #############################################
+# For use with extents in imshow #############################################
 def extents(f):
     delta = f[1] - f[0]
     return [f[0] - delta / 2, f[-1] + delta / 2]
+
+
+###############################################################################
+# File loading defs
+###############################################################################
+# Load a Thorlabs PM100D logged power series ##################################
+def load_PM100_log(path):
+
+    return
+
+
+# Load multiple .csvs #########################################################
+def load_multicsv(directory):
+    f1 = directory + r'\*.csv'
+    files = glob.glob(f1)
+    data_all = np.array([])
+    for i1, val1 in enumerate(files[0:]):
+        data = np.genfromtxt(val1, delimiter=',')
+        data_all = np.append(data_all, data)
+
+    return data_all
+
+
+# Plot an image from a .csv  (saved by LabVIEW) ###############################
+def img_csv(file, delim=',', sk_head=1):
+    im = np.genfromtxt(file, delimiter=delim, skip_header=sk_head)
+    im_size = np.shape(im)
+    y = np.arange(im_size[0])
+    x = np.arange(im_size[1])
+    X, Y = np.meshgrid(x, y)
+    coords = (X, Y)
+    return (im, coords)
+
+
+# Plot an image from a .txt (saved by labVIEW) ################################
+def img_labVIEW(file):
+    im = np.loadtxt(file)
+    im_size = np.shape(im)
+    y = np.arange(im_size[0])
+    x = np.arange(im_size[1])
+    X, Y = np.meshgrid(x, y)
+    coords = (X, Y)
+    return (im, coords)
 
 
 ###############################################################################
@@ -1650,9 +1658,10 @@ def holo_replay_Z(Z):
 ###############################################################################
 # Generic 1D Gaussian function ################################################
 def Gaussian_1D(x, A, x_c, σ_x, bkg=0, N=1):
+    # Note the optional input N, used for super Gaussians (default = 1)
     x_c = float(x_c)
-    g = bkg + A * np.exp(- (((x - x_c) ** 2) / (2 * σ_x ** 2))**N)
-    return g
+    G = bkg + A * np.exp(- (((x - x_c) ** 2) / (2 * σ_x ** 2))**N)
+    return G
 
 
 # Generic 2D Gaussian function ################################################
@@ -1663,10 +1672,16 @@ def Gaussian_2D(coords, A, x_c, y_c, σ_x, σ_y, θ=0, bkg=0, N=1):
     a = (np.cos(θ) ** 2) / (2 * σ_x ** 2) + (np.sin(θ) ** 2) / (2 * σ_y ** 2)
     b = -(np.sin(2 * θ)) / (4 * σ_x ** 2) + (np.sin(2 * θ)) / (4 * σ_y ** 2)
     c = (np.sin(θ) ** 2) / (2 * σ_x ** 2) + (np.cos(θ) ** 2) / (2 * σ_y ** 2)
-    g = (bkg + A * np.exp(- (a * ((x - x_c) ** 2) +
+    G = (bkg + A * np.exp(- (a * ((x - x_c) ** 2) +
                              2 * b * (x - x_c) * (y - y_c) +
                              c * ((y - y_c) ** 2))**N))
-    return g.ravel()
+    return G.ravel()
+
+
+# Generic 1D Lorentzian function ##############################################
+def Lorentzian_1D(x, x_c, γ, A, bkg=0):
+    L = (A * γ ** 2) / ((x - x_c)**2 + γ ** 2)
+    return L
 
 
 # Fit Λ and ϕ datasets from peak finding routine ##############################
@@ -1793,17 +1808,17 @@ def ABCD_d(q_in, d, n=1):
     return(q_out)
 
 
-def ABCD_propagate(q0, z_end, z_start=0, res=100, n=1):
+def ABCD_propagate(q0, z_end, z_start=0, res=1000, n=1):
     qz = [q0]
     zs = np.linspace(z_start, z_end, res)
     ns = n * np.ones(len(zs))
     if q0[1] == 1:
         z_start = np.real(q0[0])
 
-    dz = (z_end - z_start) / res
+    dz = zs[1] - zs[0]
 
     for i1, val1 in enumerate(zs[1:]):
-        q1 = ABCD_d(q0, dz)
+        q1 = ABCD_d(q0, dz, n)
         qz.append(q1)
         q0 = q1
 

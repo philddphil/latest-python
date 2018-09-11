@@ -9,17 +9,16 @@ import glob
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
-sys.path.insert(0, r'C:\Users\Philip\Documents\Python\Local Repo\library')
+sys.path.insert(0, r"D:\Python\Local Repo\library")
 import useful_defs_prd as prd
-from peakdetect import peakdetect
 cs = prd.palette()
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-files1 = glob.glob('*.csv')
-exp_x = np.genfromtxt(files1[0])
-exp_y = np.genfromtxt(files1[1])
+# files1 = glob.glob('*.csv')
+# exp_x = np.genfromtxt(files1[0])
+# exp_y = np.genfromtxt(files1[1])
 
 # Follows the wikipedia ray matrix formalism
 # (scroll down for the Gaussian beam bit)
@@ -27,8 +26,8 @@ exp_y = np.genfromtxt(files1[1])
 # q parameter is defined as 1/q = 1/R - i*λ0/π*n*(w**2)
 # definte initial q
 
-w0 = 5.0e-6
-λ0 = 1550e-9
+w0 = 10.0e-6
+λ0 = 633e-9
 n0 = 1
 π = np.pi
 R0 = np.inf
@@ -44,7 +43,6 @@ zs = np.empty([0])
 ns = np.empty([0])
 
 # print('zR', np.round(1e6 * zR, 2))
-print('θ', np.round(180 * θ0 / π, 2))
 print('N.A = ', np.round(np.sin(θ0),3))
 
 n1 = 1.44

@@ -15,6 +15,7 @@ import scipy.optimize as opt
 import socket
 import scipy as sp
 import scipy.io as io
+import scipy.constants
 import importlib.util
 import ntpath
 
@@ -29,7 +30,7 @@ from matplotlib import cm
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
-sys.path.insert(0, r'C:\Users\Philip\Documents\Python\Local Repo\library')
+sys.path.insert(0, r"D:\Python\Local Repo\library")
 np.set_printoptions(suppress=True)
 import useful_defs_prd as prd
 cs = prd.palette()
@@ -37,10 +38,23 @@ cs = prd.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = r"D:\LabVIEW Data\170934"
-datafiles = glob.glob(p0, '*.txt')
+π = np.pi
+c = scipy.constants.c
 
-print(datafiles(1))
+# Specify width in either freq (ν_γ) or wavelength (λ_γ)
+ν_γ = 1e9
+# λ_γ = 1e-12
+
+# Specify central freq ()
+λ_c = 1300e-9
+ν_c = c / λ_c
+
+γ_λ = γ_ν * (λ_c ** 2) / c
+γ_λ = γ_ν * (λ_c ** 2) / c
+
+p0 = r'D:\Python'
+x = np.linspace(1290e-9, 1310e-9, 100)
+y = np.sin(x)
 ##############################################################################
 # Plot some figures
 ##############################################################################
