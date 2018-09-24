@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import scipy.optimize as opt
 
 from scipy import ndimage
+from datetime import datetime
 from scipy.interpolate import interp1d
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage.filters import gaussian_filter
@@ -211,6 +212,19 @@ def load_PM100_log(filepath):
         t = np.append(t, t_datetime.timestamp() * 1000)
         P = np.append(P, float(val.split("\t")[1]))
     return (t, P)
+
+
+# Load Horiba spec file (.txt) ################################################
+def load_Horiba(filepath):
+    a = open(filepath, 'r', encoding='utf-8')
+    data = a.readlines()
+    a.close()
+    λ = []
+    cts = []
+    for i0, val in enumerate(data[2:]):
+        λ = np.append(λ, float(val.split("\t")[0]))
+        cts = np.append(cts, float(val.split("\t")[1]))
+    return (λ, cts)
 
 
 # Load multiple .csvs #########################################################

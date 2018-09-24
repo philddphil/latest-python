@@ -18,7 +18,7 @@ cs = prd.palette()
 # Do some stuff
 ##############################################################################
 p0 = (r"D:\Experimental Data\Interferometer measurements (Sophie's box)"
-      r"\07092018 173933 - Post Sophie's repack, 1 T sensor")
+      r"\11092018 112321 - With phase modulator running")
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
 
@@ -35,7 +35,7 @@ for i1, val in enumerate(datafiles[0:]):
     P1 = np.append(P1, data[:, 1])
     P2 = np.append(P2, data[:, 2])
     T1 = np.append(T1, data[:, 3])
-    T1 = np.append(T1, data[:, 4])
+    T2 = np.append(T2, data[:, 4])
 
 # Crop data
 print('cropping data')
@@ -81,8 +81,10 @@ ax2.plot(t_hrs, P2, label='P2')
 ax2.plot(t_hrs, P1 + P2, label='P$_{tot}$')
 ax2.legend(loc='upper left', fancybox=True, framealpha=1)
 ax2a = ax2.twinx()
-ax2a.set_ylabel('Δ Temp. ($^\circ$C)', color=cs['mnk_orange'])
-ax2a.plot(t_hrs, ΔT, '--', c=cs['mnk_orange'], lw=0.5, label='Temp.')
+ax2a.set_ylabel('Δ Temp. ($^\circ$C)', color=cs['mnk_yellow'])
+ax2a.plot(t_hrs, ΔT1, '--', c=cs['mnk_orange'], lw=0.5, label='Temp. 1')
+ax2a.plot(t_hrs, ΔT2, '--', c=cs['mnk_yellow'], lw=0.5, label='Temp. 2')
+
 ax2a.tick_params(axis='y', labelcolor=cs['mnk_orange'])
 ax2a.legend(loc='upper right', fancybox=True, framealpha=1)
 
