@@ -227,6 +227,23 @@ def load_Horiba(filepath):
     return (λ, cts)
 
 
+# Load Horiba spec file (.txt) ################################################
+def load_SCM_F5L10(filepath):
+    a = open(filepath, 'r', encoding='utf-8')
+    data = a.readlines()
+    a.close()
+    x_init = float(data[8].split("\t")[-1])
+    x_fin = float(data[9].split("\t")[-1])
+    x_inc = float(data[10].split("\t")[-1])
+    y_init = float(data[11].split("\t")[-1])
+    y_fin = float(data[12].split("\t")[-1])
+    y_inc = float(data[13].split("\t")[-1])
+    x = np.linspace(x_init, x_fin, (x_fin - x_init) / x_inc)
+    y = np.linspace(y_init, y_fin, (y_fin - y_init) / y_inc)
+    img = np.loadtxt(data[18:])
+    return (x, y, img)
+
+
 # Load multiple .csvs #########################################################
 def load_multicsv(directory):
     f1 = directory + r'\*.csv'
