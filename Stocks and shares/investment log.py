@@ -18,10 +18,14 @@ cs = prd.palette()
 # Do some stuff
 ##############################################################################
 from datetime import datetime
-print('starting to grab data')
-ATVI = pdr.get_data_yahoo('ATVI')
-print(ATVI['2018-07-18':'2018-07-18'])
-
+p1_no = 15
+p1_date = '2018-07-18'
+p1_ATVI = pdr.get_data_yahoo('ATVI', p1_date, p1_date)
+p1_GBP = pdr.get_data_fred('DEXUSUK', p1_date, p1_date)
+print(p1_GBP)
+p1_cost_USD = p1_no * float(p1_ATVI['Open'])
+p1_cost_GBP = p1_no * float(p1_ATVI['Open']) / 1.2843
+print('Amount paid = $', p1_cost_USD, ' = £ ', p1_cost_GBP)
 
 # fig1 = plt.figure('fig1', figsize=(5, 5))
 # ax1 = fig1.add_subplot(1, 1, 1)
@@ -30,4 +34,3 @@ print(ATVI['2018-07-18':'2018-07-18'])
 # ax1.set_ylabel('y axis')
 # plt.plot(ATVI_short['Close'],'.:')
 # plt.show()
-	
