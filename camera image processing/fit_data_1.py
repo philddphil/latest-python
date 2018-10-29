@@ -7,7 +7,6 @@ import glob
 
 # define model function and pass independant variables x and y as a list
 
-
 def Gaussian_2D(coords, A, xo, yo, σ_x, σ_y, θ):
     x, y = coords
     xo = float(xo)

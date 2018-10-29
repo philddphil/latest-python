@@ -28,7 +28,7 @@ P2 = []
 T1 = []
 T2 = []
 
-for i1, val in enumerate(datafiles[0:]):
+for i1, val in enumerate(datafiles[0:20]):
     print('reading: ', i1, val)
     data = np.loadtxt(val)
     t = np.append(t, data[:, 0])

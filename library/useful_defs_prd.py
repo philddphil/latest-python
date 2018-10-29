@@ -1,6 +1,7 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
+import os
 import glob
 import copy
 import random
@@ -199,6 +200,31 @@ def extents(f):
 ###############################################################################
 # File loading defs
 ###############################################################################
+def load_Psat(folderpath):
+    datafiles = glob.glob(folderpath + r'\*.txt')
+    datafiles.sort(key=os.path.getmtime)
+
+    P_data = np.loadtxt(datafiles[0])
+    Ps = P_data.mean(axis=1)
+
+    cps1_data = np.loadtxt(datafiles[1])
+    cps1 = cps1_data.mean(axis=1)
+    cps2_data = np.loadtxt(datafiles[1])
+    cps2 = cps2_data.mean(axis=1)
+
+    cps = cps1 + cps2
+    return Ps, cps
+
+
+# Load a data set of APD count rates ##########################################
+def load_APD(filepath):
+    data = np.loadtxt(filepath)
+    t = data[:, 0]
+    a = data[:, 1]
+    b = data[:, 2]
+    return t, a, b
+
+
 # Load a Thorlabs PM100D logged power series ##################################
 def load_PM100_log(filepath):
     a = open(filepath, 'r', encoding='utf-8')
@@ -227,19 +253,19 @@ def load_Horiba(filepath):
     return (λ, cts)
 
 
-# Load Horiba spec file (.txt) ################################################
+# Load SCM image ##############################################################
 def load_SCM_F5L10(filepath):
     a = open(filepath, 'r', encoding='utf-8')
     data = a.readlines()
     a.close()
     x_init = float(data[8].split("\t")[-1])
     x_fin = float(data[9].split("\t")[-1])
-    x_inc = float(data[10].split("\t")[-1])
+    x_res = float(data[10].split("\t")[-1])
     y_init = float(data[11].split("\t")[-1])
     y_fin = float(data[12].split("\t")[-1])
-    y_inc = float(data[13].split("\t")[-1])
-    x = np.linspace(x_init, x_fin, (x_fin - x_init) / x_inc)
-    y = np.linspace(y_init, y_fin, (y_fin - y_init) / y_inc)
+    y_res = float(data[13].split("\t")[-1])
+    x = np.linspace(x_init, x_fin, x_res)
+    y = np.linspace(y_fin, y_init, y_res)
     img = np.loadtxt(data[18:])
     return (x, y, img)
 
@@ -1697,7 +1723,20 @@ def holo_replay_Z(Z):
 ###############################################################################
 # Maths defs
 ###############################################################################
+# Saturation curve ############################################################
+def I_sat(x, I_sat, P_sat, P_bkg, bkg):
+    y = (I_sat * x) / (P_sat + x) + P_bkg * x + bkg
+    return y
+
+
+# Generic straight line #######################################################
+def straight_line(x, m, c):
+    y = m * x + c
+    return y
+
 # Generic 1D Gaussian function ################################################
+
+
 def Gaussian_1D(x, A, x_c, σ_x, bkg=0, N=1):
     # Note the optional input N, used for super Gaussians (default = 1)
     x_c = float(x_c)
@@ -1838,6 +1877,16 @@ def Pad_A_elements(A, n, a=0):
 def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
+
+
+# Get Gaussian fir of histogram of data set a
+def Gauss_hist(a, bins=10, rng=3, res=1000):
+    μ = np.mean(a)
+    σ = np.sqrt(np.var(a))
+    n, bins = np.histogram(a, bins)
+    x = np.linspace(μ - rng * σ, μ + rng * σ, res)
+    y = Gaussian_1D(x, np.max(n), μ, σ)
+    return x, y
 
 
 ###############################################################################
