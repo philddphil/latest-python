@@ -129,7 +129,7 @@ plt.plot([z1 + f1, z1 + f1], [2 * np.max(ws), (MM / 2)],
 plt.plot([z1 + f1, z1 + f1], [(MM / 2) * -1, -2 * np.max(ws)],
          '.-', c=cs['mnk_pink'], alpha=0.5)
 # ax1.legend(loc='center left', fancybox=True, framealpha=1)
-plt.xlim(2.0199, 2.0201)
+plt.xlim(2.0199, 2.0201	)
 plt.ylim(-1 * MM, MM)
 plt.tight_layout()
 plt.show()

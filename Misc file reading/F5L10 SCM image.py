@@ -6,6 +6,7 @@ import sys
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
@@ -18,12 +19,11 @@ cs = prd.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\Confocal measurements (F5 L10)\SCM Data 20181025"
+p0 = (r"D:\Experimental Data\Confocal measurements (F5 L10)\SCM Data 20181113"
       r"\Raster scans")
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
-
-
+print(datafiles)
 for i0, val0 in enumerate(datafiles[0:]):
     x, y, img = prd.load_SCM_F5L10(val0)
     lb = os.path.basename(val0)
@@ -31,13 +31,17 @@ for i0, val0 in enumerate(datafiles[0:]):
     print(lb)
 
     fig1 = plt.figure('fig1', figsize=(4, 4))
+    prd.ggplot()
     ax1 = fig1.add_subplot(1, 1, 1)
     fig1.patch.set_facecolor(cs['mnk_dgrey'])
     ax1.set_xlabel('x dimension (V)')
     ax1.set_ylabel('y dimension (V)')
-    plt.imshow(img, extent=prd.extents(x) + prd.extents(y), label=lb,
-               vmin=50, vmax=1000)
+    im1 = plt.imshow(img, extent=prd.extents(x) + prd.extents(y), label=lb,
+                     vmin=np.min(img), vmax=np.max(img))
     plt.gca().invert_yaxis()
+    divider = make_axes_locatable(ax1)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig1.colorbar(im1, cax=cax)
     plt.tight_layout()
     plt.show()
     os.chdir(p0)

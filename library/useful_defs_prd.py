@@ -1,4 +1,3 @@
-##############################################################################
 # Import some libraries
 ##############################################################################
 import os
@@ -26,7 +25,7 @@ np.set_printoptions(suppress=True)
 ###############################################################################
 # Plotting defs
 ###############################################################################
-# Modokai palette for plotting & set rcParams for nice plots ##################
+# Modokai palette for plotting ################################################
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -72,7 +71,12 @@ def palette():
                'ggdpurple': [125 / 255, 105 / 255, 220 / 255],
                'ggdyellow': [209 / 255, 200 / 255, 70 / 255],
                }
+    return colours
 
+
+# set rcParams for nice plots #################################################
+def ggplot():
+    colours = palette()
     plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
     plt.rcParams['font.family'] = 'monospace'
@@ -95,8 +99,6 @@ def palette():
     plt.rcParams['grid.color'] = colours['mnk_lgrey']
     plt.rcParams['grid.linestyle'] = ':'
     plt.rcParams['axes.titlepad'] = 6
-
-    return colours
 
 
 # Save 3d plot with a colourscheme suitable for ppt, as a png #################
@@ -201,15 +203,16 @@ def extents(f):
 # File loading defs
 ###############################################################################
 def load_Psat(folderpath):
-    datafiles = glob.glob(folderpath + r'\*.txt')
-    datafiles.sort(key=os.path.getmtime)
+    P_file = folderpath + r'\P.txt'
+    cps1_file = folderpath + r'\APD1.txt'
+    cps2_file = folderpath + r'\APD2.txt'
 
-    P_data = np.loadtxt(datafiles[0])
+    P_data = np.loadtxt(P_file)
     Ps = P_data.mean(axis=1)
 
-    cps1_data = np.loadtxt(datafiles[1])
+    cps1_data = np.loadtxt(cps1_file)
     cps1 = cps1_data.mean(axis=1)
-    cps2_data = np.loadtxt(datafiles[1])
+    cps2_data = np.loadtxt(cps2_file)
     cps2 = cps2_data.mean(axis=1)
 
     cps = cps1 + cps2

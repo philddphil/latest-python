@@ -22,18 +22,17 @@ cs = prd.palette()
 # Do some stuff
 ##############################################################################
 p0 = (r"D:\Experimental Data\Confocal measurements (F5 L10)"
-      r"\SCM Data 20181009"
-      r"\PSat 181146 Background 2Vx 2vy")
+      r"\SCM Data 20181113"
+      r"\PSat 181839")
 
 # Load data
-Ps_raw, cps = prd.load_Psat(p0)
+Ps, cps = prd.load_Psat(p0)
 
-# Scale Ps and cps
-Ps = 119 * 	Ps_raw
+# Scale cps
 kcps = cps / 1000
 
-# Perform fit
-initial_guess = (1.5e2, 1e-1, 1e1, 1e0)
+# Perform fit (I_sat, P_sat, P_bkg, bkg)
+initial_guess = (1.5e2, 1e-1, 1e3, 1e0)
 popt, _ = opt.curve_fit(prd.I_sat, Ps, kcps, p0=initial_guess,
                         bounds=((0, 0, 0, 0),
                                 (np.inf, np.inf, np.inf, np.inf)))
@@ -45,17 +44,18 @@ P_sat = np.round(popt[1] * 1000)
 Prop_bkg = np.round(popt[2])
 bkg = np.round(popt[3])
 
-print(popt[0])
 lb0 = 'fit'
 lb1 = 'emitter I$_{sat}$ = ' + str(I_sat) + 'kcps'
 lb2 = 'bkg, + ' + str(bkg) + 'kcps offset'
-print(I_sat, 'kcps, ', P_sat, 'μW, ', Prop_bkg, bkg, 'kcps')
+lb3 = 'I$_{sat}$ = ' + str(I_sat) + 'kcps, ' + \
+    'P$_{sat}$ = ' + str(P_sat) + 'μW'
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
 
 fig2 = plt.figure('fig2', figsize=(6, 4))
+prd.ggplot()
 ax2 = fig2.add_subplot(1, 1, 1)
 fig2.patch.set_facecolor(cs['mnk_dgrey'])
 ax2.set_xlabel('Inferred power (mW)')
@@ -69,6 +69,7 @@ plt.plot(Ps_fit, prd.I_sat(Ps_fit, 0, popt[1], popt[2], popt[3]),
 
 ax2.legend(loc='upper left', fancybox=True, framealpha=1)
 os.chdir(p0)
+plt.title(lb3)
 plt.tight_layout()
 plt.show()
 ax2.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))

@@ -1,0 +1,16 @@
+##############################################################################
+# Import some libraries
+##############################################################################
+import os
+import sys
+import glob
+import numpy as np
+import matplotlib.pyplot as plt
+
+##############################################################################
+# Import some extra special libraries from my own repo and do some other stuff
+##############################################################################
+sys.path.insert(0, r"D:\Python\Local Repo\library")
+np.set_printoptions(suppress=True)
+import useful_defs_prd as prd
+cs = prd.palette()
