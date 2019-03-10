@@ -30,16 +30,18 @@ path = (r"C:\Users\Phil\Documents\GitHub\latest-python\Stocks and shares"
 file = open(path, 'r', encoding='utf-8')
 data = file.readlines()
 
-yesterday = date.today() - timedelta(3)
+yesterday = date.today() - timedelta(1)
 total_paid = 0
 total_current_worth = 0
 current_USDGBP = float(get_rate("USD", "GBP", yesterday))
+print(current_USDGBP)
+print(yesterday)
 
 for i0, val in enumerate(data[1:]):
-    share = str(val.split("\t")[0])
-    amt = float(val.split("\t")[1])
-    paid = float(val.split("\t")[2])
-    date = str(val.split("\t")[3])
+    share = str(val.split("\t")[1])
+    amt = float(val.split("\t")[2])
+    paid = float(val.split("\t")[3])
+    date = str(val.split("\t")[4])
 
     current_share = pdr.get_data_yahoo(share, yesterday, yesterday)
     current_price_USD = float(current_share['Adj Close'])
@@ -67,4 +69,3 @@ file.write(s3)
 file.write(s4)
 file.close()
 # Open a plain text file for reading.  For this example, assume that
-
