@@ -44,7 +44,7 @@ print(datafiles(1))
 ##############################################################################
 # Plot some figures
 ##############################################################################
-
+# prd.ggplot()
 # fig1 = plt.figure('fig1', figsize=(5, 5))
 # ax1 = fig1.add_subplot(1, 1, 1)
 # fig1.patch.set_facecolor(cs['mnk_dgrey'])

@@ -17,14 +17,23 @@ cs = prd.palette()
 # Do some stuff
 ##############################################################################
 π = np.pi
-ωs = np.linspace(1, 1.2, 10)
-ts = np.linspace(-100 * π, 100 * π, 1000)
+c = 299792458
+λ0 = 660e-9
+λΔ = 10e-9
+λres = 9
 
+λs = np.linspace(λ0 - 10 * λΔ, λ0 + 10 * λΔ, λres)
+frqs = c / λs
+ωs = 2 * π * frqs
+ts = np.linspace(0, 50 * 1e-15, 1000)
 sins = []
+
 for i0, val0 in enumerate(ωs):
     sins.append(np.cos(val0 * ts))
 
 print(sum(sins))
+λspec = λΔ / ((λs - λ0)**2 + λΔ**2)
+Wavepacket = np.fft.ifft(λspec)
 ##############################################################################
 # Plot some figures
 ##############################################################################
@@ -35,6 +44,8 @@ prd.ggplot()
 # ax1.set_xlabel('x axis')
 # ax1.set_ylabel('y axis')
 # plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
+x = λs * 1e9
+y = λspec / np.max(λspec)
 
 ###
 
@@ -55,6 +66,16 @@ fig2.patch.set_facecolor(cs['mnk_dgrey'])
 ax2.set_xlabel('x axis')
 ax2.set_ylabel('y axis')
 plt.plot(sum(sins), '.:')
+plt.tight_layout()
+
+###
+
+fig3 = plt.figure('fig3', figsize=(5, 5))
+ax3 = fig3.add_subplot(1, 1, 1)
+fig3.patch.set_facecolor(cs['mnk_dgrey'])
+ax3.set_xlabel('x axis')
+ax3.set_ylabel('y axis')
+plt.plot(frqs, y, '.:')
 plt.tight_layout()
 
 ###

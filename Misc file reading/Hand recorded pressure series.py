@@ -3,8 +3,8 @@
 ##############################################################################
 import sys
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
+
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
@@ -16,48 +16,35 @@ cs = prd.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-π = np.pi
-ωs = np.linspace(1, 1.2, 10)
-ts = np.linspace(-100 * π, 100 * π, 1000)
+p0 = (r"D:\Experimental Data\Pressure measurements (F5 L10)"
+      r"\Pressure 20181218\Time series 1.txt")
+p1 = (r"D:\Experimental Data\Pressure measurements (F5 L10)"
+      r"\Pressure 20181219\Time series 2.txt")
+p2 = (r"D:\Experimental Data\Pressure measurements (F5 L10)"
+      r"\Pressure 20181219\Time series 3.txt")
 
-sins = []
-for i0, val0 in enumerate(ωs):
-    sins.append(np.cos(val0 * ts))
-
-print(sum(sins))
+Δts0, Ps0 = prd.load_Pressure(p0)
+Δts1, Ps1 = prd.load_Pressure(p1)
+Δts2, Ps2 = prd.load_Pressure(p2)
 ##############################################################################
 # Plot some figures
 ##############################################################################
 prd.ggplot()
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mdk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
 
 ###
 
-fig1 = plt.figure('fig1', figsize=(5, 5))
+fig1 = plt.figure('fig1', figsize=(10, 5))
 ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
-ax1.set_xlabel('x axis')
-ax1.set_ylabel('y axis')
-for i0, val0 in enumerate(ωs):
-    plt.plot(ts, sins[i0] + 2 * i0, '-')
+ax1.set_xlabel('time (min)')
+ax1.set_ylabel('pressure (mbar)')
+ax1.set_yscale('log')
+plt.plot(Δts0, Ps0, 'o--', label='Original')
+plt.plot(Δts1, Ps1, 'o--', label='1st clean')
+plt.plot(Δts2, Ps2, 'o--', label='2nd clean')
 plt.tight_layout()
 
-###
-
-fig2 = plt.figure('fig2', figsize=(5, 5))
-ax2 = fig2.add_subplot(1, 1, 1)
-fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('x axis')
-ax2.set_ylabel('y axis')
-plt.plot(sum(sins), '.:')
-plt.tight_layout()
-
-###
-
+ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
 plt.show()
-prd.PPT_save_2d(fig2, ax2, 'plot1.png')
+ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
+prd.PPT_save_2d(fig1, ax1, 'plot1.png')
