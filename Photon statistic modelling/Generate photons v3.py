@@ -10,7 +10,7 @@ import numpy as np
 # Do some stuff
 ##############################################################################
 # Number of photons in experiment
-γs = 4e8
+γs = 1e5
 # Time steps (ns)
 Δt = 1
 # Excited state lifetime (ns)
@@ -26,20 +26,31 @@ HBT_click = 0
 delay = 0
 displayed = 0
 
-# initiate files
-f4 = r'Data\tau ' + str(τ_decay) + 'ns, ' + \
+# initiate files and paths
+p0 = r'D:\Experimental Data\Python simulations (G5 A5)'\
+    r'\Single photon statistics\Data'
+
+f4 = p0 + r'\\' + str(τ_decay) + 'ns, ' + \
     str(τ_excite) + 'x exc, ' + \
     'T ' + str(round(T, 2)) + '% - HBT.txt'
-f5 = r'Data\tau ' + str(τ_decay) + 'ns, ' + \
+f5 = p0 + r'\\' + str(τ_decay) + 'ns, ' + \
     str(τ_excite) + 'x exc, ' + \
     'T ' + str(round(T, 2)) + '% - fom.txt'
-
+# read exp clk value
+with open(f5, 'r', encoding='utf-8') as f:
+    a = f.read()
+    b = a.split('\n')
+    for i0, j0 in enumerate(b):
+        if 'exp clk =' in j0:
+            t_clk = float(j0.split(' = ')[-1])
+            print(t_clk)
 # write figures-of-merit file
-with open(f5, 'w') as f:
-    f.write("%s\n" % τ_decay)
-    f.write("%s\n" % τ_excite)
-    f.write("%s\n" % Δt)
-    f.write("%s\n" % γs)
+with open(f5, 'w', encoding='utf-8') as f:
+    f.write('τ decay = '"%s\n" % τ_decay)
+    f.write('τ excite = '"%s\n" % τ_excite)
+    f.write('Δt = '"%s\n" % Δt)
+    f.write('# photons = '"%s\n" % γs)
+    f.write('exp clk = '"%s\n" % γs)
 
 p2 = T / 100
 
