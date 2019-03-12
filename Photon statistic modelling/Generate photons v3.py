@@ -44,13 +44,6 @@ with open(f5, 'r', encoding='utf-8') as f:
         if 'exp clk =' in j0:
             t_clk = float(j0.split(' = ')[-1])
             print(t_clk)
-# write figures-of-merit file
-with open(f5, 'w', encoding='utf-8') as f:
-    f.write('τ decay = '"%s\n" % τ_decay)
-    f.write('τ excite = '"%s\n" % τ_excite)
-    f.write('Δt = '"%s\n" % Δt)
-    f.write('# photons = '"%s\n" % γs)
-    f.write('exp clk = '"%s\n" % γs)
 
 p2 = T / 100
 
@@ -90,6 +83,13 @@ for i0, j0 in enumerate(np.arange(γs)):
                 t_start = t + t_clk
 
     t_clk = t + t_clk
+    # write figures-of-merit file
+    with open(f5, 'w', encoding='utf-8') as f:
+        f.write('τ decay = '"%s\n" % τ_decay)
+        f.write('τ excite = '"%s\n" % τ_excite)
+        f.write('Δt = '"%s\n" % Δt)
+        f.write('# photons = '"%s\n" % γs)
+        f.write('exp clk = '"%s\n" % γs)
     display, __ = divmod(t_clk, 100000)
     if display != displayed:
         print(display)
