@@ -10,15 +10,15 @@ import os
 # Do some stuff
 ##############################################################################
 # Number of photons in experiment
-γs = 1e6
+γs = 3e6
 # Time steps (ns)
 Δt = 1
 # Excited state lifetime (ns)
-τ_decay = 1
+τ_decay = 10
 # τ_excite means excitation is τ_excite times faster than τ_decay
-τ_excite = 10
+τ_excite = 0.1
 # System transmission (%)
-T = 5
+T = 10
 
 # initiate stuff for calcs
 HBT_click = 0
@@ -27,14 +27,12 @@ displayed = 0
 
 # initiate files and paths
 p0 = r'D:\Experimental Data\Python simulations (G5 A5)'\
-    r'\Single photon statistics\Data'
+    r'\Single photon statistics\Data\\' + str(τ_decay) + 'ns, ' + \
+    str(τ_excite) + 'x exc, ' + \
+    'T ' + str(round(T, 2)) + '%'
 
-f4 = p0 + r'\\' + str(τ_decay) + 'ns, ' + \
-    str(τ_excite) + 'x exc, ' + \
-    'T ' + str(round(T, 2)) + '% - HBT.txt'
-f5 = p0 + r'\\' + str(τ_decay) + 'ns, ' + \
-    str(τ_excite) + 'x exc, ' + \
-    'T ' + str(round(T, 2)) + '% - fom.txt'
+f4 = p0 + ' - HBT.txt'
+f5 = p0 + ' - fom.txt'
 
 # read exp clk value
 if os.path.isfile(f5) is True:
@@ -44,22 +42,27 @@ if os.path.isfile(f5) is True:
         for i0, j0 in enumerate(b):
             if 'exp clk =' in j0:
                 t_clk = float(j0.split(' = ')[-1])
-                print(t_clk)
+                print('t start = ', t_clk)
+            if '# photons =' in j0:
+                γs_prev = float(j0.split(' = ')[-1])
+                print('γs so far =', γs_prev)
 else:
     t_clk = 0
     print('restarted clock')
+    γs_prev = 0
+    print('restarted counts')
 
 p2 = T / 100
 
 for i0, j0 in enumerate(np.arange(γs)):
     # set excitation rate 10 times quicket than decay rate
     p0 = np.random.random()
-    t0 = 1 - τ_decay * τ_excite * np.log(1 - p0)
+    t0 = 1 - (τ_decay / τ_excite) * np.log(1 - p0)
 
     # determine decay time
     # note this limits the timesteps to integers (i.e. ns)
     p1 = np.random.random()
-    t1 = -1 * τ_decay * np.log(p1 / Δt)
+    t1 = - τ_decay * np.log(p1 / Δt)
 
     t = int(t1 + t0)
 
@@ -93,7 +96,8 @@ for i0, j0 in enumerate(np.arange(γs)):
     if display != displayed:
         print(display)
         displayed = display
-
+γs = γs + γs_prev
+print('total count rate = ', 1e3 * (γs / t_clk), 'Mcps')
 with open(f5, 'w', encoding='utf-8') as f:
     f.write('τ decay = '"%s\n" % τ_decay)
     f.write('τ excite = '"%s\n" % τ_excite)

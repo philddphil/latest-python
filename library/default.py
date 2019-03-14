@@ -37,14 +37,16 @@ cs = prd.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = r"D:\LabVIEW Data\170934"
-datafiles = glob.glob(p0, '*.txt')
+τ = 10
+y = np.linspace(0.0001, 1, 100)
+x1 = - τ * np.log(y)
+x2 = 1 - 0.1 * τ * np.log(1 - y)
 
-print(datafiles(1))
+
 ##############################################################################
 # Plot some figures
 ##############################################################################
-# prd.ggplot()
+prd.ggplot()
 # fig1 = plt.figure('fig1', figsize=(5, 5))
 # ax1 = fig1.add_subplot(1, 1, 1)
 # fig1.patch.set_facecolor(cs['mnk_dgrey'])
@@ -52,14 +54,18 @@ print(datafiles(1))
 # ax1.set_ylabel('y axis')
 # plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
 
-# fig2 = plt.figure('fig2', figsize=(5, 5))
-# ax2 = fig2.add_subplot(1, 1, 1)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('x axis')
-# ax2.set_ylabel('y axis')
-# plt.plot(x, y)
+fig2 = plt.figure('fig2', figsize=(5, 5))
+ax2 = fig2.add_subplot(1, 1, 1)
+fig2.patch.set_facecolor(cs['mnk_dgrey'])
+ax2.set_xlabel('x axis')
+ax2.set_ylabel('y axis')
+plt.plot(x1, y, '.', alpha=0.4, color=cs['gglred'], label='')
+plt.plot(x1, y, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
+plt.plot(x2, y, '.', alpha=0.4, color=cs['gglblue'], label='')
+plt.plot(x2, y, alpha=1, color=cs['ggblue'], lw=0.5, label='excite')
 
+ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
 # os.chdir(p0)
-# plt.tight_layout()
-# plt.show()
+plt.tight_layout()
+plt.show()
 # prd.PPT_save_2d(fig2, ax2, 'plot1.png')
