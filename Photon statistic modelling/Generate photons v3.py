@@ -10,13 +10,13 @@ import os
 # Do some stuff
 ##############################################################################
 # Number of photons in experiment
-γs = 3e6
+γs = 8e6
 # Time steps (ns)
 Δt = 1
 # Excited state lifetime (ns)
 τ_decay = 10
 # τ_excite means excitation is τ_excite times faster than τ_decay
-τ_excite = 0.1
+τ_excite = 0.01
 # System transmission (%)
 T = 10
 
