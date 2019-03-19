@@ -8,7 +8,12 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
+# Office PC (eea) path
 sys.path.insert(0, r"D:\Python\Local Repo\library")
+
+# Surface Pro path
+sys.path.insert(0, r"C:\Users\Philip\Documents\GitHub\latest-python\library")
+
 np.set_printoptions(suppress=True)
 
 import prd_plots
@@ -22,10 +27,20 @@ cs = prd_plots.palette()
 T = 10
 τ_decay = 10
 τ_excite = 100
+τ_decay = 1
+τ_excite = 1
+k_12 = 0.01
 
+# Office PC (eea) path
 p0 = r'D:\Experimental Data\Python simulations (G5 A5)'\
-    r'\Single photon statistics\Data\\' + str(τ_decay) + 'ns, ' + \
+    r'\Single photon statistics\Data\pulsed ' + str(τ_decay) + 'ns, ' + \
     str(τ_excite) + 'x exc, ' + \
+    str(k_12) + 'k_12,' + \
+    'T ' + str(round(T, 2)) + '%'
+# Surface Pro path
+p0 = r"C:\Users\Philip\Documents\Data\pulsed " + str(τ_decay) + 'ns, ' + \
+    str(τ_excite) + 'x exc, ' + \
+    str(k_12) + 'k_12,' + \
     'T ' + str(round(T, 2)) + '%'
 
 f4 = p0 + ' - HBT.txt'
@@ -52,8 +67,10 @@ print('experiment time = ', 1e-6 * t_clk, 'ms')
 print('total count rate = ', 1e3 * (γs / t_clk), 'Mcps')
 # Prepare histogram to be plotted
 x1 = τs_HBT
-# x1 = [i for i in x1 if i <= 100]
-# x1 = [i for i in x1 if i >= -100]
+
+x1 = [i for i in x1 if i <= 300]
+x1 = [i for i in x1 if i >= -300]
+
 print('plotted data', len(x1))
 print('norm factor =', ((γs)**2 / (4 * t_clk)))
 
@@ -77,10 +94,11 @@ x2 = 100 * g2s
 prd_plots.ggplot()
 
 # histograms
+
 fig2 = plt.figure('fig2', figsize=(2 * np.sqrt(2), 2))
 ax2 = fig2.add_subplot(1, 1, 1)
 fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('τ')
+ax2.set_xlabel('τ (ns)')
 ax2.set_ylabel('#')
 ax2.set_yscale('log')
 plt.hist(x1, bins=bin_N, alpha=0.5,
@@ -94,7 +112,7 @@ plt.tight_layout()
 fig1 = plt.figure('fig1', figsize=(2 * np.sqrt(2), 2))
 ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
-ax1.set_xlabel('τ')
+ax1.set_xlabel('τ (ns)')
 ax1.set_ylabel('g$^2$(τ)')
 ax1.set_yscale('log')
 plt.plot(bin_centres, x2, '.', color=cs['ggblue'])
