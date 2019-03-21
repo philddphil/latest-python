@@ -28,7 +28,7 @@ T = 10
 τ_decay = 10
 τ_decay = 1
 τ_excite = 1
-# k_12 = 0.01
+k_12 = 0.01
 drive = 'pulsed'
 drive = 'cw'
 
@@ -36,12 +36,12 @@ drive = 'cw'
 p0 = r'D:\Experimental Data\Python simulations (G5 A5)'\
     r'\Single photon statistics\Data\\'+ drive + str(τ_decay) + 'ns, ' + \
     str(τ_excite) + 'x exc, ' + \
-    # str(k_12) + 'k_12,' + \
+    str(k_12) + 'k_12,' + \
     'T ' + str(round(T, 2)) + '%'
 # Surface Pro path
 p0 = r'C:\Users\Philip\Documents\Data\\'+ drive + str(τ_decay) + 'ns, ' + \
     str(τ_excite) + 'x exc, ' + \
-    # str(k_12) + 'k_12,' + \
+    str(k_12) + 'k_12,' + \
     'T ' + str(round(T, 2)) + '%'
 
 f4 = p0 + ' - HBT.txt'

@@ -41,10 +41,11 @@ p0 = r"D:\Experimental Data\Python simulations (G5 A5)"\
     r"\Single photon statistics\20190320"
 
 τ = 10
+
+y2 = np.linspace(0.00001, 1, 300)
+x2 = 1 - 1 * τ * np.log(1 - y2)
 y1 = np.linspace(0.00001, 1, 1000)
 x1 = - τ * np.log(y1) + τ
-y2 = np.linspace(0.00001, 1, 300)
-x2 = 1 - 0.1 * τ * np.log(1 - y2)
 
 
 ##############################################################################
@@ -57,8 +58,8 @@ prd.ggplot()
 # ax1.set_xlabel('x axis')
 # ax1.set_ylabel('y axis')
 # plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
-size = 4
-fig2 = plt.figure('fig2', figsize=(size*np.sqrt(2), size))
+size = 2
+fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
 ax2 = fig2.add_subplot(1, 1, 1)
 fig2.patch.set_facecolor(cs['mnk_dgrey'])
 ax2.set_xlabel('x axis')
@@ -72,5 +73,6 @@ ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
 # os.chdir(p0)
 plt.tight_layout()
 plt.show()
-plot_file_name = p0 + 'plot1.png'
+ax2.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
+plot_file_name = p0 + r'\plot1.png'
 prd.PPT_save_2d(fig2, ax2, plot_file_name)
