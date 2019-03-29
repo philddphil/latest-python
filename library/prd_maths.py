@@ -137,7 +137,7 @@ def circle(r, x, y):
     return (xc, yc)
 
 
-# Mode overlap for 2 fields G1 G2 in field with x & y axis
+# Mode overlap for 2 fields G1 G2 in field with x & y axis ####################
 def overlap(x, y, G1, G2):
     η1 = sp.trapz(sp.trapz((G1 * G2), y), x)
     η2 = sp.trapz(sp.trapz(G1, y), x) * sp.trapz(sp.trapz(G2, y), x)
@@ -145,7 +145,7 @@ def overlap(x, y, G1, G2):
     return η
 
 
-# Pad an array A with n elements all of value a
+# Pad an array A with n elements all of value a ###############################
 def Pad_A_elements(A, n, a=0):
     Ax, Ay = np.shape(A)
     P = a * np.ones(((2 * n + 1) * (Ax), (2 * n + 1) * (Ay)))
@@ -159,13 +159,13 @@ def Pad_A_elements(A, n, a=0):
     return P
 
 
-# Find nearest element in array to value
+# Find nearest element in array to value ######################################
 def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
 
 
-# Get Gaussian fir of histogram of data set a
+# Get Gaussian fit of histogram of data set a #################################
 def Gauss_hist(a, bins=10, rng=3, res=1000):
     μ = np.mean(a)
     σ = np.sqrt(np.var(a))
@@ -174,3 +174,12 @@ def Gauss_hist(a, bins=10, rng=3, res=1000):
     y = Gaussian_1D(x, np.max(n), μ, σ)
     return x, y
 
+
+# Poissonian distribution at values of k for mean value λ #####################
+def Poissonian(k, λ):
+    P = []
+
+    for i0, j0 in enumerate(k):
+        P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
+
+    return P

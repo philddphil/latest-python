@@ -63,20 +63,21 @@ with open(f5, 'r', encoding='utf-8') as f:
         if '# photons det 2 =' in j0:
             γs_det2 = float(j0.split(' = ')[-1])
 
-print(len(τs_HBT))
-print(γs)
 print('experiment time = ', np.round(1e-6 * t_clk, 2), 'ms')
 print('emission rate = ', np.round(1e3 * (γs / t_clk), 2), 'Mcps')
 print('detection rate = ',
       np.round(1e3 * ((γs_det1 + γs_det2) / t_clk), 2), 'Mcps')
+print('Emission:detection:HBT', γs / γs, ':',
+      (γs_det1 + γs_det2) / γs, ':',
+      len(τs_HBT) / γs)
 
 # Prepare histogram to be plotted
 x1 = τs_HBT
 
-x1 = [i for i in x1 if i <= 100]
-x1 = [i for i in x1 if i >= -100]
+# x1 = [i for i in x1 if i <= 1000]
+# x1 = [i for i in x1 if i >= -1000]
 
-bin_N = 201
+bin_N = 501
 h1, bins = np.histogram(x1, bins=bin_N, density=False)
 bin_centres = np.linspace(bins[0] + (bins[1] - bins[0]) / 2,
                           bins[-2] + (bins[-1] - bins[-2]) / 2, len(bins) - 1)
@@ -88,7 +89,11 @@ bin_width = bins[1] - bins[0]
 det_1 = γs_det1 / t_clk
 det_2 = γs_det2 / t_clk
 g2s = h1 / (det_1 * det_2 * bin_width * t_clk)
-x2 = g2s
+y2 = g2s
+
+t_excite = 10
+x3 = np.linspace(0, bins[-1], 1000)
+y3 = np.exp(-(0.5 * (x3) / τ_decay) * (T / 100))
 
 #######################################################################
 # Plot some figures
@@ -96,15 +101,16 @@ x2 = g2s
 prd_plots.ggplot()
 
 # histograms
+plot_size = 4
 
-fig2 = plt.figure('fig2', figsize=(2 * np.sqrt(2), 2))
+fig2 = plt.figure('fig2', figsize=(plot_size * np.sqrt(2), plot_size))
 ax2 = fig2.add_subplot(1, 1, 1)
 fig2.patch.set_facecolor(cs['mnk_dgrey'])
 ax2.set_xlabel('τ (ns)')
 ax2.set_ylabel('#')
 # ax2.set_yscale('log')
 plt.hist(x1, bins=bin_N, alpha=0.5,
-         facecolor=cs['ggred'], edgecolor=cs['mnk_dgrey'],
+         facecolor=cs['ggred'], edgecolor=cs['ggred'],
          label='Probabilistic', density=False)
 plt.plot(bin_centres, h1, '.', color=cs['ggblue'])
 plt.savefig('hist.svg')
@@ -112,16 +118,17 @@ plt.title('count rate = ' + str(np.round(
     1e3 * ((γs_det2 + γs_det1) / t_clk), 2)) + ' Mcps')
 plt.tight_layout()
 
-fig1 = plt.figure('fig1', figsize=(2 * np.sqrt(2), 2))
+fig1 = plt.figure('fig1', figsize=(plot_size * np.sqrt(2), plot_size))
 ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_xlabel('τ (ns)')
 ax1.set_ylabel('g$^2$(τ)')
 # ax1.set_yscale('log')
-plt.plot(bin_centres, x2, '.', color=cs['ggblue'])
+plt.plot(bin_centres, y2, '.', color=cs['ggblue'])
 plt.savefig('g2s.svg')
 plt.title('count rate = ' + str(np.round(
     1e3 * ((γs_det2 + γs_det1) / t_clk), 2)) + ' Mcps')
+plt.plot(x3 + t_excite, 0.8*y3)
 plt.tight_layout()
 
 plt.show()
