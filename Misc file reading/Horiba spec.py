@@ -21,7 +21,7 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0 = (r"D:\Experimental Data\Spectrometer (Ganni F5 L10)\Spec data 20190321")
+p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190404")
 os.chdir(p0)
 
 # Generate list of relevant data files and sort them chronologically

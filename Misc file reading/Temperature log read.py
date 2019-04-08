@@ -1,26 +1,24 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
-import os
 import sys
-import glob
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
 sys.path.insert(0, r"D:\Python\Local Repo\library")
 np.set_printoptions(suppress=True)
-import useful_defs_prd as prd
-cs = prd.palette()
+import prd_plots
+cs = prd_plots.palette()
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\Confocal measurements (F5 L10)\SCM Data 20190128"
+p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190403"
       r"\Temperature log.txt")
 a = open(p0, 'r', encoding='utf-8')
 data = a.readlines()
@@ -38,7 +36,11 @@ for i0, val in enumerate(data[0:]):
 ##############################################################################
 # Plot some figures
 ##############################################################################
-prd.ggplot()
+prd_plots.ggplot()
+plot_path = r"D:\Python\Plots\\"
+plot_label = p0.split('\\')[-2]
+plot_label = plot_label.split(' ')[-1]
+print(plot_label)
 ###
 
 fig1 = plt.figure('fig1', figsize=(10, 5))
@@ -52,4 +54,5 @@ plt.tight_layout()
 ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
 plt.show()
 ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-prd.PPT_save_2d(fig1, ax1, 'plot1.png')
+plot_file_name = plot_path + plot_label + '.png'
+prd_plots.PPT_save_2d(fig1, ax1, plot_file_name)
