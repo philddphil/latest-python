@@ -41,17 +41,28 @@ cs = prd_plots.palette()
 ##############################################################################
 p0 = r"path line 1"\
     r"path line 2"
-L = 0.5
-λ = 1
-x = np.linspace(-2, 2, 100)
-y = x
-coords = np.meshgrid(x, y)
-S = prd_maths.Dipole_2D(*coords, L, λ)
+NA = 0.4
+λ = 0.7
+L = 0.2
+r = np.linspace(-15, 15, 1000)
+z = np.linspace(-20, 20, 1000)
+
+w0 = λ / (np.pi * NA)
+coords = np.meshgrid(z, r)
+I_rz, w_z = prd_maths.Gaussian_beam(*coords, w0, λ)
+
 z_lim = 1
-for i0, j0 in enumerate(S):
+for i0, j0 in enumerate(I_rz):
     for i1, j1 in enumerate(j0):
         if j1 >= z_lim:
-            S[i0, i1] = z_lim
+            I_rz[i0, i1] = z_lim
+
+S_rz = prd_maths.Dipole_2D(*coords, L, λ)
+z_lim = 0.005
+for i0, j0 in enumerate(S_rz):
+    for i1, j1 in enumerate(j0):
+        if j1 >= z_lim:
+            S_rz[i0, i1] = z_lim
 
 ##############################################################################
 # Plot some figures
@@ -60,12 +71,17 @@ prd_plots.ggplot()
 plot_path = r"D:\Python\Plots\\"
 
 ###### image plot ############################################################
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(z, extent=prd_plots.extents(x) + prd_plots.extents(y))
+fig1 = plt.figure('fig1', figsize=(5, 5))
+ax1 = fig1.add_subplot(1, 1, 1)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('x axis')
+ax1.set_ylabel('y axis')
+# plt.imshow(z_lim - I_rz, extent=prd_plots.extents(z) + prd_plots.extents(r),
+#            cmap='Greens')
+plt.imshow(S_rz, extent=prd_plots.extents(z) + prd_plots.extents(r),
+           cmap='magma')
+plt.plot(z, w_z, c = 'xkcd:green')
+plt.plot(z, -w_z, c = 'xkcd:green')
 
 ###### xy plot ###############################################################
 # size = 4
@@ -87,9 +103,13 @@ fig3.patch.set_facecolor(cs['mnk_dgrey'])
 ax3.set_xlabel('x axis')
 ax3.set_ylabel('y axis')
 ax3.set_zlabel('z axis')
-# scatexp = ax3.scatter(*coords, z, '.', alpha=0.4, color=cs['gglred'], label='')
-contour = ax3.contour(*coords, S, 10, cmap=cm.jet)
-surf = ax3.plot_surface(*coords, S, cmap=cm.jet, alpha=0.1)
+# scatexp = ax3.scatter(*coords, z, '.', alpha=0.4, color=cs['gglred'],
+# label='')
+plt.plot(z, w_z, c = cs['ggred'])
+plt.plot(z, -w_z, c = cs['ggred'])
+# surf = ax3.plot_surface(*coords, I_rz/5, cmap='magma', alpha=0.3)
+contour = ax3.contour(*coords, S_rz/10, 20, cmap='viridis')
+
 
 ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
 ax3.set_zlim(0, z_lim)

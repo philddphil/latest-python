@@ -3,6 +3,7 @@
 ##############################################################################
 import numpy as np
 import scipy as sp
+import scipy.constants
 import scipy.optimize as opt
 from scipy import ndimage
 
@@ -22,7 +23,7 @@ def straight_line(x, m, c):
     return y
 
 
-# Generic 1D Gaussian function ################################################
+# Generic 1D Gaussian peak function ###########################################
 def Gaussian_1D(x, A, x_c, σ_x, bkg=0, N=1):
     # Note the optional input N, used for super Gaussians (default = 1)
     x_c = float(x_c)
@@ -30,7 +31,7 @@ def Gaussian_1D(x, A, x_c, σ_x, bkg=0, N=1):
     return G
 
 
-# Generic 2D Gaussian function ################################################
+# Generic 2D Gaussian peak function ###########################################
 def Gaussian_2D(coords, A, x_c, y_c, σ_x, σ_y, θ=0, bkg=0, N=1):
     x, y = coords
     x_c = float(x_c)
@@ -176,10 +177,29 @@ def Gauss_hist(a, bins=10, rng=3, res=1000):
 
 
 # Poissonian distribution at values of k for mean value λ #####################
-def Poissonian(k, λ):
+def Poissonian_1D(k, λ):
     P = []
 
     for i0, j0 in enumerate(k):
         P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
 
     return P
+
+
+# Dipole emission in x y field plane with strength in z direction #############
+def Dipole_2D(x, y, L, λ, I_0=1):
+    # see  "Dipole antenna" wikipedia
+    ρ, ϕ = cart2pol(y, x)
+    S = (1 / ρ**2) * (L**2 / λ**2) * np.sin(ϕ)**2
+    return S
+
+
+# Gaussian beam propagating in the +- x direction, y is the radial ############
+def Gaussian_beam(z, r, w0, λ, I0=1):
+    # see "Gaussian beam" wikipedia
+    k = 2 * np.pi / λ
+    zR = np.pi * w0**2 / λ
+    w_z = w0 * np.sqrt(1 + (z / zR)**2)
+    R_z = z * (1 + (zR / z)**2)
+    I_rz = I0 * (w0 / w_z)**2 * np.exp((-2 * r**2) / (w_z**2))
+    return I_rz, w_z[0][:]

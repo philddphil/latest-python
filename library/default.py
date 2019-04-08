@@ -89,6 +89,7 @@ plt.tight_layout()
 ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+set_zlim(min_value, max_value)
 plt.show()
 plot_file_name = plot_path + 'plot1.png'
 prd_plots.PPT_save_3d(fig3, ax3, plot_file_name)
