@@ -22,8 +22,8 @@ cs = prd_plots.palette()
 ##############################################################################
 # Specify results directory and change working directory to this location
 p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190404")
+p0 = (r"D:\Experimental Data\Internet Thorlabs optics data")
 os.chdir(p0)
-
 # Generate list of relevant data files and sort them chronologically
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
@@ -68,7 +68,7 @@ for i0, val0 in enumerate(datafiles[0:]):
 # Final plots
 a = 0
 b = 1
-c = 8
+c = 2
 prd_plots.ggplot()
 fig1 = plt.figure('fig1', figsize=(6, 4))
 ax1 = fig1.add_subplot(1, 1, 1)
@@ -79,14 +79,14 @@ ax1.plot(λs[a], ctss[a], '.', markersize=1,
          alpha=0.5, color=cs['gglred'], label='QD1 - 750 grating')
 ax1.plot(λs[a], ctss[a], alpha=0.8,
          color=cs['ggdred'], lw=0.5, label='')
-ax1.plot(λs[b], ctss[b] + 200, '.', markersize=1,
+ax1.plot(λs[b], ctss[b], '.', markersize=1,
          alpha=0.5, color=cs['gglblue'], label='QD1 - 950 grating')
-ax1.plot(λs[b], ctss[b] + 200, alpha=0.8,
+ax1.plot(λs[b], ctss[b], alpha=0.8,
          color=cs['ggdblue'], lw=0.5, label='')
-# ax1.plot(λs[c], ctss[c], '.', markersize=1,
-#          alpha=0.5, color=cs['ggpurple'], label='QD3')
-# ax1.plot(λs[c], ctss[c], alpha=0.8,
-#          color=cs['gglpurple'], lw=0.5, label='')
+ax1.plot(λs[c], ctss[c], '.', markersize=1,
+         alpha=0.5, color=cs['ggpurple'], label='QD3')
+ax1.plot(λs[c], ctss[c], alpha=0.8,
+         color=cs['gglpurple'], lw=0.5, label='')
 # ax1.plot(λs[7], 10 * ctss[7], color=cs['ggdyellow'],
 #          alpha=0.5, label='filter')
 # ax1.plot(λs[7], 10 * ctss[7], '.', color=cs['ggyellow'], label='')
