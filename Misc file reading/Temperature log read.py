@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, r"D:\Python\Local Repo\library")
 np.set_printoptions(suppress=True)
 import prd_plots
+import prd_file_import
 cs = prd_plots.palette()
 
 ##############################################################################
@@ -20,19 +21,8 @@ cs = prd_plots.palette()
 ##############################################################################
 p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190403"
       r"\Temperature log.txt")
-a = open(p0, 'r', encoding='utf-8')
-data = a.readlines()
-a.close
-t_sec = []
-t_date = []
-T = []
-for i0, val in enumerate(data[0:]):
-    t_string = val.split("\t")[0]
-    t_datetime = datetime.strptime(t_string, "%d/%m/%Y %H:%M:%S")
-    t_sec = np.append(t_sec, t_datetime.timestamp())
-    t_date = np.append(t_date, t_datetime)
-    T = np.append(T, float(val.split("\t")[1]))
 
+T, t_date = prd_file_import.load_T_log(p0)
 ##############################################################################
 # Plot some figures
 ##############################################################################
