@@ -16,11 +16,11 @@ import os
 # Excited state lifetime (ns)
 τ_decay = 1
 # τ_excite means excitation is τ_excite times faster than τ_decay
-τ_excite = 1
+τ_excite = 10
 # System transmission (%)
 T = 10
 # Pump rate (GHz)
-k_12 = 0.01
+k_12 = 0.1
 
 # initiate stuff for calcs
 HBT_click = 0
