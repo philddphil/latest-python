@@ -76,7 +76,10 @@ for i0, j0 in enumerate(np.arange(γs)):
     p1 = np.random.random()
     t1 = - τ_decay * np.log(p1 / Δt)
 
-    t = int(t2 + t1 + t0)
+    # sum the excitation time, decay time and next pulse time
+    t = t2 + t1 + t0
+
+    # calculate the time until the next pulse arrives
     q, r = divmod(t, t_excite)
     t2 = t_excite - r
 
@@ -103,13 +106,15 @@ for i0, j0 in enumerate(np.arange(γs)):
                 HBT_click = 1
                 t_start = t + t_clk
 
+    # keep track of experiment clock
     t_clk = t + t_clk
-    # write figures-of-merit file
 
+    # write figures-of-merit file
     display, __ = divmod(t_clk, 100000)
     if display != displayed:
         print(display)
         displayed = display
+
 γs = γs + γs_prev
 print('total count rate = ', 1e3 * (γs / t_clk), 'Mcps')
 with open(f5, 'w', encoding='utf-8') as f:
