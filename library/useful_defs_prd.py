@@ -1974,7 +1974,7 @@ def ABCD_tlens(q_in, f):
 def ABCD_plan(q_in, n1, n2):
     M = np.array([[1, 0], [0, n1 / n2]])
     q_out = np.matmul(M, q_in)
-    if np.iscomplex(q_in[0]) == True:
+    if np.iscomplex(q_in[0]) is True:
         q_out = q_out / q_out[1]
     return(q_out)
 
@@ -1982,6 +1982,6 @@ def ABCD_plan(q_in, n1, n2):
 def ABCD_curv(q_in, n1, n2, R):
     M = np.array([[1, 0], [(n1 - n2) / (R * n2), n1 / n2]])
     q_out = np.matmul(M, q_in)
-    if np.iscomplex(q_in[0]) == True:
+    if np.iscomplex(q_in[0]) is True:
         q_out = q_out / q_out[1]
     return(q_out)

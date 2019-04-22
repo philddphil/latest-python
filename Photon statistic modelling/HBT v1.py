@@ -23,7 +23,7 @@ T = 5
 τ_decay = 1
 τ_excite = 10
 
-name_str = 'tau ' + str(τ_decay) + 'ns, ' + \
+name_str = str(τ_decay) + 'ns, ' + \
     str(τ_excite) + 'x exc, ' + \
     'T ' + str(round(T, 2)) + '%'
 p0 = r'D:\Experimental Data\Python simulations (G5 A5)'\

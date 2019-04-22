@@ -18,7 +18,7 @@ import os
 # τ_excite means excitation is τ_excite times faster than τ_decay
 τ_excite = 1
 # System transmission (%)
-T = 10
+T = 1
 
 # initiate stuff for calcs
 HBT_click = 0
