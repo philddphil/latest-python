@@ -19,9 +19,8 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190403"
-      r"\Temperature log.txt")
-
+p0 = (r"D:\Experimental Data\F5 L10 Janis ST500 Temperatures"
+      r"\T Data 20190319\Temperature log.txt")
 T, t_date = prd_file_import.load_T_log(p0)
 ##############################################################################
 # Plot some figures
@@ -32,8 +31,8 @@ plot_label = p0.split('\\')[-2]
 plot_label = plot_label.split(' ')[-1]
 print(plot_label)
 ###
-
-fig1 = plt.figure('fig1', figsize=(10, 5))
+size = 4
+fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
 ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_xlabel('Time')

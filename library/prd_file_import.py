@@ -1,5 +1,5 @@
 import glob
-import datetime
+from datetime import datetime
 import numpy as np
 
 
