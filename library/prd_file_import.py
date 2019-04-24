@@ -1,7 +1,6 @@
 import glob
 import datetime
 import numpy as np
-from datetime import datetime
 
 
 ###############################################################################
