@@ -54,7 +54,7 @@ print(cts[2, :])
 # fig1.patch.set_facecolor(cs['mnk_dgrey'])
 # ax1.set_xlabel('x axis')
 # ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
+# plt.imshow(im, extent=prd_plots.extents(x) + prd_plots.extents(y))
 
 ###### xy plot ###############################################################
 # size = 4

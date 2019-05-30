@@ -18,12 +18,15 @@ cs = prd.palette()
 ##############################################################################
 π = np.pi
 ts = np.linspace(-15 * π, 15 * π, 1000)
-Es = prd.Gaussian_1D(ts, 1, 0, 10) * np.cos(ts)
+Es = prd.Gaussian_1D(ts, 1, 0, 8 * π, 0, 5) * np.cos(ts*2)
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
 prd.ggplot()
+plot_path = r"D:\Python\Plots\\"
+plot_label = 'Gaussian wavepacket'
+plot_file_name = plot_path + plot_label
 # fig1 = plt.figure('fig1', figsize=(5, 5))
 # ax1 = fig1.add_subplot(1, 1, 1)
 # fig1.patch.set_facecolor(cs['mdk_dgrey'])
@@ -44,6 +47,6 @@ plt.axis('off')
 
 ###
 
-plt.savefig('test.svg')
+plt.savefig(plot_file_name + '.svg')
 plt.show()
-prd.PPT_save_2d(fig1, ax1, 'plot1.png')
+prd.PPT_save_2d(fig1, ax1, plot_file_name + '.png')
