@@ -51,7 +51,7 @@ def Lorentzian_1D(x, x_c, γ, A, bkg=0):
     return L
 
 
-# Fit Λ and ϕ datasets from peak finding routine ##############################
+# Fit hologram period, Λ and rotation angle ϕ datasets from peak find #########
 def find_fit_peak(x, y, A, x_c):
     x_1 = np.linspace(min(x), max(x), 100)
     Peak_ind = np.unravel_index(y.argmax(), y.shape)
@@ -166,14 +166,14 @@ def find_nearest(array, value):
     return array[idx], idx
 
 
-# Get Gaussian fit of histogram of data set a #################################
+# Get Gaussian fit of histogram of data set a (x,y) also hist & bins n, bins ##
 def Gauss_hist(a, bins=10, rng=3, res=1000):
     μ = np.mean(a)
     σ = np.sqrt(np.var(a))
     n, bins = np.histogram(a, bins)
     x = np.linspace(μ - rng * σ, μ + rng * σ, res)
     y = Gaussian_1D(x, np.max(n), μ, σ)
-    return x, y
+    return x, y,
 
 
 # Poissonian distribution at values of k for mean value λ #####################
