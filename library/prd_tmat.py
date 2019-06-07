@@ -1,57 +1,62 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
-import os
-import glob
-import copy
-import random
-import datetime
-
 import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-import scipy.optimize as opt
-
-from scipy import ndimage
-from datetime import datetime
-from scipy.interpolate import interp1d
-from scipy.interpolate import RectBivariateSpline
-from scipy.ndimage.filters import gaussian_filter
-from PIL import Image
+import copy
 
 
 ###############################################################################
 # ABCD matrix defs
 ###############################################################################
-def ABCD_d(q_in, d, n=1):
+# Follows the wikipedia ray matrix formalism
+
+# q parameter is defined as 1/q = 1/R - i*λ0/π*n*(w**2)
+# p is a normal ray trace
+
+# This is the matrix multiplication for propagation
+# takes the input vector (q_in) and multiplies it by the matrix corresponding
+# to a length of d (optical path length = n * d)
+def ABCD_MM(q_in, d, n=1):
     M = np.array([[1, d * n], [0, 1]])
     q_out = np.matmul(M, q_in)
     return(q_out)
 
 
-def ABCD_propagate(q0, z_end, z_start=0, res=1000, n=1):
-    qz = [q0]
-    zs = np.linspace(z_start, z_end, res)
-    ns = n * np.ones(len(zs))
+#
+def ABCD_propagate(qs, z_end, zs_in=None, ns_in=None, res=1000):
+    if zs_in is None:
+        zs_in = [0]
+    if ns_in is None:
+        ns_in = [1]
+    zs_out = copy.copy(zs_in)
+    qz = qs
+    q0 = qs[-1]
+    z_start = zs_in[-1]
+    zs_i = np.linspace(z_start, z_end, res)
+    ns = ns_in[-1] * np.ones(len(zs_i))
+    ns_out = copy.copy(ns_in)
     if q0[1] == 1:
         z_start = np.real(q0[0])
 
-    dz = zs[1] - zs[0]
+    dz = zs_i[1] - zs_i[0]
 
-    for i1, val1 in enumerate(zs[1:]):
-        q1 = ABCD_d(q0, dz, n)
+    for i1, val1 in enumerate(zs_i[0:]):
+        q1 = ABCD_MM(q0, dz, ns[i1])
         qz.append(q1)
         q0 = q1
+        zs_out.append(zs_i[i1])
+        ns_out.append(ns[i1])
 
-    return(zs, qz, ns)
+    return(zs_out, qz, ns_out)
 
 
-def ABCD_tlens(q_in, f):
+def ABCD_tlens(qs, f):
     M = np.array([[1, 0], [-1 / f, 1]])
-    q_out = np.matmul(M, q_in)
-    if q_in[1] == 1:
+    q_out = np.matmul(M, qs[-1])
+    if qs[-1][1] == 1:
         q_out = q_out / q_out[1]
-    return(q_out)
+    qs[-1] = q_out
+    return qs
 
 
 def ABCD_plan(q_in, n1, n2):

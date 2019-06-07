@@ -18,7 +18,7 @@ def I_sat(x, I_sat, P_sat, P_bkg, bkg):
 
 
 # Generic straight line #######################################################
-def straight_line(x, m, c):
+def straight_line(x, m, c=0):
     y = m * x + c
     return y
 
@@ -166,14 +166,14 @@ def find_nearest(array, value):
     return array[idx], idx
 
 
-# Get Gaussian fit of histogram of data set a (x,y) also hist & bins n, bins ##
+# Get Gaussian fit of histogram of data set a ################################
 def Gauss_hist(a, bins=10, rng=3, res=1000):
     μ = np.mean(a)
     σ = np.sqrt(np.var(a))
     n, bins = np.histogram(a, bins)
     x = np.linspace(μ - rng * σ, μ + rng * σ, res)
     y = Gaussian_1D(x, np.max(n), μ, σ)
-    return x, y,
+    return x, y
 
 
 # Poissonian distribution at values of k for mean value λ #####################

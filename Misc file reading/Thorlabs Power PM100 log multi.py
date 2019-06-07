@@ -4,66 +4,120 @@
 import os
 import sys
 import glob
-import time
-import datetime
+import re
 import numpy as np
 import matplotlib.pyplot as plt
-import ntpath
-from datetime import datetime
+from scipy.optimize import curve_fit
+
 
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+p_surface = r"C:\Users\Philip\Documents\GitHub\latest-python\library"
+p_home = r"C:\Users\Phil\Documents\GitHub\latest-python\library"
+p_office = r"D:\Python\Local Repo\library"
+sys.path.insert(0, p_office)
 np.set_printoptions(suppress=True)
-import useful_defs_prd as prd
-cs = prd.palette()
+import prd_plots
+import prd_file_import
+import prd_data_proc
+import prd_maths
+cs = prd_plots.palette()
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\Confocal measurements (F5 L10)"
-      r"\Noise eater implementation\Data 11092018"
-      r"\Thorlabs PM100D")
+p0 = (r"D:\Experimental Data\F5 L10 Laser powers\PM100D 20190516")
 datafiles = glob.glob(p0 + r'\*.txt')
-datafiles.sort(key=os.path.getmtime)
-
-fig1 = plt.figure('fig1', figsize=(10, 4))
-ax1 = fig1.add_subplot(1, 1, 1)
-fig1.patch.set_facecolor(cs['mnk_dgrey'])
-ax1.set_xlabel('time, (s)')
-ax1.set_ylabel('Δ Power (μW)')
-
-fig2 = plt.figure('fig2', figsize=(10, 4))
-ax2 = fig2.add_subplot(1, 1, 1)
-fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('Power (μW)')
-ax2.set_ylabel('# measurements')
-
-datafiles.sort(key=os.path.getmtime)
-for i1, val1 in enumerate(datafiles[::-1]):
-    x, y = prd.load_PM100_log(val1)
-    t = x - np.min(x)
-    P_avg = y - np.mean(y)
-    lb = os.path.basename(val1)
-    fig1
-    ax1.plot(t, 1e6 * P_avg, '.', label=lb)
-    fig2
-    plt.hist(1e6 * P_avg, bins=10, label=lb, alpha=0.5,
-             edgecolor=cs['mnk_dgrey'])
+datafiles = prd_file_import.natural_sort(datafiles)
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
 
-ax1.legend(loc='lower right', fancybox=True, framealpha=1)
-plt.tight_layout()
-ax2.legend(loc='upper left', fancybox=True, framealpha=1)
-plt.tight_layout()
-plt.show()
+datafiles.reverse()
+datafiles_n = len(datafiles)
+colors = plt.cm.viridis(np.linspace(0, 1, datafiles_n))
 
-ax1.legend(loc='lower right', fancybox=True, framealpha=0)
-ax2.legend(loc='upper left', fancybox=True, framealpha=0)
+prd_plots.ggplot()
+size = 4
+
+fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+ax1 = fig1.add_subplot(1, 1, 1)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('time, (s)')
+ax1.set_ylabel('Δ Power (μW)')
+ax1.set_title('time series')
+fig1.tight_layout()
+
+fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
+ax2 = fig2.add_subplot(1, 1, 1)
+fig2.patch.set_facecolor(cs['mnk_dgrey'])
+ax2.set_xlabel('Power (μW)')
+ax2.set_ylabel('# measurements')
+ax2.set_title('histograms')
+fig2.tight_layout()
+
+fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
+ax3 = fig3.add_subplot(1, 1, 1)
+fig3.patch.set_facecolor(cs['mnk_dgrey'])
+ax3.set_xlabel('Drive current (mA)')
+ax3.set_ylabel('Measured power (μW)')
+ax3.set_title('scatter')
+fig3.tight_layout()
+
+# accumulated data for post loop import (times, powers, currents)
+ts = []
+Ps = []
+Ids = []
+
+for i0, val0 in enumerate(datafiles[::-1]):
+    lb = str(os.path.basename(val0))
+    regex = re.compile(r'\d+')
+    Id = float(regex.findall(lb)[0])
+    # import datasets
+    x, y = prd_file_import.load_PM100_log(val0)
+
+    # scale ys and offset xs
+    t = x - np.min(x)
+    P = y * 1e6
+    lb = os.path.basename(val0)
+    gx, gy = prd_maths.Gauss_hist(P)
+
+    # fig1
+    ax1.plot(t, P, label=lb, c=colors[i0])
+    fig1.tight_layout()
+
+    # fig2
+    ax2.plot(gx, gy, c=colors[i0], lw=0.5)
+    ax2.hist(P, bins=10, label=lb, alpha=0.5,
+             edgecolor=cs['mnk_dgrey'], facecolor=colors[i0])
+    fig2.tight_layout()
+
+    # fig3
+    ax3.plot(Id * np.ones(P.shape), P, 'o',
+             mfc='None',
+             mec=colors[i0])
+    fig3.tight_layout()
+    Ps.append(np.mean(P))
+    ts.append(np.mean(t))
+    Ids.append(Id)
+
+x_fit = np.linspace(Ids[0], Ids[-1], 1000)
+m = Ps[-1] / Ids[-1]
+popt, pcov = curve_fit(prd_maths.straight_line,
+                       Ids, Ps, p0=[m, 0])
+m_str = str(np.round(popt[0], 2))
+c_str = str(np.round(popt[1], 2))
+fit_lb = 'y = ' + m_str + 'x ' + c_str
+ax3.plot(x_fit, prd_maths.straight_line(x_fit, *popt),
+         c=cs['ggred'],
+         label=fit_lb)
+ax3.legend(loc='upper left', fancybox=True, framealpha=1)
+plt.show()
+ax3.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
+
 os.chdir(p0)
-prd.PPT_save_2d(fig2, ax2, 'histogram.png')
-prd.PPT_save_2d(fig1, ax1, 'time series.png')
+prd_plots.PPT_save_2d(fig1, ax1, 'time series.png')
+prd_plots.PPT_save_2d(fig2, ax2, 'histogram.png')
+prd_plots.PPT_save_2d(fig3, ax3, 'scatter.png')

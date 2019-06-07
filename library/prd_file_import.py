@@ -1,6 +1,10 @@
 import glob
-from datetime import datetime
 import numpy as np
+import re
+import os
+
+from datetime import datetime
+import prd_data_proc
 
 
 ###############################################################################
@@ -117,6 +121,36 @@ def load_spec(filepath):
     return (λ, cts)
 
 
+# Load all spec (.txt) in directort ###########################################
+def load_spec_dir(dirpath):
+    datafiles = glob.glob(dirpath + r'\*.txt')
+    datafiles.sort(key=os.path.getmtime)
+
+    # Initialise lists of datasets
+    λs = []
+    ctss = []
+    lbs = []
+    count = 0
+
+    # load each spec file, generate λ array cts array, label and plot name
+
+    for i0, val0 in enumerate(datafiles[0:]):
+
+        cts = []
+        λ, cts = load_spec(val0)
+
+        for i1, val1 in enumerate(cts[0, :]):
+            lb = str(i1) + ' ' + os.path.basename(val0)
+            cts_crr = prd_data_proc.cos_ray_rem(cts[:, i1], 50)
+            ctss.append(list(cts_crr))
+            λs.append(λ)
+            lbs.append(lb)
+
+            count += 1
+
+    return λs, ctss, lbs
+
+
 # Load SCM image ##############################################################
 def load_SCM_F5L10(filepath):
     a = open(filepath, 'r', encoding='utf-8')
@@ -176,3 +210,10 @@ def img_labVIEW(file):
     X, Y = np.meshgrid(x, y)
     coords = (X, Y)
     return (im, coords)
+
+
+# Natural sort ###############################################################
+def natural_sort(l):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+    return sorted(l, key=alphanum_key)

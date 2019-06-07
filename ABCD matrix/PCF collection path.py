@@ -10,8 +10,9 @@ import glob
 # Import some extra special libraries from my own repo
 ##############################################################################
 sys.path.insert(0, r"D:\Python\Local Repo\library")
-import useful_defs_prd as prd
-cs = prd.palette()
+import prd_plots
+import prd_tmat
+cs = prd_plots.palette()
 
 ##############################################################################
 # Do some stuff
@@ -65,28 +66,28 @@ print('zR = ', np.round(1e6 * zR, 3))
 print('q0 = ', np.round(q0, 3))
 
 # Propagation: fibre ==> 1st thin lens
-zs0, qs0, ns0 = prd.ABCD_propagate(q0, z1)
-_, ps0, _ = prd.ABCD_propagate(p0, z1)
+zs0, qs0, ns0 = prd_tmat.ABCD_propagate(q0, z1)
+_, ps0, _ = prd_tmat.ABCD_propagate(p0, z1)
 qs = np.append(qs, qs0, axis=0)
 ps = np.append(ps, ps0, axis=0)
 zs = np.append(zs, zs0, axis=0)
 ns = np.append(ns, ns0, axis=0)
 
 # Pass through 1st thin lens
-q1 = prd.ABCD_tlens(qs[-1], f1)
-p1 = prd.ABCD_tlens(ps[-1], f1)
+q1 = prd_tmat.ABCD_tlens(qs[-1], f1)
+p1 = prd_tmat.ABCD_tlens(ps[-1], f1)
 
 # Propagation: thin lens ==>  start of pin hole region
-zs1, qs1, ns1 = prd.ABCD_propagate(q1, z2, z_start=z1)
-_, ps1, _ = prd.ABCD_propagate(p1, z2, z_start=z1)
+zs1, qs1, ns1 = prd_tmat.ABCD_propagate(q1, z2, z_start=z1)
+_, ps1, _ = prd_tmat.ABCD_propagate(p1, z2, z_start=z1)
 qs = np.append(qs, qs1, axis=0)
 ps = np.append(ps, ps1, axis=0)
 zs = np.append(zs, zs1, axis=0)
 ns = np.append(ns, ns1, axis=0)
 
 # Propagation: start ==> end of pin hole region
-zs2, qs2, ns2 = prd.ABCD_propagate(qs[-1], z3, z_start=z2, res=10000)
-_, ps2, _ = prd.ABCD_propagate(ps[-1], z3, z_start=z2, res=10000)
+zs2, qs2, ns2 = prd_tmat.ABCD_propagate(qs[-1], z3, z_start=z2, res=10000)
+_, ps2, _ = prd_tmat.ABCD_propagate(ps[-1], z3, z_start=z2, res=10000)
 qs = np.append(qs, qs2, axis=0)
 ps = np.append(ps, ps2, axis=0)
 zs = np.append(zs, zs2, axis=0)
@@ -110,6 +111,7 @@ xs = np.array(ps)[:, 0]
 # Plot the outputted waists
 ##############################################################################
 # Scale values for appropriate plotting
+prd_plots.ggplot()
 zs = 1e0 * zs
 ws = 1e3 * ws
 xs = 1e3 * xs
@@ -143,4 +145,4 @@ plt.plot([z1 + f1, z1 + f1], [(PCF / 2) * -1, -np.max(ws)],
 # plt.plot(1e6 * zs, 180 * θs / π, c=cs['ggred'])
 plt.tight_layout()
 plt.show()
-prd.PPT_save_2d(fig1, ax1, 'SMF output - Raytrace, G. Beam.png')
+prd_plots.PPT_save_2d(fig1, ax1, 'SMF output - Raytrace, G. Beam.png')

@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-
+import prd_data_proc
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage.filters import gaussian_filter
 from PIL import Image
@@ -178,7 +178,25 @@ def cross_image(im1, im2):
     return sp.signal.fftconvolve(im1_gray, im2_gray[::-1, ::-1], mode='same')
 
 
-# For use with extents in imshow #############################################
+# For use with extents in imshow ##############################################
 def extents(f):
     delta = f[1] - f[0]
     return [f[0] - delta / 2, f[-1] + delta / 2]
+
+
+# Using ginput to get n points from plot ######################################
+def gin(x, y, n=0):
+    ggplot()
+    cs = palette()
+    fig1 = plt.figure('fig1', figsize=(6, 4))
+    ax1 = fig1.add_subplot(1, 1, 1)
+    fig1.patch.set_facecolor(cs['mnk_dgrey'])
+    ax1.set_xlabel('x')
+    ax1.set_ylabel('y')
+
+    ax1.plot(x, y, '.', markersize=2,
+             alpha=0.5, color=cs['gglred'], label='')
+    plt.title('click on peaks, enter when finished')
+    pts = np.asarray(plt.ginput(n))
+    plt.close()
+    return pts
