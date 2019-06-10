@@ -124,7 +124,7 @@ def load_spec(filepath):
 # Load all spec (.txt) in directort ###########################################
 def load_spec_dir(dirpath):
     datafiles = glob.glob(dirpath + r'\*.txt')
-    datafiles.sort(key=os.path.getmtime)
+    datafiles = natural_sort(datafiles)
 
     # Initialise lists of datasets
     λs = []
@@ -135,7 +135,6 @@ def load_spec_dir(dirpath):
     # load each spec file, generate λ array cts array, label and plot name
 
     for i0, val0 in enumerate(datafiles[0:]):
-
         cts = []
         λ, cts = load_spec(val0)
 

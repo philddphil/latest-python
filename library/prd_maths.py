@@ -203,3 +203,9 @@ def Gaussian_beam(z, r, w0, λ, I0=1):
     R_z = z * (1 + (zR / z)**2)
     I_rz = I0 * (w0 / w_z)**2 * np.exp((-2 * r**2) / (w_z**2))
     return I_rz, w_z[0][:]
+
+
+# General monomial function (see wiki, monomial)
+def Monomial(x, a, k):
+    y = a * (x**k)
+    return y

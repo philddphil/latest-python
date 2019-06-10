@@ -1,7 +1,6 @@
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-import prd_data_proc
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage.filters import gaussian_filter
 from PIL import Image
