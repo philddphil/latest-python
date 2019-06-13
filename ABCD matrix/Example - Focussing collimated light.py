@@ -9,7 +9,7 @@ import glob
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+sys.path.insert(0, r"C:\GitHub\latest-python\library")
 import prd_plots
 import prd_tmat
 cs = prd_plots.palette()

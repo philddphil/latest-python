@@ -3,7 +3,6 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage.filters import gaussian_filter
-from PIL import Image
 
 
 ###############################################################################
