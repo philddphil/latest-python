@@ -17,15 +17,15 @@ cs = prd.palette()
 # Do some stuff
 ##############################################################################
 π = np.pi
-ts = np.linspace(-15 * π, 15 * π, 1000)
-Es = prd.Gaussian_1D(ts, 1, 0, 8 * π, 0, 5) * np.cos(ts*2)
+ts = np.linspace(-6 * π, 6 * π, 1000)
+Es = prd.Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2)
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
 prd.ggplot()
 plot_path = r"D:\Python\Plots\\"
-plot_label = 'Gaussian wavepacket'
+plot_label = 'Gaussian wavepacket b'
 plot_file_name = plot_path + plot_label
 # fig1 = plt.figure('fig1', figsize=(5, 5))
 # ax1 = fig1.add_subplot(1, 1, 1)

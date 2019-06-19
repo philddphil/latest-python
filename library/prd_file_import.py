@@ -121,7 +121,7 @@ def load_spec(filepath):
     return (λ, cts)
 
 
-# Load all spec (.txt) in directort ###########################################
+# Load all spec (.txt) in directory ###########################################
 def load_spec_dir(dirpath):
     datafiles = glob.glob(dirpath + r'\*.txt')
     datafiles = natural_sort(datafiles)
@@ -216,3 +216,29 @@ def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(l, key=alphanum_key)
+
+
+
+# Load HH file (.txt) #######################################################
+def load_HH(filepath):
+    with open(filepath, 'r', encoding='ascii') as file:
+        data = file.readlines()
+    data_line = 0
+    skip_head = 0
+    while skip_head == 0:
+        try:
+            float(data[data_line].split('\t')[0])
+        except ValueError:
+            data_line = data_line + 1
+        else:
+            skip_head = 1
+    λ = []
+
+    cts = np.zeros(shape=(len(data) - data_line,
+                          len(data[data_line].split('\t')) - 1))
+    for i0, val0 in enumerate(data[data_line:]):
+        λ = np.append(λ, float(val0.split("\t")[0]))
+        for i1, val1 in enumerate(val0.split("\t")[1:]):
+            cts[i0][i1] = float(val1)
+
+    return (λ, cts)
