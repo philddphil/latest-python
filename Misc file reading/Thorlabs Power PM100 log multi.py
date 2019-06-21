@@ -27,7 +27,8 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\F5 L10 Laser powers\PM100D 20190516")
+p0 = (r"D:\Experimental Data\F5 L10 Laser powers\PM100D 20190611")
+os.chdir(p0)
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles = prd_file_import.natural_sort(datafiles)
 
@@ -73,6 +74,8 @@ Ids = []
 
 for i0, val0 in enumerate(datafiles[::-1]):
     lb = str(os.path.basename(val0))
+    # This bit grabs a value from the file name, when I was saving it
+    # according to the drive curred (Id) set on the laser control box
     regex = re.compile(r'\d+')
     Id = float(regex.findall(lb)[0])
     # import datasets
@@ -103,6 +106,13 @@ for i0, val0 in enumerate(datafiles[::-1]):
     ts.append(np.mean(t))
     Ids.append(Id)
 
+# save some of the series data
+data_name = 'Power series.dat'
+data = np.array(Ps)
+header = "Powers"
+np.savetxt(data_name, da, header=header)
+
+# Perform fit on series data
 x_fit = np.linspace(Ids[0], Ids[-1], 1000)
 m = Ps[-1] / Ids[-1]
 popt, pcov = curve_fit(prd_maths.straight_line,
@@ -110,14 +120,16 @@ popt, pcov = curve_fit(prd_maths.straight_line,
 m_str = str(np.round(popt[0], 2))
 c_str = str(np.round(popt[1], 2))
 fit_lb = 'y = ' + m_str + 'x ' + c_str
+
+# plot series data
 ax3.plot(x_fit, prd_maths.straight_line(x_fit, *popt),
          c=cs['ggred'],
          label=fit_lb)
 ax3.legend(loc='upper left', fancybox=True, framealpha=1)
 plt.show()
-ax3.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
 
-os.chdir(p0)
+# save series plots
+ax3.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
 prd_plots.PPT_save_2d(fig1, ax1, 'time series.png')
 prd_plots.PPT_save_2d(fig2, ax2, 'histogram.png')
 prd_plots.PPT_save_2d(fig3, ax3, 'scatter.png')

@@ -218,27 +218,23 @@ def natural_sort(l):
     return sorted(l, key=alphanum_key)
 
 
-
 # Load HH file (.txt) #######################################################
 def load_HH(filepath):
-    with open(filepath, 'r', encoding='ascii') as file:
-        data = file.readlines()
-    data_line = 0
-    skip_head = 0
-    while skip_head == 0:
-        try:
-            float(data[data_line].split('\t')[0])
-        except ValueError:
-            data_line = data_line + 1
-        else:
-            skip_head = 1
-    λ = []
+    a = open(filepath, 'r', encoding='ascii')
+    data = a.readlines()
+    a.close()
+    for i0, j0 in enumerate(data):
+        if '#channels per curve' in j0:
+            channels = float(data[i0 + 1])
+        if '#ns/bin' in j0:
+            τ_res0 = float(data[i0 + 1].split("\t")[0])
+            τ_res1 = float(data[i0 + 1].split("\t")[1])
+        if '#counts' in j0:
+            data_start_line = i0 + 1
 
-    cts = np.zeros(shape=(len(data) - data_line,
-                          len(data[data_line].split('\t')) - 1))
-    for i0, val0 in enumerate(data[data_line:]):
-        λ = np.append(λ, float(val0.split("\t")[0]))
-        for i1, val1 in enumerate(val0.split("\t")[1:]):
-            cts[i0][i1] = float(val1)
-
-    return (λ, cts)
+    τs0 = np.linspace(0, τ_res0 * (channels - 1), channels)
+    τs1 = np.linspace(0, τ_res1 * (channels - 1), channels)
+    all_cts = np.loadtxt(data[data_start_line:])
+    cts0 = all_cts[:, 0]
+    cts1 = all_cts[:, 1]
+    return (τs0, τs1, cts0, cts1)

@@ -59,11 +59,11 @@ for i0, val0 in enumerate(pts):
     popt, pcov = curve_fit(prd_maths.Gaussian_1D,
                            x_roi, y_roi, p0=[1, μ, σ, bkg])
 
-    As, μs, σs, Ps = prd_data_proc.spec_seq_Gauss_fit(p0,
-                                                      popt,
-                                                      idx_pk,
-                                                      roi,
-                                                      pk_lb)
+    As, μs, σs, Ps = prd_data_proc.spec_seq_Gauss_fit_20190516(p0,
+                                                               popt,
+                                                               idx_pk,
+                                                               roi,
+                                                               pk_lb)
     fit_data.append([As, μs, σs, Ps])
     data_name = pk_lb + '.dat'
     data = np.column_stack((Ps, As, μs, σs))

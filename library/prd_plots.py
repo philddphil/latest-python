@@ -183,7 +183,7 @@ def extents(f):
 
 
 # Using ginput to get n points from plot ######################################
-def gin(x, y, n=0):
+def gin(x, y, n=0, title=''):
     ggplot()
     cs = palette()
     fig1 = plt.figure('fig1', figsize=(6, 4))
@@ -192,9 +192,9 @@ def gin(x, y, n=0):
     ax1.set_xlabel('x')
     ax1.set_ylabel('y')
 
-    ax1.plot(x, y, '.', markersize=2,
+    ax1.plot(x, y, 'o-', markersize=2,
              alpha=0.5, color=cs['gglred'], label='')
-    plt.title('click on peaks, enter when finished')
+    plt.title(title)
     pts = np.asarray(plt.ginput(n))
     plt.close()
     return pts

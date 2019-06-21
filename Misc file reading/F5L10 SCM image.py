@@ -20,7 +20,7 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190404"
+p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190617"
       r"\Raster scans")
 
 datafiles = glob.glob(p0 + r'\*.txt')
@@ -29,7 +29,8 @@ print(datafiles)
 for i0, val0 in enumerate(datafiles[0:]):
     x, y, img = prd_file_import.load_SCM_F5L10(val0)
     lb = os.path.basename(val0)
-    plotname = os.path.splitext(lb)[0] + '.png'
+    plotname1 = os.path.splitext(lb)[0] + '.png'
+    plotname2 = os.path.splitext(lb)[0] + '.svg'
     print(lb)
 
     fig1 = plt.figure('fig1', figsize=(4, 4))
@@ -51,4 +52,14 @@ for i0, val0 in enumerate(datafiles[0:]):
     plt.tight_layout()
     plt.show()
     os.chdir(p0)
-    prd_plots.PPT_save_2d(fig1, ax1, plotname)
+    prd_plots.PPT_save_2d(fig1, ax1, plotname1)
+    plt.axis('off')
+    plt.cla()
+    im1 = plt.imshow(np.flipud(img), cmap='magma',
+                     extent=prd_plots.extents(y) +
+                     prd_plots.extents(x),
+                     label=lb,
+                     vmin=np.min(img),
+                     vmax=0.6 * np.max(img),
+                     alpha=0.5)
+    plt.savefig(plotname2)

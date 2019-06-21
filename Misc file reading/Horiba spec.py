@@ -21,7 +21,7 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190516")
+p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190611")
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
@@ -39,7 +39,7 @@ for i0, val0 in enumerate(datafiles[0:]):
     cts = []
     λ, cts = prd_file_import.load_spec(val0)
     lb = os.path.basename(val0)
-    plot_name = '925 to 945 ' + os.path.splitext(lb)[0]
+    plot_name = '' + os.path.splitext(lb)[0]
 
     # deals with each column of the cts array
     for i1, val1 in enumerate(cts[0, :]):
@@ -88,23 +88,27 @@ fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_xlabel('Wavelength (λ) / nm')
 ax1.set_ylabel('% Transmission')
 
-# for i1, val1 in enumerate(λs[:]):
-#     print(i1)
-#     ax1.plot(λs[i1], ctss[i1], '.', markersize=3,
-#              alpha=0.8, color=colors[i1], label='')
-#     ax1.plot(λs[i1], ctss[i1], lw=0.5,
-#              alpha=0.5, color=colors[i1], label='')
+for i1, val1 in enumerate(λs[:]):
+    print(i1)
+    ax1.plot(λs[i1], ctss[i1], '.', markersize=3,
+             alpha=0.8, color=colors[i1], label='')
+    ax1.plot(λs[i1], ctss[i1], lw=0.5,
+             alpha=0.5, color=colors[i1], label='')
 
-ax1.plot(λs[0], ctss[0], '.', markersize=3,
-         alpha=0.8, color=colors[0], label='')
-ax1.plot(λs[-1], ctss[-1], '.', markersize=3,
-         alpha=0.8, color=colors[-1], label='')
+
+# ax1.plot(λs[0], ctss[0], '.', markersize=3,
+#          alpha=0.8, color=colors[0], label='')
+# ax1.plot(λs[-1], ctss[-1], '.', markersize=3,
+#          alpha=0.8, color=colors[-1], label='')
 
 ax1.legend(loc='upper right', fancybox=True, framealpha=1)
-ax1.set_title('All spectra')
+
+
+plot_name = 'All spectra'
+ax1.set_title(plot_name)
 plt.tight_layout()
 # plt.xlim((922.3, 923))
 plt.show()
-ax1.figure.savefig('All spectra dark' + '.png')
+ax1.figure.savefig(plot_name + 'dark.png')
 ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-prd_plots.PPT_save_2d(fig1, ax1, 'All spectrum')
+prd_plots.PPT_save_2d(fig1, ax1, plot_name)

@@ -3,6 +3,7 @@
 ##############################################################################
 import os
 import sys
+import glob
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -22,8 +23,12 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190516")
+p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190611")
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
+datafiles = glob.glob(p0 + r'\Power series.dat')
+datafile = datafiles[0]
+Ps = np.genfromtxt(datafile, skip_header=1)
+print(Ps)
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
 roi = 80
@@ -59,17 +64,18 @@ for i0, val0 in enumerate(pts):
     popt, pcov = curve_fit(prd_maths.Gaussian_1D,
                            x_roi, y_roi, p0=[1, μ, σ, bkg])
 
-    As, μs, σs, Ps = prd_data_proc.spec_seq_Gauss_fit(p0,
-                                                      popt,
-                                                      idx_pk,
-                                                      roi,
-                                                      pk_lb)
+    As, μs, σs = prd_data_proc.spec_seq_Gauss_fit_20190611(p0,
+                                                           popt,
+                                                           idx_pk,
+                                                           roi,
+                                                           pk_lb,
+                                                           Ps)
     fit_data.append([As, μs, σs, Ps])
     data_name = pk_lb + '.dat'
     data = np.column_stack((Ps, As, μs, σs))
     header = "Powers, Gaussian Amplitudes, Gaussian centres, Gaussian widths"
     np.savetxt(data_name, data, header=header)
-print(len(fit_data))
+
 prd_plots.ggplot()
 size = 4
 fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
@@ -88,11 +94,11 @@ for i0, val0 in enumerate(fit_data):
                                  fit_data[i0][0][1],
                                  fit_data[i0][1][1],
                                  fit_data[i0][2][1])
-    ax1.plot(pk_x, pk_y, '.',
+    ax1.plot(pk_x, pk_y + np.mean(ys0), '.',
              mfc=cs['ggblue'],
              mec=cs['ggblue'],
              label='peak ' + str(i0))
-    ax1.text(pk_x, pk_y, ' peak ' + str(i0))
+    ax1.text(pk_x, pk_y + np.mean(ys0), ' peak ' + str(i0))
 
 fig1.tight_layout()
 plt.show()
