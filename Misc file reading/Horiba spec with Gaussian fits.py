@@ -41,10 +41,13 @@ pts = prd_plots.gin(λs[0], ctss[0], 0)
 # Restrict data set to roi of interest
 x_roi = x[int(idx_pk - roi / 2):int(idx_pk + roi / 2)]
 y_roi = y[int(idx_pk - roi / 2):int(idx_pk + roi / 2)]
+print(np.shape(x_roi))
+print(np.shape(y_roi))
 # Extract first guess values for fitting
 mean = λ_pk
 sigma = 0.1
 bkg = np.mean(y_roi)
+print([1, mean, sigma, bkg])
 # Set up higher resolution x axis for fit
 x_fit = np.linspace(min(x_roi), max(x_roi), 1000)
 # Perform fit

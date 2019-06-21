@@ -60,24 +60,24 @@ prd_plots.ggplot()
 plot_path = r"D:\Python\Plots\\"
 
 ###### image plot ############################################################
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(z, extent=prd_plots.extents(x) + prd_plots.extents(y))
+fig1 = plt.figure('fig1', figsize=(5, 5))
+ax1 = fig1.add_subplot(1, 1, 1)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('x axis')
+ax1.set_ylabel('y axis')
+plt.imshow(z, extent=prd_plots.extents(x) + prd_plots.extents(y))
 
 ###### xy plot ###############################################################
-# size = 4
-# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-# ax2 = fig2.add_subplot(111)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('x axis')
-# ax2.set_ylabel('y axis')
-# plt.plot(x1, y1, '.', alpha=0.4, color=cs['gglred'], label='')
-# plt.plot(x1, y1, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
-# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
-# plt.plot(x2, y2, alpha=1, color=cs['ggblue'], lw=0.5, label='excite')
+size = 4
+fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
+ax2 = fig2.add_subplot(111)
+fig2.patch.set_facecolor(cs['mnk_dgrey'])
+ax2.set_xlabel('x axis')
+ax2.set_ylabel('y axis')
+plt.plot(x1, y1, '.', alpha=0.4, color=cs['gglred'], label='')
+plt.plot(x1, y1, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
+plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
+plt.plot(x2, y2, alpha=1, color=cs['ggblue'], lw=0.5, label='excite')
 
 ###### xyz plot ##############################################################
 size = 4

@@ -140,8 +140,8 @@ def load_spec_dir(dirpath):
 
         for i1, val1 in enumerate(cts[0, :]):
             lb = str(i1) + ' ' + os.path.basename(val0)
-            cts_crr = prd_data_proc.cos_ray_rem(cts[:, i1], 50)
-            ctss.append(list(cts_crr))
+            # cts_crr = prd_data_proc.cos_ray_rem(cts[:, i1], 50)
+            ctss.append(list(cts[:, i1]))
             λs.append(λ)
             lbs.append(lb)
 

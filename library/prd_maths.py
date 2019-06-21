@@ -187,10 +187,10 @@ def Poissonian_1D(k, λ):
 
 
 # Dipole emission in x y field plane with strength in z direction #############
-def Dipole_2D(x, y, L, λ, I_0=1):
+def Dipole_2D(x, y, L, λ, shift=0, I_0=1):
     # see  "Dipole antenna" wikipedia
     ρ, ϕ = cart2pol(y, x)
-    S = (1 / ρ**2) * (L**2 / λ**2) * np.sin(ϕ)**2
+    S = (1 / (ρ - shift)**2) * (L**2 / λ**2) * np.sin(ϕ)**2
     return S
 
 

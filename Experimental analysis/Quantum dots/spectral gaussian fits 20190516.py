@@ -77,9 +77,9 @@ ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_xlabel('Wavelength (λ - nm)')
 ax1.set_ylabel('Counts')
-ax1.set_title('Labelled spectrum with fits')
-ax1.plot(xs0, ys0, '.', markersize=2,
-         alpha=0.5, color=cs['gglred'], label='')
+ax1.set_title('Labelled spectrum')
+ax1.plot(xs0, ys0, '-.', markersize=2, lw=0.5,
+         alpha=1, color=cs['gglred'], label='')
 
 pk_ys = [ys0[i] for i in pk_idxs]
 for i0, val0 in enumerate(fit_data):
