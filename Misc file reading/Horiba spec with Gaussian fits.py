@@ -3,7 +3,6 @@
 ##############################################################################
 import os
 import sys
-import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -47,14 +46,13 @@ print(np.shape(y_roi))
 mean = λ_pk
 sigma = 0.1
 bkg = np.mean(y_roi)
-print([1, mean, sigma, bkg])
 # Set up higher resolution x axis for fit
 x_fit = np.linspace(min(x_roi), max(x_roi), 1000)
 # Perform fit
 popt, pcov = curve_fit(prd_maths.Gaussian_1D,
                        x_roi, y_roi, p0=[1, mean, sigma, bkg])
 
-# Plot 
+# Plot
 prd_plots.ggplot()
 size = 4
 colors = plt.cm.viridis(np.linspace(0, 1, len(λs)))
@@ -85,21 +83,21 @@ for i1, val in enumerate(λs):
     prd_plots.ggplot()
 
     colors = plt.cm.viridis(np.linspace(0, 1, len(λs)))
-    ax1.plot(x, y, '--', alpha=0.5,
+    ax1.plot(x - popt[2], y, '--', alpha=0.5,
              color=colors[i1],
              label='',
              lw=0)
 
-    plt.plot(x_roi, y_roi, '.',
+    plt.plot(x_roi - popt[2], y_roi, '.',
              c=colors[i1],
              alpha=0.3)
-    plt.plot(x_fit, prd_maths.Gaussian_1D(
-        x_fit, *popt),
+    plt.plot(x_fit - popt[2], prd_maths.Gaussian_1D(
+        x_fit - popt[2], *popt),
         label='fit',
         c=colors[i1],
         lw=0.5)
 
-    plt.xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 * roi)]))
+    # plt.xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 * roi)]))
 ax1.set_title('spectra with fits')
 fig1.tight_layout()
 plt.show()

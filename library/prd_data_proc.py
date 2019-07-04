@@ -48,7 +48,7 @@ def spec_seq_Gauss_fit_20190611(d, popt, idx_pk, roi, pk_lb, Ps):
     fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
     ax1 = fig1.add_subplot(1, 1, 1)
     fig1.patch.set_facecolor(cs['mnk_dgrey'])
-    ax1.set_xlabel('Wavelength (λ - nm)')
+    ax1.set_xlabel('Wavelength shifted with excitation power')
     ax1.set_ylabel('Counts')
     ax1.set_title('Spectra with fits - ' + pk_lb)
     fig1.tight_layout()
@@ -100,21 +100,22 @@ def spec_seq_Gauss_fit_20190611(d, popt, idx_pk, roi, pk_lb, Ps):
         prd_plots.ggplot()
 
         colors = plt.cm.viridis(np.linspace(0, 1, len(λs)))
-        ax1.plot(x, y, '--', alpha=0.5,
+        ax1.plot(x - popt[1] + i0, y, '--', alpha=0.5,
                  color=colors[i0],
                  label='',
                  lw=0)
 
-        ax1.plot(x_roi, y_roi, '.',
+        ax1.plot(x_roi - popt[1] + i0, y_roi, '.',
                  c=colors[i0],
                  alpha=0.3)
 
-        ax1.plot(x_fit, prd_maths.Gaussian_1D(
-            x_fit, *popt),
+        ax1.plot(x_fit - popt[1] + i0, prd_maths.Gaussian_1D(
+            x_fit - popt[1] + i0, *(popt[0], i0, popt[2], popt[3])),
             label='fit',
             c=colors[i0],
             lw=0.5)
         ax1.set_xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 * roi)]))
+        ax1.set_xlim((-1, 12))
         fig1.tight_layout()
 
         ax2.plot(P, popt[0], 'o', c=colors[i0])
@@ -157,7 +158,7 @@ def spec_seq_Gauss_fit_20190516(d, popt, idx_pk, roi, pk_lb):
     fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
     ax1 = fig1.add_subplot(1, 1, 1)
     fig1.patch.set_facecolor(cs['mnk_dgrey'])
-    ax1.set_xlabel('Wavelength (λ - nm)')
+    ax1.set_xlabel('Relative wavelength (λ - nm)')
     ax1.set_ylabel('Counts')
     ax1.set_title('Spectra with fits - ' + pk_lb)
     fig1.tight_layout()
@@ -213,21 +214,23 @@ def spec_seq_Gauss_fit_20190516(d, popt, idx_pk, roi, pk_lb):
         prd_plots.ggplot()
 
         colors = plt.cm.viridis(np.linspace(0, 1, len(λs)))
-        ax1.plot(x, y, '--', alpha=0.5,
+        ax1.plot(x - popt[1] + i0, y, '--', alpha=0.5,
                  color=colors[i0],
                  label='',
                  lw=0)
 
-        ax1.plot(x_roi, y_roi, '.',
+        ax1.plot(x_roi - popt[1] + i0, y_roi, '.',
                  c=colors[i0],
                  alpha=0.3)
 
-        ax1.plot(x_fit, prd_maths.Gaussian_1D(
-            x_fit, *popt),
+        ax1.plot(x_fit - popt[1] + i0, prd_maths.Gaussian_1D(
+            x_fit - popt[1] + i0, *(popt[0], i0, popt[2], popt[3])),
             label='fit',
             c=colors[i0],
             lw=0.5)
-        ax1.set_xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 * roi)]))
+        # ax1.set_xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 *
+        # roi)]))
+        ax1.set_xlim(auto=True)
         fig1.tight_layout()
 
         ax2.plot(P, popt[0], 'o', c=colors[i0])
