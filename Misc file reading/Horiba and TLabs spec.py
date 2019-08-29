@@ -21,8 +21,9 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190516\Ts sweep")
-p0 = (r"D:\Experimental Data\Internet Thorlabs optics data")
+p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190815")
+# p0 = (r"D:\Experimental Data\Internet Thorlabs optics data")
+# p0 = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Conferences\SPW 2019\Figures")
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
 datafiles = glob.glob(p0 + r'\*.txt')
@@ -55,26 +56,27 @@ for i0, val0 in enumerate(datafiles[0:]):
         # append each data set to list for subsequent plotting
         y0 = cts_crr
 
-        # plot each data set and save (close pop-up to save each time)
-        # prd_plots.ggplot()
-        # fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
-        # ax1 = fig1.add_subplot(1, 1, 1)
-        # fig1.patch.set_facecolor(cs['mnk_dgrey'])
-        # ax1.set_xlabel('Wavelength (λ) / nm')
-        # ax1.set_ylabel('Counts')
-        # ax1.plot(λ, y0, '.', alpha=0.4, color=cs['gglred'],
-        # label=os.path.splitext(lb)[0])
-        # ax1.plot(λ, y0, alpha=1, color=cs['ggdred'], lw=0.5, label='')
-        # # plt.ylim(1.1 * np.min(y0), 1.1 * np.max(y0))
-        # # plt.xlim((922, 923.5))
-        # plt.title('spectrum')
-        # plt.tight_layout()
-        # ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-        # plt.show()
-        # ax1.figure.savefig(plot_name + 'dark.png')
-        # ax1.legend(loc='upper left', fancybox=True,
-        #            facecolor=(1.0, 1.0, 1.0, 0.0))
-        # prd_plots.PPT_save_2d(fig1, ax1, plot_name)
+        #### plot each data set and save (close pop-up to save each time)
+        
+        prd_plots.ggplot()
+        fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
+        ax1 = fig1.add_subplot(1, 1, 1)
+        fig1.patch.set_facecolor(cs['mnk_dgrey'])
+        ax1.set_xlabel('Wavelength (λ) / nm')
+        ax1.set_ylabel('Counts')
+        ax1.plot(λ, y0, '.', alpha=0.4, color=cs['gglred'],
+        label=os.path.splitext(lb)[0])
+        ax1.plot(λ, y0, alpha=1, color=cs['ggdred'], lw=0.5, label='')
+        # plt.ylim(1.1 * np.min(y0), 1.1 * np.max(y0))
+        # plt.xlim((922, 923.5))
+        plt.title('spectrum')
+        plt.tight_layout()
+        ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
+        plt.show()
+        ax1.figure.savefig(plot_name + 'dark.png')
+        ax1.legend(loc='upper left', fancybox=True,
+                   facecolor=(1.0, 1.0, 1.0, 0.0))
+        prd_plots.PPT_save_2d(fig1, ax1, plot_name)
 
         # increment counter
         count += 1
@@ -83,20 +85,25 @@ for i0, val0 in enumerate(datafiles[0:]):
 # diff = ctss[0] - ctss[1]
 
 # Final plots
-a = 7
-b = 8
-print(np.shape(ctss))
-print(np.shape(λs[0]))
-y = np.linspace(7, 30, np.shape(ctss)[0])
-x = λs[0]
-# c = [a0 - b0 for a0, b0 in zip(ctss[1], ctss[12])]
+a = 0
+b = 1
+c = 2
+
+x0 = λs[0]
+x1 = λs[1]
+x2 = λs[2]
+
+y0 = (ctss[0] - np.min(ctss[0])) / np.max(ctss[0])
+y1 = (ctss[1] - np.min(ctss[1])) / np.max(ctss[1])
+y2 = (ctss[2] - np.min(ctss[2])) / np.max(ctss[2])
 
 prd_plots.ggplot()
-fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
+# fig1 = plt.figure('fig1', figsize=(5 * np.sqrt(2), 5))
+fig1 = plt.figure('fig1', figsize=(8, 4))
 ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_xlabel('Wavelength (λ) / nm')
-ax1.set_ylabel('Transmission')
+ax1.set_ylabel('Arbitrary Units')
 
 # plt.imshow(ctss, cmap='magma',
 #            extent=prd_plots.extents(x) +
@@ -105,26 +112,26 @@ ax1.set_ylabel('Transmission')
 # for i0 in np.arange(45):
 #     ax1.plot(λs[i0] + 0 * i0, ctss[i0], '-o',
 #              markersize=1, alpha=0.5, label=i0)
-ax1.plot(λs[a], ctss[a], '.', markersize=1,
-         alpha=0.5, color=cs['gglred'], label='T')
-ax1.plot(λs[a], ctss[a], alpha=0.8,
-         color=cs['ggdred'], lw=0.5, label='')
-ax1.plot(λs[b], ctss[b], '.', markersize=1,
-         alpha=0.5, color=cs['gglblue'], label='R')
-ax1.plot(λs[b], ctss[b], alpha=0.8,
-         color=cs['ggdblue'], lw=0.5, label='')
-# ax1.plot(λs[b], c, '.', markersize=1,
-#          alpha=0.5, color=cs['ggpurple'], label='Δ')
-# ax1.plot(λs[b], c, alpha=0.8,
-#          color=cs['gglpurple'], lw=0.5, label='')
+ax1.plot(x0, y0, '.', markersize=1,
+         alpha=0.5, color=cs['gglred'], label='')
+ax1.plot(x0, y0, alpha=0.8,
+         color=cs['ggdred'], lw=1, label='QD')
+ax1.plot(x1, y1, '.', markersize=1,
+         alpha=0.5, color=cs['gglblue'], label='')
+ax1.plot(x1, y1, alpha=0.8,
+         color=cs['ggdblue'], lw=1, label='NV')
+ax1.plot(x2, y2, '.', markersize=1,
+         alpha=0.5, color=cs['ggpurple'], label='')
+ax1.plot(x2, y2, alpha=0.8,
+         color=cs['gglpurple'], lw=1, label='hBN')
 # ax1.plot(λs[7], 10 * ctss[7], color=cs['ggdyellow'],
 # #          alpha=0.5, label='filter')
 # # ax1.plot(λs[7], 10 * ctss[7], '.', color=cs['ggyellow'], label='')
 ax1.legend(loc='upper right', fancybox=True, framealpha=1)
 # plt.title('spectrum')
 plt.tight_layout()
-plt.xlim((500, 1000))
+# plt.xlim((500, 1000))
 plt.show()
-ax1.legend(loc='lower right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
+ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
 ax1.figure.savefig('Spectrum_dark' + '.png')
 prd_plots.PPT_save_2d(fig1, ax1, 'Spectrum')

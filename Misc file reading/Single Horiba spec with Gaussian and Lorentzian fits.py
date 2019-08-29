@@ -31,6 +31,7 @@ os.chdir(p0)
 datafile = p0 + r'\30mA.txt'
 roi = 80
 λ, cts = prd_file_import.load_spec(datafile)
+print('resolution = ', λ[1] - λ[0], ' nm')
 cts = cts[:, 0]
 # Use gin to get first approximation for peak location
 pts = prd_plots.gin(λ, cts, 0, 'click once and tap enter to fit peak')
@@ -39,13 +40,10 @@ print(λ_pk, idx_pk)
 # Restrict data set to roi of interest
 x_roi = λ[int(idx_pk - roi / 2):int(idx_pk + roi / 2)]
 y_roi = cts[int(idx_pk - roi / 2):int(idx_pk + roi / 2)]
-print(np.shape(x_roi))
-print(np.shape(y_roi))
 # Extract first guess values for fitting
 mean = λ_pk
 sigma = 0.1
 bkg = np.mean(y_roi)
-print([1, mean, sigma, bkg])
 # Set up higher resolution x axis for fit
 x_fit = np.linspace(min(x_roi), max(x_roi), 1000)
 # Perform fit
@@ -54,8 +52,10 @@ popt_G, pcov = curve_fit(prd_maths.Gaussian_1D,
 
 popt_L, pcov = curve_fit(prd_maths.Lorentzian_1D,
                          x_roi, y_roi, p0=[mean, sigma, 1, bkg])
-popt_Li = [mean, 0.1, 1000, bkg]
-# Plot
+print('Gaussian FWHM = ', np.abs(np.round(2.354 * popt_G[2], 3)), 'nm')
+print('Lorentzian FWHM = ', np.abs(np.round(2 * popt_L[1], 3)), 'nm')
+
+# Plots
 prd_plots.ggplot()
 size = 4
 
@@ -97,13 +97,13 @@ ax2.plot(x, y - prd_maths.Gaussian_1D(
     x, *popt_G), '.-',
     color=cs['ggblue'],
     label='Gaussian residuals',
-    lw=1)
+    lw=0.5)
 
 ax2.plot(x, y - prd_maths.Lorentzian_1D(
     x, *popt_L), '.-',
     color=cs['ggpurple'],
     label='Lorentzian residuals',
-    lw=1)
+    lw=0.5)
 
 ax1.set_xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 * roi)]))
 ax2.set_xlim((x[idx_pk - int(0.3 * roi)], x[idx_pk + int(0.3 * roi)]))

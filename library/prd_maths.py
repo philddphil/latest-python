@@ -209,3 +209,9 @@ def Gaussian_beam(z, r, w0, λ, I0=1):
 def Monomial(x, a, k):
     y = a * (x**k)
     return y
+
+
+# dB to ratio
+def dB_to_lin(a):
+    b = 10**(-a / 10)
+    return b

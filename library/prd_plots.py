@@ -86,7 +86,7 @@ def ggplot():
 
 # Save 3d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_3d(fig, ax, name):
-    plt.rcParams['text.color'] = 'xkcd:charcoal grey'
+    plt.rcParams['text.color'] = 'xkcd:black'
     fig.patch.set_facecolor('xkcd:white')
     ax.patch.set_facecolor('xkcd:white')
     ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
@@ -94,39 +94,39 @@ def PPT_save_3d(fig, ax, name):
     ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     fig.patch.set_alpha(0.0)
     ax.patch.set_alpha(0.0)
-    ax.xaxis.label.set_color('xkcd:charcoal grey')
-    ax.yaxis.label.set_color('xkcd:charcoal grey')
-    ax.zaxis.label.set_color('xkcd:charcoal grey')
-    ax.tick_params(axis='x', colors='xkcd:charcoal grey')
-    ax.tick_params(axis='y', colors='xkcd:charcoal grey')
-    ax.tick_params(axis='z', colors='xkcd:charcoal grey')
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.zaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
+    ax.tick_params(axis='z', colors='xkcd:black')
     fig.savefig(name)
 
 
 # Save 2d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_2d(fig, ax, name):
-    plt.rcParams['text.color'] = 'xkcd:charcoal grey'
+    plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
     ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:charcoal grey')
-    ax.yaxis.label.set_color('xkcd:charcoal grey')
-    ax.tick_params(axis='x', colors='xkcd:charcoal grey')
-    ax.tick_params(axis='y', colors='xkcd:charcoal grey')
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
     ax.figure.savefig(name)
 
 
 # Save 2d image with a colourscheme suitable for ppt, as a png ################
 def PPT_save_2d_im(fig, ax, cb, name):
-    plt.rcParams['text.color'] = 'xkcd:charcoal grey'
+    plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
     ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:charcoal grey')
-    ax.yaxis.label.set_color('xkcd:charcoal grey')
-    ax.tick_params(axis='x', colors='xkcd:charcoal grey')
-    ax.tick_params(axis='y', colors='xkcd:charcoal grey')
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
     cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
     # cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
-    plt.setp(cbytick_obj, color='xkcd:charcoal grey')
+    plt.setp(cbytick_obj, color='xkcd:black')
 
     ax.figure.savefig(name)
 
