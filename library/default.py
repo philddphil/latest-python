@@ -5,7 +5,6 @@ import sys
 import numpy as np
 
 
-
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
@@ -21,11 +20,12 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 p0 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190828\text.txt"
+p1 = r"D:\Experimental Data\G4 L12 Rennishaw\20190829\NV test"
 
-d = np.genfromtxt(p0, delimiter="\n")
+data0 = np.loadtxt(p1)
+data1 = data0.reshape((1015, 27, 30))
+print(np.shape(data1))
 
-print(np.shape(d))
-print(d[1])
 ##############################################################################
 # Plot some figures
 ##############################################################################
@@ -33,13 +33,13 @@ print(d[1])
 # plot_path = r"D:\Python\Plots\\"
 # plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
 
-###### image plot ############################################################
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd_plots.extents(x) + prd_plots.extents(y))
+##### image plot ############################################################
+fig1 = plt.figure('fig1', figsize=(5, 5))
+ax1 = fig1.add_subplot(1, 1, 1)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('x axis')
+ax1.set_ylabel('y axis')
+plt.imshow(data0, extent=prd_plots.extents(x) + prd_plots.extents(y))
 
 ###### xy plot ###############################################################
 # size = 4

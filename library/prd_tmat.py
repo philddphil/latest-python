@@ -22,7 +22,6 @@ def ABCD_MM(q_in, d, n=1):
     return(q_out)
 
 
-#
 def ABCD_propagate(qs, z_end, zs_in=None, ns_in=None, res=1000):
     if zs_in is None:
         zs_in = [0]
