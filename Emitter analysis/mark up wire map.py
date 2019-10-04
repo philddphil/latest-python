@@ -1,15 +1,16 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
-import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
+import time
 
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
-sys.path.insert(0, r"C:\local files\Python\Local Repo")
+sys.path.insert(0, r"D:\Python\Local Repo\library")
 sys.path.insert(0, r"C:\Users\Phil\Documents\GitHub\latest-python\library")
 np.set_printoptions(suppress=True)
 import prd_plots
@@ -20,43 +21,37 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-# p0 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt0.txt"
-# p1 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt1.txt"
+p0 = r"D:\Experimental Data\G4 L12 Rennishaw\20190828\peak overlay.jpg"
 
-# print(prd_maths.dB_to_lin(0.3))
-# print(prd_maths.dB_to_lin(0.6))
-# print(prd_maths.dB_to_lin(0.8))
+# image = Image.open(p0)
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
-prd_plots.ggplot()
-plot_path = r"C:\local files\Python\Plots"
+# prd_plots.ggplot()
+# plot_path = r"D:\Python\Plots\\"
 # plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
-os.chdir(plot_path)
-###### xy plot ###############################################################
-size = 9
-fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-ax2 = fig2.add_subplot(111)
-fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-ax2.set_ylabel('Money (M$)', fontsize=28)
-# plt.bar(1, 500, color=cs['ggred'])
-# plt.bar(2, 1000, color=cs['ggblue'])
-# plt.bar(3, 1275, color=cs['mnk_green'])
-# plt.bar(4, 10000, color=cs['ggpurple'])
-ax2.set_xlim(0.5, 4.5)
-ax2.set_ylim(0, 11000)
-ax2.set_yticklabels([])
-ax2.set_xticklabels([])
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
+
+##### image plot ############################################################
+# fig1 = plt.figure('fig1', figsize=(5, 5))
+# ax1 = fig1.add_subplot(1, 1, 1)
 # fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
+# ax1.set_xlabel('x axis')
+# ax1.set_ylabel('y axis')
+# plt.imshow(image)
+# pts = np.asarray(plt.ginput(0))
+
+###### xy plot ###############################################################
+# size = 4
+# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
+# ax2 = fig2.add_subplot(111)
+# fig2.patch.set_facecolor(cs['mnk_dgrey'])
+# ax2.set_xlabel('x axis')
+# ax2.set_ylabel('y axis')
+# plt.plot(noise, alpha=0.4, color=cs['gglred'], label='')
+# plt.hist(G_noise, 10, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
+# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
+# plt.plot(x2, y2, alpha=1, color=cs['ggblue'], lw=0.5, label='excite')
 
 ###### xyz plot ##############################################################
 # size = 4
@@ -70,13 +65,45 @@ ax2.set_xticklabels([])
 
 # ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
 # # os.chdir(p0)
-plt.tight_layout()
+# plt.tight_layout()
 # ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # set_zlim(min_value, max_value)
 
-plt.show()
-ax2.figure.savefig('funding' + '.png')
-plot_file_name = plot_path + 'plot2.png'
-prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
+# plt.show()
+# plot_file_name = plot_path + 'plot1.png'
+# prd_plots.PPT_save_3d(fig2, ax2, plot_file_name)
+
+
+def tellme(s):
+    print(s)
+    plt.title(s, fontsize=16)
+    plt.draw()
+
+    plt.clf()
+plt.setp(plt.gca(), autoscale_on=False)
+
+tellme('You will define a triangle, click to begin')
+
+plt.waitforbuttonpress()
+
+while True:
+    pts = []
+    while len(pts) < 3:
+        tellme('Select 3 corners with mouse')
+        pts = np.asarray(plt.ginput(3))
+        if len(pts) < 3:
+            tellme('Too few points, starting over')
+            time.sleep(1)  # Wait a second
+
+    ph = plt.fill(pts[:, 0], pts[:, 1], 'r', lw=2)
+
+    tellme('Happy? Key click for yes, mouse click for no')
+
+    if plt.waitforbuttonpress():
+        break
+
+    # Get rid of fill
+    for p in ph:
+        p.remove()

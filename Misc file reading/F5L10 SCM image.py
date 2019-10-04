@@ -20,7 +20,7 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190617"
+p0 = (r"D:\Experimental Data\F5 L10 Confocal measurements\SCM Data 20190912"
       r"\Raster scans")
 
 datafiles = glob.glob(p0 + r'\*.txt')
@@ -30,7 +30,7 @@ for i0, val0 in enumerate(datafiles[0:]):
     x, y, img = prd_file_import.load_SCM_F5L10(val0)
     lb = os.path.basename(val0)
     plotname1 = os.path.splitext(lb)[0] + '.png'
-    plotname2 = os.path.splitext(lb)[0] + '.svg'
+    plotname2 = os.path.splitext(lb)[0] + ' log.png'
     print(lb)
 
     fig1 = plt.figure('fig1', figsize=(4, 4))
@@ -40,12 +40,13 @@ for i0, val0 in enumerate(datafiles[0:]):
     ax1.set_xlabel('x dimension (V)')
     ax1.set_ylabel('y dimension (V)')
     plt.title(lb)
-    im1 = plt.imshow(np.flipud(img), cmap='magma',
+    im1 = plt.imshow(np.flipud(np.log(img)), cmap='magma',
                      extent=prd_plots.extents(y) +
                      prd_plots.extents(x),
                      label=lb,
-                     vmin=np.min(img),
-                     vmax=0.6 * np.max(img))
+                     # vmin=np.min(img),
+                     # vmax=0.6 * np.max(img)
+                     )
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     fig1.colorbar(im1, cax=cax)
@@ -53,13 +54,36 @@ for i0, val0 in enumerate(datafiles[0:]):
     plt.show()
     os.chdir(p0)
     prd_plots.PPT_save_2d(fig1, ax1, plotname1)
-    plt.axis('off')
-    plt.cla()
-    im1 = plt.imshow(np.flipud(img), cmap='magma',
+
+    # plt.axis('off')
+    # plt.cla()
+    # im1 = plt.imshow(np.flipud(img), cmap='magma',
+    #                  extent=prd_plots.extents(y) +
+    #                  prd_plots.extents(x),
+    #                  label=lb,
+    #                  vmin=np.min(img),
+    #                  vmax=0.6 * np.max(img),
+    #                  alpha=0.5)
+    # plt.savefig(plotname2)
+
+    fig2 = plt.figure('fig2', figsize=(4, 4))
+    prd_plots.ggplot()
+    ax2 = fig2.add_subplot(1, 1, 1)
+    fig2.patch.set_facecolor(cs['mnk_dgrey'])
+    ax2.set_xlabel('x dimension (V)')
+    ax2.set_ylabel('y dimension (V)')
+    plt.title(lb)
+    im2 = plt.imshow(np.flipud(img), cmap='magma',
                      extent=prd_plots.extents(y) +
                      prd_plots.extents(x),
                      label=lb,
                      vmin=np.min(img),
-                     vmax=0.6 * np.max(img),
-                     alpha=0.5)
-    plt.savefig(plotname2)
+                     vmax=0.6 * np.max(img)
+                     )
+    divider = make_axes_locatable(ax2)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig1.colorbar(im1, cax=cax)
+    plt.tight_layout()
+    plt.show()
+    os.chdir(p0)
+    prd_plots.PPT_save_2d(fig2, ax2, plotname2)

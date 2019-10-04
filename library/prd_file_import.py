@@ -149,7 +149,7 @@ def load_spec_dir(dirpath):
     return λs, ctss, lbs
 
 
-# Load SCM image ##############################################################
+# Load SCM image #############################################################
 def load_SCM_F5L10(filepath):
     a = open(filepath, 'r', encoding='utf-8')
     data = a.readlines()
@@ -176,7 +176,7 @@ def load_SCM_F5L10(filepath):
     return (x, y, img)
 
 
-# Load multiple .csvs #########################################################
+# Load multiple .csvs ########################################################
 def load_multicsv(directory):
     f1 = directory + r'\*.csv'
     files = glob.glob(f1)
@@ -188,7 +188,7 @@ def load_multicsv(directory):
     return data_all
 
 
-# Plot an image from a .csv  (saved by LabVIEW) ###############################
+# Plot an image from a .csv  (saved by LabVIEW) ##############################
 def img_csv(file, delim=',', sk_head=1):
     im = np.genfromtxt(file, delimiter=delim, skip_header=sk_head)
     im_size = np.shape(im)
@@ -199,7 +199,7 @@ def img_csv(file, delim=',', sk_head=1):
     return (im, coords)
 
 
-# Plot an image from a .txt (saved by labVIEW) ################################
+# Plot an image from a .txt (saved by labVIEW) ###############################
 def img_labVIEW(file):
     im = np.loadtxt(file)
     im_size = np.shape(im)
@@ -217,7 +217,7 @@ def natural_sort(l):
     return sorted(l, key=alphanum_key)
 
 
-# Load HH file (.txt) #######################################################
+# Load HH file (.txt) ########################################################
 def load_HH(filepath):
     a = open(filepath, 'r', encoding='ascii')
     data = a.readlines()
@@ -227,13 +227,15 @@ def load_HH(filepath):
             channels = float(data[i0 + 1])
         if '#ns/bin' in j0:
             τ_res0 = float(data[i0 + 1].split("\t")[0])
-            τ_res1 = float(data[i0 + 1].split("\t")[1])
         if '#counts' in j0:
             data_start_line = i0 + 1
 
-    τs0 = np.linspace(0, τ_res0 * (channels - 1), channels)
-    τs1 = np.linspace(0, τ_res1 * (channels - 1), channels)
+    τs = np.linspace(0, τ_res0 * (channels - 1), channels)
     all_cts = np.loadtxt(data[data_start_line:])
-    cts0 = all_cts[:, 0]
-    cts1 = all_cts[:, 1]
-    return (τs0, τs1, cts0, cts1)
+    cts = all_cts[:, 0]
+    return (τs, cts)
+
+
+# Load labVIEW saved T2 file (.txt) ##########################################
+def load_T2(filepath):
+    return
