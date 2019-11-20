@@ -20,6 +20,12 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 
+# Follows the wikipedia ray matrix formalism
+# (scroll down for the Gaussian beam bit)
+
+# q parameter is defined as 1/q = 1/R - i*λ0/π*n*(w**2)
+# p is  a normal ray trace
+
 # User defined parameters
 # w0 is the Gaussian waist of the starting beam
 w0 = 1e-2
