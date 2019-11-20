@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
 import prd_plots
 import prd_tmat
 cs = prd_plots.palette()
@@ -65,7 +65,7 @@ xs = np.array(ps)[:, 0]
 ##############################################################################
 # Scale values for appropriate plotting
 prd_plots.ggplot()
-plot_path = r"D:\Python\Plots"
+plot_path = r"C:\local files\Python\Plots"
 zs = 1e0 * np.array(zs)
 ws = 1e3 * ws
 xs = 1e3 * xs
@@ -84,6 +84,6 @@ plt.tight_layout()
 plt.show()
 
 # Saving plots
-plot_file_name = plot_path + r'\Gauss and Ray tracing.png'
+plot_file_name = plot_path + r'\Gauss and Ray tracing Propagation.png'
 ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
 prd_plots.PPT_save_2d(fig1, ax1, plot_file_name)

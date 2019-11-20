@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
 import prd_plots
 import prd_tmat
 cs = prd_plots.palette()
@@ -132,7 +132,7 @@ pθs2 = np.array(ps2)[:, 1]
 ##############################################################################
 # Scale values for appropriate plotting
 prd_plots.ggplot()
-plot_path = r"D:\Python\Plots"
+plot_path = r"C:\local files\Python\Plots"
 zs_plot = 1e0 * np.array(zs3)
 qxs0 = 1e6 * qxs0
 qxs1 = 1e6 * qxs1
@@ -163,12 +163,12 @@ plt.plot(zs_plot, ws, '--', c=cs['gglred'], label='Gaussian Beam')
 plt.plot(zs_plot, -ws, '--', c=cs['gglred'])
 
 ax1.legend(loc='upper right', fancybox=True, framealpha=1)
-ax1.set_xlim(2.0 + f1 - Δf1, 2.0 + f1 + Δf1)
-ax1.set_ylim(-10, 10)
+# ax1.set_xlim(2.0 + f1 - Δf1, 2.0 + f1 + Δf1)
+# ax1.set_ylim(-10, 10)
 plt.tight_layout()
 plt.show()
 
 # Saving plots
-plot_file_name = plot_path + r'\Gauss and Ray tracing.png'
+plot_file_name = plot_path + r'\Gauss and Ray tracing off axis.png'
 ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
 prd_plots.PPT_save_2d(fig1, ax1, plot_file_name)

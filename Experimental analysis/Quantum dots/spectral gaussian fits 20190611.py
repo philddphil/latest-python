@@ -11,7 +11,7 @@ from scipy.optimize import curve_fit
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
 np.set_printoptions(suppress=True)
 import prd_plots
 import prd_file_import
@@ -23,7 +23,7 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190611")
+p0 = (r"C:\local files\Experimental Data\F5 L10 Spectrometer\Spec data 20190611")
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 datafiles = glob.glob(p0 + r'\Power series.dat')
 datafile = datafiles[0]

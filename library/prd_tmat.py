@@ -21,7 +21,7 @@ def ABCD_MM(q_in, d, n=1):
     q_out = np.matmul(M, q_in)
     return(q_out)
 
-
+# propagation from z_in to z_end with 1000 pts in between. ###################
 def ABCD_propagate(qs, z_end, zs_in=None, ns_in=None, res=1000):
     if zs_in is None:
         zs_in = [0]
@@ -48,7 +48,7 @@ def ABCD_propagate(qs, z_end, zs_in=None, ns_in=None, res=1000):
 
     return(zs_out, qz, ns_out)
 
-
+# refraction due to a thin lens ##############################################
 def ABCD_tlens(qs, f):
     M = np.array([[1, 0], [-1 / f, 1]])
     q_out = np.matmul(M, qs[-1])
@@ -57,7 +57,7 @@ def ABCD_tlens(qs, f):
     qs[-1] = q_out
     return qs
 
-
+# refraction at a planar interface ###########################################
 def ABCD_plan(q_in, n1, n2):
     M = np.array([[1, 0], [0, n1 / n2]])
     q_out = np.matmul(M, q_in)
@@ -65,7 +65,7 @@ def ABCD_plan(q_in, n1, n2):
         q_out = q_out / q_out[1]
     return(q_out)
 
-
+# refraction at a curved interface ###########################################
 def ABCD_curv(q_in, n1, n2, R):
     M = np.array([[1, 0], [(n1 - n2) / (R * n2), n1 / n2]])
     q_out = np.matmul(M, q_in)

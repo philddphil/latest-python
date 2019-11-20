@@ -19,36 +19,35 @@ cs = prd_plots.palette()
 
 ##############################################################################
 # Do some stuff
-##############################################################################
+##############################################################################	
 # p0 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt0.txt"
 # p1 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt1.txt"
 
 # print(prd_maths.dB_to_lin(0.3))
-# print(prd_maths.dB_to_lin(0.6))
-# print(prd_maths.dB_to_lin(0.8))
+print(prd_maths.dB_to_lin(0.01))
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
-prd_plots.ggplot()
-plot_path = r"C:\local files\Python\Plots"
+# prd_plots.ggplot()
+# plot_path = r"C:\local files\Python\Plots"
 # plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
-os.chdir(plot_path)
+# os.chdir(plot_path)
 ###### xy plot ###############################################################
-size = 9
-fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-ax2 = fig2.add_subplot(111)
-fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-ax2.set_ylabel('Money (M$)', fontsize=28)
+# size = 9
+# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
+# ax2 = fig2.add_subplot(111)
+# fig2.patch.set_facecolor(cs['mnk_dgrey'])
+# ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
+# ax2.set_ylabel('Money (M$)', fontsize=28)
 # plt.bar(1, 500, color=cs['ggred'])
 # plt.bar(2, 1000, color=cs['ggblue'])
 # plt.bar(3, 1275, color=cs['mnk_green'])
 # plt.bar(4, 10000, color=cs['ggpurple'])
-ax2.set_xlim(0.5, 4.5)
-ax2.set_ylim(0, 11000)
-ax2.set_yticklabels([])
-ax2.set_xticklabels([])
+# ax2.set_xlim(0.5, 4.5)
+# ax2.set_ylim(0, 11000)
+# ax2.set_yticklabels([])
+# ax2.set_xticklabels([])
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
 # ax1 = fig1.add_subplot(111)
@@ -70,13 +69,13 @@ ax2.set_xticklabels([])
 
 # ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
 # # os.chdir(p0)
-plt.tight_layout()
+# plt.tight_layout()
 # ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # set_zlim(min_value, max_value)
 
-plt.show()
-ax2.figure.savefig('funding' + '.png')
-plot_file_name = plot_path + 'plot2.png'
-prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
+# plt.show()
+# ax2.figure.savefig('funding' + '.png')
+# plot_file_name = plot_path + 'plot2.png'
+# prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
