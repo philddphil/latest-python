@@ -8,7 +8,10 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
-sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
+p_lib = (r"C:\local files\Python\Local Repo\library")
+p_lib = (r"C:\GitHub\latest-python\library")
+sys.path.insert(0, p_lib)
+
 import prd_plots
 import prd_tmat
 cs = prd_plots.palette()

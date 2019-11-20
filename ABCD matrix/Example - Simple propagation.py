@@ -8,7 +8,10 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
-sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
+p_lib = (r"C:\local files\Python\Local Repo\library")
+p_lib = (r"C:\GitHub\latest-python\library")
+sys.path.insert(0, p_lib)
+
 import prd_plots
 import prd_tmat
 cs = prd_plots.palette()
@@ -19,13 +22,13 @@ cs = prd_plots.palette()
 
 # User defined parameters
 # w0 is the Gaussian waist of the starting beam
-w0 = 2e-4
-λ0 = 633e-9
+w0 = 1e-2
+λ0 = 1550e-9
 
 # Optical path set-up [manual] ################################################
 # Propagate the beam from z0 --> z1
 z0 = 0
-z1 = 1
+z1 = 700e3
 
 # Choose ref.indices
 n0 = 1
@@ -66,15 +69,15 @@ xs = np.array(ps)[:, 0]
 # Scale values for appropriate plotting
 prd_plots.ggplot()
 plot_path = r"C:\local files\Python\Plots"
-zs = 1e0 * np.array(zs)
-ws = 1e3 * ws
-xs = 1e3 * xs
+zs = 1e-3 * np.array(zs)
+ws = 1e0 * ws
+xs = 1e0 * xs
 
 fig1 = plt.figure('fig1')
 ax1 = fig1.add_subplot(1, 1, 1)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
-ax1.set_xlabel('optical axis (m)')
-ax1.set_ylabel('y axis - beam waist (mm)')
+ax1.set_xlabel('optical axis (km)')
+ax1.set_ylabel('y axis - beam waist (m)')
 plt.plot(zs, ws, '-', c=cs['ggred'], label='Gaussian Beam')
 plt.plot(zs, -ws, '-', c=cs['ggred'])
 plt.plot(zs, xs, '-', c=cs['ggblue'], label='Raytrace')
