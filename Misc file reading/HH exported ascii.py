@@ -21,8 +21,8 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = r"C:\local files\Experimental Data\F5 L10 HydraHarp\HH data 20190614\\"
-p0 = r"C:\Users\pd10\OneDrive - National Physical Laboratory\Conferences\SPW 2019\Data\HBTs"
+p0 = r"C:\local files\Experimental Data\F5 L10 HydraHarp\HH data 20191125\\"
+# p0 = r"C:\Users\pd10\OneDrive - National Physical Laboratory\Conferences\SPW 2019\Data\HBTs"
 os.chdir(p0)
 ##############################################################################
 # Plot some figures
@@ -35,20 +35,20 @@ for i0, val0 in enumerate(datafiles[0:]):
     lb = os.path.basename(val0)
     lb = os.path.splitext(lb)[0]
     ts, cts = prd_file_import.load_HH(val0)
-    norm = np.mean(cts[0:50])
+    # norm = np.mean(cts[0:50])
     prd_plots.ggplot()
-    size = 2.0
+    size = 4
     fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
     ax2 = fig2.add_subplot(111)
     fig2.patch.set_facecolor(cs['mnk_dgrey'])
     ax2.set_xlabel('Δt (ns)')
     ax2.set_ylabel('g$^2$(τ)')
-    plt.plot(ts-46.3, cts/norm, lw=0.5,
+    plt.plot(ts-250, cts, lw=0.5,
              alpha=0.4, color=cs['ggdred'], label=lb)
-    plt.plot(ts-46.3, cts/norm, 'o', lw=0.5,
+    plt.plot(ts-250, cts, 'o', lw=0.5,
              alpha=1, color=cs['gglred'], markersize=2)
-    plt.xlim((-46.3, 46.3))
-    plt.ylim((0, 2))
+    plt.xlim((-250, 250))
+    plt.ylim((0, np.max(cts)))
     # ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
     plt.tight_layout()
     plt.show()

@@ -24,7 +24,7 @@ cs = prd_plots.palette()
 # p1 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt1.txt"
 
 # print(prd_maths.dB_to_lin(0.3))
-print(prd_maths.dB_to_lin(0.01))
+print(prd_maths.dB_to_lin(0.9))
 
 ##############################################################################
 # Plot some figures

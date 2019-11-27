@@ -1,7 +1,6 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
-
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,9 +9,9 @@ import matplotlib.pyplot as plt
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
 sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
-np.set_printoptions(suppress=True)
 import prd_data_proc
 import prd_plots
+np.set_printoptions(suppress=True)
 cs = prd_plots.palette()
 
 ##############################################################################
@@ -47,20 +46,38 @@ fom = np.loadtxt(f5)
 Δt = fom[1]
 γs = fom[2]
 print(len(τs_HBT))
+
 # trim longer array to length of shorter
 n = min(len(τs_1), len(τs_2))
 τs_1 = τs_1[0:n]
 τs_2 = τs_2[0:n]
-g = np.correlate(τs_1, τs_2, 'full')
-print(type(g))
+g = np.correlate(τs_1, τs_2, 'same')
+print(np.shape(τs_abs))
 print(n)
+alt_t1 = []
+alt_t2 = []
+for i0, v0 in enumerate(τs_abs[0:10000]):
+    if np.random.random() < 0.5:
+        alt_t1.append(v0)
+    else:
+        alt_t2.append(v0)
+
+print(alt_t1[0:9])
+print(alt_t2[0:9])
+alt_τ = np.linspace(-1000, 1000, 2001)
+t1_bar = len(alt_t1) / np.max(alt_t1)
+t2_bar = len(alt_t2) / np.max(alt_t2)
+g2 = []
+# for i0, v0 in alt_τ:
+#     g2.append()
+# g = np.correlate(alt_t1, alt_t2,'same')
 #######################################################################
 # Plot some figures
 #######################################################################
 prd_plots.ggplot()
 
 # histograms
-x0 = τs_1 - τs_2
+# x0 = τs_1 - τs_2
 # x0 = [i for i in (τs_1 - τs_2) if i <= 1000]
 # x0 = [i for i in x0 if i >= -1000]
 
@@ -76,21 +93,15 @@ hist, bins = np.histogram(x1, bins=bin_N)
 hist_time = np.linspace(bins[0] + (bins[1] - bins[0]) / 2,
                         bins[-2] + (bins[-1] - bins[-2]) / 2, 1000)
 
-# fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('Time')
-# ax1.set_ylabel('#')
-# ax1.set_yscale('log')
-# plt.hist(x0, bins=bin_N, alpha=0.5,
-#          facecolor=cs['ggred'], edgecolor=cs['mnk_dgrey'],
-#          label='Probabilistic')
-# # ax1.plot(hist_time, hist[0] * np.exp(-(hist_time / τ)), label='Analytic')
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-# plt.savefig('plot.svg')
-# plt.title('Δt = τ1 - τ2')
-# plt.tight_layout()
-# # plt.xlim(0, 100)
+fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
+ax1 = fig1.add_subplot(1, 1, 1)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('')
+ax1.set_ylabel('')
+plt.plot(τs_1)
+plt.plot(τs_2)
+plt.tight_layout()
+plt.show()
 
 fig2 = plt.figure('fig2', figsize=(3 * np.sqrt(2), 3))
 ax2 = fig2.add_subplot(1, 1, 1)
@@ -105,71 +116,9 @@ plt.hist(x1, bins=bin_N, alpha=0.5,
 #          facecolor=cs['ggred'], edgecolor=cs['mnk_dgrey'],
 # label='Probabilistic')
 # ax2.plot(hist_time, hist[0] * np.exp(-(hist_time / τ)), label='Analytic')
-# ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
+ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
 plt.savefig('logplot.svg')
 plt.title('τs_HBT')
 plt.tight_layout()
 # plt.xlim(0, 1000)
-
-# fig3 = plt.figure('fig3', figsize=(3 * np.sqrt(2), 3))
-# ax3 = fig3.add_subplot(1, 1, 1)
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('Time')
-# ax3.set_ylabel('#')
-# ax3.set_yscale('log')
-# plt.hist(x2, bins=bin_N, alpha=0.5,
-#          facecolor=cs['ggred'], edgecolor=cs['mnk_dgrey'],
-#          label='Probabilistic')
-# # plt.hist(x2, bins=bin_N, alpha=0.5,
-# #          facecolor=cs['ggred'], edgecolor=cs['mnk_dgrey'],
-# # label='Probabilistic')
-# # ax3.plot(hist_time, hist[0] * np.exp(-(hist_time / τ)), label='Analytic')
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# plt.savefig('logplot.svg')
-# plt.title('τs_rel')
-# plt.tight_layout()
-
-# plt.xlim(0, 1000)
-
-
 plt.show()
-
-# ax2.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-# ax1.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-
-# prd_plots.PPT_save_2d(fig1, ax1, 'plot.png')
-prd_plots.PPT_save_2d(fig2, ax2, 'log plot.png')
-
-# barchart time plot
-# fig3 = plt.figure('fig3', figsize=(6 * np.sqrt(2), 3))
-# ax3 = fig3.add_subplot(1, 1, 1)
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('Time')
-# ax3.set_ylabel('#')
-# plt.bar(τs_abs[0:15], np.ones(len(τs_abs[0:15])), 2,
-#         edgecolor=cs['mnk_dgrey'], label='all counts')
-# plt.tight_layout()
-# plt.xlim(0, 250)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# plt.savefig('barchart.svg')
-
-# fig4 = plt.figure('fig4', figsize=(6 * np.sqrt(2), 3))
-# ax4 = fig4.add_subplot(1, 1, 1)
-# fig4.patch.set_facecolor(cs['mnk_dgrey'])
-# ax4.set_xlabel('Time')
-# ax4.set_ylabel('#')
-# plt.bar(τs1[0:10], np.ones(len(τs1[0:10])), 2, edgecolor=cs['mnk_dgrey'],
-#         label='d1 counts')
-# plt.bar(τs2[0:10], np.ones(len(τs2[0:10])), 2, edgecolor=cs['mnk_dgrey'],
-#         label='d2 counts')
-# plt.tight_layout()
-# plt.xlim(0, 250)
-# ax4.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# plt.savefig('barchart.svg')
-# plt.show()
-
-# ax3.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-# ax4.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-
-# prd_plots.PPT_save_2d(fig3, ax3, 'barchart_all.png')
-# prd_plots.PPT_save_2d(fig4, ax4, 'barchar_ch1_ch2.png')
