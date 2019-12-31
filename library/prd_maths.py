@@ -11,6 +11,9 @@ from scipy import ndimage
 ###############################################################################
 # Maths defs
 ###############################################################################
+
+# Functions (often used in fitting):
+
 # Saturation curve ############################################################
 def I_sat(x, I_sat, P_sat, P_bkg, bkg):
     y = (I_sat * x) / (P_sat + x) + P_bkg * x + bkg
@@ -49,6 +52,19 @@ def Gaussian_2D(coords, A, x_c, y_c, σ_x, σ_y, θ=0, bkg=0, N=1):
 def Lorentzian_1D(x, x_c, γ, A, bkg=0):
     L = (A * γ ** 2) / ((x - x_c)**2 + γ ** 2)
     return L
+
+
+# g2 function taken from "Berthel et al 2015" for 3 level system ##############
+def g2_3_lvl(tau, a, b, c):
+    g = 1 - c * np.exp(- a * np.abs(tau)) + (c - 1) * np.exp(- b * np.abs(tau))
+    return g
+
+
+# as above but with experimental count rate envelope ##########################
+def g2_3_lvl_exp(tau, a, b, c, d):
+    g = 1 - c * np.exp(- a * np.abs(tau)) + (c - 1) * np.exp(- b * np.abs(tau))
+    h = g * np.exp(-d * np.abs(tau))
+    return h
 
 
 # Fit hologram period, Λ and rotation angle ϕ datasets from peak find #########
