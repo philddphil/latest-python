@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # Import some extra special libraries from my own repo
 ##############################################################################
 p_lib = (r"C:\local files\Python\Local Repo\library")
-p_lib = (r"C:\GitHub\latest-python\library")
+# p_lib = (r"C:\GitHub\latest-python\library")
 sys.path.insert(0, p_lib)
 
 import prd_plots
@@ -28,13 +28,13 @@ cs = prd_plots.palette()
 
 # User defined parameters
 # w0 is the Gaussian waist of the starting beam
-w0 = 1e-2
-λ0 = 1550e-9
+w0 = 232e-6
+λ0 = 674e-9
 
 # Optical path set-up [manual] ################################################
 # Propagate the beam from z0 --> z1
 z0 = 0
-z1 = 700e3
+z1 = 400e-3
 
 # Choose ref.indices
 n0 = 1

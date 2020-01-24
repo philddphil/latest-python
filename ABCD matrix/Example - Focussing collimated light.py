@@ -1,17 +1,17 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
+import os
 import sys
+import codecs
 import numpy as np
 import matplotlib.pyplot as plt
-
 ##############################################################################
 # Import some extra special libraries from my own repo
 ##############################################################################
 p_lib = (r"C:\local files\Python\Local Repo\library")
-p_lib = (r"C:\GitHub\latest-python\library")
+# p_lib = (r"C:\GitHub\latest-python\library")
 sys.path.insert(0, p_lib)
-
 import prd_plots
 import prd_tmat
 cs = prd_plots.palette()

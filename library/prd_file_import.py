@@ -236,6 +236,62 @@ def load_HH(filepath):
     return (τs, cts)
 
 
-# Load labVIEW saved T2 file (.txt) ##########################################
-def load_T2(filepath):
-    return
+# Load NEA 121 Profile data (.txt) ##########################################
+def load_NEA_Prof(filepath):
+    a = open(filepath, 'r', encoding='utf-8')
+    data = a.readlines()
+    a.close()
+    for i0, j0 in enumerate(data):
+        if 'Period length' in j0:
+            p_HMS = data[i0].split("\t")[1]
+            p_HMS = p_HMS[1:-1]
+            p_H = float(p_HMS.split(':')[0])
+            p_M = float(p_HMS.split(':')[1])
+            p_S = float(p_HMS.split(':')[2])
+            p_s = 360 * p_H + 60 * p_M + p_S
+        if 'Total number of periods' in j0:
+            p_tot = float(data[i0].split("\t")[-1])
+        if 'Trig time' in j0:
+            t_init = data[i0].split("\t")[1]
+        if 'Period:' in j0:
+            data_start_line = i0 + 1
+    ts = []
+    dBs = []
+    for i0, v0 in enumerate(data[data_start_line:]):
+        ts.append(float(v0.split("\t")[0]))
+        dB_temp = v0.split("\t")[3:]
+        dBs.append([float(i0) for i0 in dB_temp])
+    return ([p_s, p_tot, t_init], ts, dBs)
+
+
+# Load NEA 121 Global data (.txt) ###########################################
+def load_NEA_Glob(filepath):
+    a = open(filepath, 'r', encoding='utf-8')
+    data = a.readlines()
+    a.close()
+    for i0, j0 in enumerate(data):
+        if 'Period length' in j0:
+            p_HMS = data[i0].split("\t")[1]
+            p_HMS = p_HMS[1:-1]
+            p_H = float(p_HMS.split(':')[0])
+            p_M = float(p_HMS.split(':')[1])
+            p_S = float(p_HMS.split(':')[2])
+            p_s = 360 * p_H + 60 * p_M + p_S
+        if 'Total number of periods' in j0:
+            p_tot = float(data[i0].split("\t")[-1])
+        if 'Trig time' in j0:
+            t_init = data[i0].split("\t")[1]
+        if 'Period:' in j0:
+            data_start_line = i0 + 1
+
+    dBs_str = data[data_start_line].split("\t")[3:]
+    fs_str = data[data_start_line - 1].split("\t")[3:]
+    dBs = [float(i0) for i0 in dBs_str]
+    fs = []
+    for i0, v0 in enumerate(fs_str):
+        if 'k' in v0.split()[1]:
+            fs.append(1000 * float(v0.split()[0]))
+        else:
+            fs.append(float(v0.split()[0]))
+
+    return [p_s, p_tot, t_init], fs, dBs

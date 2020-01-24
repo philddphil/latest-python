@@ -61,10 +61,11 @@ n = min(len(ts_1), len(ts_2))
 ts_1c = ts_1[0:n]
 ts_2c = ts_2[0:n]
 
+
 #######################################################################
-# Do alternative 'beam splitting' by randomly allocating
-# τs_abs elements to alt_t1 & alt_t2
+# Do alternative 'beam splitting'
 #######################################################################
+# by randomly allocating τs_abs elements to alt_t1 & alt_t2
 
 alt_t1 = []
 alt_t2 = []
@@ -78,6 +79,7 @@ print(len(alt_t1), len(alt_t2))
 n = min(len(alt_t1), len(alt_t2))
 alt_t1 = alt_t1[0:n]
 alt_t2 = alt_t2[0:n]
+
 
 #######################################################################
 # Generate time series based on photon arrival times
@@ -172,14 +174,14 @@ y2 = g2s_exp2
 popt, pcov = curve_fit(prd_maths.g2_3_lvl_exp,
                        bin_centres1, y1, p0=[*init])
 
-# fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('')
-# ax1.set_ylabel('')
+fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
+ax1 = fig1.add_subplot(1, 1, 1)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('')
+ax1.set_ylabel('')
 plt.plot(g, '.')
-# plt.tight_layout()
-# plt.show()
+plt.tight_layout()
+plt.show()
 
 fig2 = plt.figure('fig2', figsize=(3 * np.sqrt(2), 3))
 ax2 = fig2.add_subplot(1, 1, 1)
@@ -198,11 +200,6 @@ ax2.plot(τs, prd_maths.g2_3_lvl_exp(
     τs, *popt), '-',
     color=cs['ggred'],
     label='Fit',
-    lw=0.5)
-ax2.plot(τs, prd_maths.g2_3_lvl_exp(
-    τs, *init), '-',
-    color=cs['ggyellow'],
-    label='Initial fit',
     lw=0.5)
 # ax2.plot(bin_centres, x2, '.', color=cs['ggblue'])
 ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)

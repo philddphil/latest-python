@@ -19,7 +19,7 @@ cs = prd_plots.palette()
 
 ##############################################################################
 # Do some stuff
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20191126\Raster scans")
+p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20200108\Raster scans")
 
 
 datafiles = glob.glob(p0 + r'\*.txt')

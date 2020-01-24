@@ -1,10 +1,16 @@
+
 ##############################################################################
 # Import some libraries
 ##############################################################################
 import os
 import sys
 import numpy as np
+import scipy as sp
+import scipy.signal
 import matplotlib.pyplot as plt
+
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
@@ -23,32 +29,37 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 
-print('some stuff')
+filepath = r"C:\local files\Experimental Data\G5 A5 Norsonic\200122 1" \
+    + r"\NPL_INBOX_0004_Ch1-PROFILE_LAFspl.txt"
+
+hdr, ts, dBs = prd_file_import.load_NEA_Prof(filepath)
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
-
 # prep colour scheme for plots and paths to save figs to
 prd_plots.ggplot()
 # NPL path
 plot_path = r"C:\local files\Python\Plots"
 # Surface Pro path
 plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
-
 # os.chdir(plot_path)
 
-###### xy plot ###############################################################
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.plot(c, '.-')
-# plt.show()
+# xy plot ####################################################################
+size = 4
+fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+ax1 = fig1.add_subplot(111)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('x axis')
+ax1.set_ylabel('y axis')
+plt.plot(ts, dBs, '.-')
+plt.title('res=' + str(hdr[0])
+          + 's  ' + 'dur=' + str(hdr[1])
+          + 's ' + '@' + str(hdr[2]))
+fig1.tight_layout()
+plt.show()
 
-###### hist/bar plot #########################################################
+# hist/bar plot ##############################################################
 # size = 9
 # fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
 # ax2 = fig2.add_subplot(111)
@@ -72,14 +83,15 @@ plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
 # plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
 # plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
 
-###### xyz plot ##############################################################
+# xyz plot ###################################################################
 # size = 4
 # fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
 # ax3 = fig3.add_subplot(111, projection='3d')
 # fig3.patch.set_facecolor(cs['mnk_dgrey'])
 # ax3.set_xlabel('x axis')
 # ax3.set_ylabel('y axis')
-# scatexp = ax3.scatter(*coords, z, '.', alpha=0.4, color=cs['gglred'], label='')
+# scatexp = ax3.scatter(*coords, z, '.', alpha=0.4,
+#                       color=cs['gglred'], label='')
 # surffit = ax3.contour(*coords, z, 10, cmap=cm.jet)
 # ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
 # # os.chdir(p0)
@@ -89,7 +101,20 @@ plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
 # ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 # set_zlim(min_value, max_value)
 
-###### save plot ##############################################################
+# img plot ###################################################################
+# size = 4
+# fig4 = plt.figure('fig4', figsize=(size * np.sqrt(2), size))
+# ax4 = fig4.add_subplot(1, 1, 1)
+# fig4.patch.set_facecolor(cs['mnk_dgrey'])
+# ax4.set_xlabel('x dimension (V)')
+# ax4.set_ylabel('y dimension (V)')
+# plt.title('')
+# im4 = plt.imshow(img, cmap='magma')
+# divider = make_axes_locatable(ax4)
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# fig4.colorbar(im4, cax=cax)
+
+# save plot ###################################################################
 # plt.show()
 # ax2.figure.savefig('funding' + '.png')
 # plot_file_name = plot_path + 'plot2.png'

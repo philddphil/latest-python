@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
 np.set_printoptions(suppress=True)
 import prd_plots
 import prd_file_import
@@ -21,7 +21,8 @@ cs = prd_plots.palette()
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0 = (r"D:\Experimental Data\F5 L10 Spectrometer\Spec data 20190611")
+p0 = (r"C:\local files\Experimental Data") + \
+    (r"\F5 L10 Spectrometer\Spec data 20201301")
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
@@ -45,30 +46,30 @@ for i0, val0 in enumerate(datafiles[0:]):
     for i1, val1 in enumerate(cts[0, :]):
         lb = str(i1) + ' ' + os.path.basename(val0)
         print(count, lb)
-        cts_crr = prd_data_proc.cos_ray_rem(cts[:, i1], 50)
-        ctss.append(list(cts_crr))
+        # cts_crr = prd_data_proc.cos_ray_rem(cts[:, i1], 50)
+        ctss.append(list(cts))
         λs.append(λ)
         # append each data set to list for subsequent plotting
-        y0 = cts_crr
-        # # plot each data set and save (close pop-up to save each time)
-        # prd_plots.ggplot()
-        # fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
-        # ax1 = fig1.add_subplot(1, 1, 1)
-        # fig1.patch.set_facecolor(cs['mnk_dgrey'])
-        # ax1.set_xlabel('Wavelength (λ) / nm')
-        # ax1.set_ylabel('Counts')
-        # ax1.plot(λ, y0, '.', alpha=0.4, color=cs['gglred'], label=lb)
-        # ax1.plot(λ, y0, alpha=1, color=cs['ggdred'], lw=0.5, label='')
-        # # plt.ylim(1.1 * np.min(y0), 1.1 * np.max(y0))
+        y0 = cts
+        # plot each data set and save (close pop-up to save each time)
+        prd_plots.ggplot()
+        fig1 = plt.figure('fig1', figsize=(3 * np.sqrt(2), 3))
+        ax1 = fig1.add_subplot(1, 1, 1)
+        fig1.patch.set_facecolor(cs['mnk_dgrey'])
+        ax1.set_xlabel('Wavelength (λ) / nm')
+        ax1.set_ylabel('Counts')
+        ax1.plot(λ, y0, '.', alpha=0.4, color=cs['gglred'], label=lb)
+        ax1.plot(λ, y0, alpha=1, color=cs['ggdred'], lw=0.5, label='')
+        # plt.ylim(1.1 * np.min(y0), 1.1 * np.max(y0))
         # plt.xlim((922, 923.5))
         # plt.title('spectrum')
-        # plt.tight_layout()
-        # ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-        # plt.show()
-        # ax1.figure.savefig(plot_name + 'dark.png')
-        # ax1.legend(loc='upper left', fancybox=True,
-        #            facecolor=(1.0, 1.0, 1.0, 0.0))
-        # prd_plots.PPT_save_2d(fig1, ax1, plot_name)
+        plt.tight_layout()
+        ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
+        plt.show()
+        ax1.figure.savefig(plot_name + 'dark.png')
+        ax1.legend(loc='upper left', fancybox=True,
+                   facecolor=(1.0, 1.0, 1.0, 0.0))
+        prd_plots.PPT_save_2d(fig1, ax1, plot_name)
         count += 1
 
 # Do any dataset manipulation required

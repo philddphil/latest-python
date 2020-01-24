@@ -3,6 +3,8 @@
 ##############################################################################
 import sys
 import numpy as np
+import scipy as sp
+import scipy.signal
 import matplotlib.pyplot as plt
 
 ##############################################################################
@@ -22,39 +24,43 @@ cs = prd_plots.palette()
 # Import data (saved by labVIEW code controlling HH400)
 ##############################################################################
 d0 = r"C:\local files\Experimental Data\F5 L10 Confocal measurements" + \
-    r"\SCM Data 20200102\HH T3 162729"
+    r"\SCM Data 20200117\HH\HH T3 164743"
 p0 = d0 + r"\tt ch0.txt"
 p1 = d0 + r"\tt ch1.txt"
 
 tt0 = np.loadtxt(p0)
 tt1 = np.loadtxt(p1)
-
+# 1e-7 is the saved resolution - this is 0.1 microsecond
 total_t = np.max([np.max(tt0), np.max(tt1)]) * 1e-7
 c0 = len(tt0)
 c1 = len(tt1)
 cps0 = c0 / total_t
 cps1 = c1 / total_t
-print(total_t)
-print(c0)
-print(c1)
-print(np.round(cps0))
-print(np.round(cps1))
-print
+print('total time collected ', np.round(total_t, 5), 's')
+print('Ctr 1 - ', np.round(cps0 / 1000, 2), ' k counts per second')
+print('Ctr 2 - ', np.round(cps1 / 1000, 2), ' k counts per second')
+
 
 ##############################################################################
 # Generate time series based on photon arrival times
 ##############################################################################
-# ts1 = np.zeros(int(np.max(ts_1c)))
-# ts2 = np.zeros(int(np.max(ts_2c)))
-# # print(np.shape(ts1))
-# # print(np.shape(ts2))
-# for i0, v0 in enumerate(ts_1c):
-#     ts1[int(v0) - 1] = 1
+ts0 = np.zeros(int(total_t * 1e7))
+ts1 = np.zeros(int(total_t * 1e7))
 
-# for i0, v0 in enumerate(ts_2c):
-#     ts2[int(v0) - 1] = 1
+for i0, v0 in enumerate(tt0):
+    ts0[int(v0) - 2] = 1
 
-# print(np.shape(ts1))
+for i0, v0 in enumerate(tt1):
+    ts1[int(v0) - 2] = 1
+
+
+# ts0_d = sp.signal.decimate(ts0, 1000)
+# ts1_d = sp.signal.decimate(ts1, 1000)
+
+# print(np.shape(ts0_d), np.shape(ts1_d))
+##############################################################################
+# Generate time series based on photon arrival times
+##############################################################################
 
 ##############################################################################
 # Plot some figures
