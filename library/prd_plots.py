@@ -1,6 +1,7 @@
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
+import os.path
 from scipy.interpolate import RectBivariateSpline
 from scipy.ndimage.filters import gaussian_filter
 
@@ -112,7 +113,20 @@ def PPT_save_2d(fig, ax, name):
     ax.yaxis.label.set_color('xkcd:black')
     ax.tick_params(axis='x', colors='xkcd:black')
     ax.tick_params(axis='y', colors='xkcd:black')
-    ax.figure.savefig(name)
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no)) 
+        else:
+            app_no = app_no + 1     
+            print('Base + # exists')
 
 
 # Save 2d image with a colourscheme suitable for ppt, as a png ################
@@ -128,7 +142,20 @@ def PPT_save_2d_im(fig, ax, cb, name):
     # cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
     plt.setp(cbytick_obj, color='xkcd:black')
 
-    ax.figure.savefig(name)
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no)) 
+        else:
+            app_no = app_no + 1     
+            print('Base + # exists')
 
 
 # Smooth a numpy image array ##################################################
