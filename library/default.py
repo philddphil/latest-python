@@ -4,6 +4,7 @@
 ##############################################################################
 import os
 import sys
+import glob
 import numpy as np
 import scipy as sp
 import scipy.signal
@@ -119,3 +120,22 @@ plt.show()
 # ax2.figure.savefig('funding' + '.png')
 # plot_file_name = plot_path + 'plot2.png'
 # prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
+                fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+                fig1.patch.set_facecolor(cs['mnk_dgrey'])
+                ax1 = fig1.add_subplot(111)
+
+                plt.plot(tt0_ns, '.--', lw=0.5,
+                         alpha=1, markersize=5, label='t0')
+                plt.plot(tt_x, tt_pad, '.--', lw=0.5,
+                         alpha=1, markersize=5, label='t1')
+                plt.plot(x_local, tt_temp, '.--',
+                         lw=0.5, alpha=1, markersize=5, label='|t1 - v0|')
+                plt.plot(i0, v0, 'o', mec=cs[
+                         'ggyellow'], mfc='none', label='v0')
+                plt.plot(x_local[HBT_idx], tt_temp[HBT_idx], 'o', mec=cs[
+                         'mnk_orange'], mfc='none', label='HBT value')
+                plt.plot([i_tt1 - 30, i_tt1 + 30], [1500, 1500])
+                ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
+                ax1.set_ylim(0, 1.5 * v0)
+                ax1.set_xlim(i_tt1 - 30, i_tt1 + 30)
+                plt.show()

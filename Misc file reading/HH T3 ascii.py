@@ -2,6 +2,7 @@
 # Import some libraries
 ##############################################################################
 import sys
+import glob
 import numpy as np
 import scipy as sp
 import scipy.signal
@@ -24,70 +25,105 @@ cs = prd_plots.palette()
 # Import data (saved by labVIEW code controlling HH400)
 ##############################################################################
 d0 = r"C:\local files\Experimental Data\F5 L10 Confocal measurements" + \
-    r"\SCM Data 20200117\HH\HH T3 164743"
-p0 = d0 + r"\tt ch0.txt"
-p1 = d0 + r"\tt ch1.txt"
+    r"\SCM Data 20200128\HH\HH T3 123912"
+p0 = d0 + r"\0 tt ch0.txt"
+p1 = d0 + r"\1 tt ch1.txt"
 
-tt0 = np.loadtxt(p0)
-tt1 = np.loadtxt(p1)
-# 1e-7 is the saved resolution - this is 0.1 microsecond
-total_t = np.max([np.max(tt0), np.max(tt1)]) * 1e-7
-c0 = len(tt0)
-c1 = len(tt1)
-cps0 = c0 / total_t
-cps1 = c1 / total_t
-print('total time collected ', np.round(total_t, 5), 's')
-print('Ctr 1 - ', np.round(cps0 / 1000, 2), ' k counts per second')
-print('Ctr 2 - ', np.round(cps1 / 1000, 2), ' k counts per second')
+datafiles0 = glob.glob(d0 + r'\*0.txt')
+datafiles1 = glob.glob(d0 + r'\*1.txt')
+HBT_ss = []
 
+for i0, v0 in enumerate(datafiles0[0:3]):
 
-##############################################################################
-# Generate time series based on photon arrival times
-##############################################################################
-ts0 = np.zeros(int(total_t * 1e7))
-ts1 = np.zeros(int(total_t * 1e7))
+    # i0 = 2
+    print('file #', i0, ' ', datafiles0[i0])
+    # 1e-7 is the saved resolution - this is 0.1 microsecond
+    tta = np.loadtxt(datafiles0[i0])
+    ttb = np.loadtxt(datafiles1[i0])
 
-for i0, v0 in enumerate(tt0):
-    ts0[int(v0) - 2] = 1
+    # conditional conversion of the time series.
+    # longer one is the start channel
+    if len(tta) > len(ttb):
+        tt0_ns = [j0 * 1e2 for j0 in tta]
+        tt1_ns = [j0 * 1e2 for j0 in ttb]
+    # convert to ns
+    else:
+        tt0_ns = [j0 * 1e2 for j0 in ttb]
+        tt1_ns = [j0 * 1e2 for j0 in tta]
 
-for i0, v0 in enumerate(tt1):
-    ts1[int(v0) - 2] = 1
+    total_t = np.max([np.max(tt0_ns), np.max(tt1_ns)]) * 1e-9
+    c0 = len(tt0_ns)
+    c1 = len(tt1_ns)
 
+    cps0 = c0 / total_t
+    cps1 = c1 / total_t
+    dydx0 = np.max(tt0_ns) / len(tt0_ns)
+    dydx1 = np.max(tt1_ns) / len(tt1_ns)
+    print('total time collected ', np.round(total_t, 5), 's')
+    print('Ctr 1 - ', np.round(cps0 / 1000, 2), 'k counts per second')
+    print('Ctr 2 - ', np.round(cps1 / 1000, 2), 'k counts per second')
 
-# ts0_d = sp.signal.decimate(ts0, 1000)
-# ts1_d = sp.signal.decimate(ts1, 1000)
+    ##########################################################################
+    # Perform start-stop measurements
+    ##########################################################################
+    locale = 1000
+    tt_pad = np.pad(tt1_ns, locale + 1)
 
-# print(np.shape(ts0_d), np.shape(ts1_d))
-##############################################################################
-# Generate time series based on photon arrival times
-##############################################################################
+    # loop through tt0_ns as our start channel
+    for i1, v1 in enumerate(tt0_ns[0:]):
 
+        # trunkate full tt1_ns list to a region of 200 values around the same
+        # time as the value v0 is (need to use dydx1 to convert)
+
+        # 1. find the corresponding index in tt1_ns
+        i_tt1 = int(v1 / dydx1)
+
+        # 2.  specify locale around idx to check - get both times & idx vals
+        tt_local = tt_pad[i_tt1:i_tt1 + 2 * locale]
+        x_local = np.arange(i_tt1, i_tt1 + 2 * locale) - locale + 1
+
+        # substract ith value of tt0_ns (v1) from tt1_ns & use abs operator
+        tt_temp = np.abs(tt_local - v1)
+
+        # find idx of min
+        HBT_idx0 = np.argmin(tt_temp)
+
+        # find time difference of min value
+        HBT_test0 = tt_local[HBT_idx0] - v1
+
+        # if time difference within range, analyse sub-region
+        if -500 < HBT_test0 < 500:
+            
+            # need loop to check another sub-region, around the minimum value
+            for i2 in np.arange(-10, 10):
+                # find idx of min
+
+                HBT_idx1 = HBT_idx0 + i2
+                print(HBT_idx0, HBT_idx1)
+                # find time difference of min value
+                HBT_test1 = tt_local[HBT_idx1] - v1
+
+                # check if value is of interest
+                if -500 < HBT_test1 < 500:
+                    HBT_ss.append(HBT_test1)
+
+    print(np.shape(HBT_ss))
 ##############################################################################
 # Plot some figures
 ##############################################################################
-prd_plots.ggplot()
-plot_path = r"D:\Python\Plots\\"
 # plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
-
+prd_plots.ggplot()
 ###### xy plot ###############################################################
-# size = 4
-# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-# ax2 = fig2.add_subplot(111)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
-# ax2.set_yscale('log')
-
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
+size = 4
+fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+ax1 = fig1.add_subplot(111)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('x axis')
+ax1.set_ylabel('y axis')
+plt.hist(HBT_ss, 500)
+plt.title('')
+fig1.tight_layout()
+plt.show()
 
 ###### xyz plot ##############################################################
 # size = 4

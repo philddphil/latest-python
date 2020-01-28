@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
 ##############################################################################
-sys.path.insert(0, r"D:\Python\Local Repo\library")
+sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
 sys.path.insert(0, r"C:\Users\Phil\Documents\GitHub\latest-python\library")
 np.set_printoptions(suppress=True)
 import prd_plots
@@ -18,11 +18,13 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt0.txt"
-p1 = r"D:\Experimental Data\F5 L10 HydraHarp\HH data 20190903\tt1.txt"
+p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
+      r"\SCM Data 20200127\HH\HH T3 123529")
+f0 = r"\0 tt ch0.txt"
+f1 = r"\0 tt ch1.txt"
 
-tt0 = np.loadtxt(p0)
-tt1 = np.loadtxt(p1)
+tt0 = np.loadtxt(p0 + f0)
+tt1 = np.loadtxt(p0 + f1)
 
 δt0 = []
 for i0, val0 in enumerate(tt0):

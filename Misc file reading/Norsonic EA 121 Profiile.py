@@ -37,11 +37,12 @@ filepath3 = r"\NPL_INBOX_0006_Ch1-PROFILE_LfFspl.txt"
 # read in the global and report files
 hdr1, fs, dBs_f = prd_file_import.load_NEA_Glob(dirpath + filepath1)
 hdr2, ts, dBs_tf_R = prd_file_import.load_NEA_Prof(dirpath + filepath2)
-
+print(hdr2)
+thrs = [hdr2[0] * v0 / (60 * 60) for v0 in ts]
 
 # the profile data is 50 times more resolved than the report data.
 # it can be accessed here for subsequent analysis if needed.
-# it is impracticle to plot an image with 800,000 pixels in x, so it is not - 
+# it is impracticle to plot an image with 800,000 pixels in x, so it is not -
 # - accessed here.
 # hdr_P, ts_P, dBs_tf_P = prd_file_import.load_NEA_Prof(dirpath + filepath3)
 
@@ -85,10 +86,10 @@ size = 4
 fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size / 2))
 ax2 = fig2.add_subplot(111)
 fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('time, s')
+ax2.set_xlabel('time, hrs')
 ax2.set_ylabel('dB')
-plt.plot(ts, dBs_t, lw=0.1, color=cs['ggdred'])
-plt.plot(ts, dBs_t, '.', alpha=0.1)
+plt.plot(thrs, dBs_t, lw=0.1, color=cs['ggdred'])
+plt.plot(thrs, dBs_t, '.', alpha=0.1)
 
 plt.title('t = ' + str(hdr1[0]) +
           's  ' + '# = ' + str(hdr1[1]) +
@@ -97,13 +98,13 @@ ax2.get_xaxis().set_visible(False)
 fig2.tight_layout()
 
 # img plot ###################################################################
-t_ax = [v0 * hdr2[0] for v0 in ts]
+t_ax = thrs
 fq_ax = np.flip(fs)
 size = 4
 fig4 = plt.figure('fig4', figsize=(size * np.sqrt(2), size))
 ax4 = fig4.add_subplot(1, 1, 1)
 fig4.patch.set_facecolor(cs['mnk_dgrey'])
-ax4.set_xlabel('time, s')
+ax4.set_xlabel('time, hrs')
 ax4.set_ylabel('frequency, Hz')
 im4 = plt.imshow(np.flipud(np.transpose(dBs_tf_R)),
                  cmap='magma',
