@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # Import some extra special libraries from my own repo
 ##############################################################################
 p_lib = (r"C:\local files\Python\Local Repo\library")
-p_lib = (r"C:\GitHub\latest-python\library")
+# p_lib = (r"C:\GitHub\latest-python\library")
 sys.path.insert(0, p_lib)
 
 import prd_plots
@@ -22,7 +22,7 @@ cs = prd_plots.palette()
 
 # Follows the wikipedia ray matrix formalism
 # (scroll down for the Gaussian beam bit)
-
+	
 # q parameter is defined as 1/q = 1/R - i*λ0/π*n*(w**2)
 # p is  a normal ray trace
 

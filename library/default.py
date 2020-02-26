@@ -13,54 +13,122 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-##############################################################################
-# Import some extra special libraries from my own repo and do some other stuff
-##############################################################################
-# NPL laptop library path
-sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
-# Surface Pro 4 library path
-sys.path.insert(0, r"C:\Users\Phil\Documents\GitHub\latest-python\library")
-np.set_printoptions(suppress=True)
-import prd_plots
-import prd_file_import
-import prd_maths
-cs = prd_plots.palette()
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
 
-filepath = r"C:\local files\Experimental Data\G5 A5 Norsonic\200122 1" \
-    + r"\NPL_INBOX_0004_Ch1-PROFILE_LAFspl.txt"
+print(np.arange(0,1))
 
-hdr, ts, dBs = prd_file_import.load_NEA_Prof(filepath)
+##############################################################################
+# Some plotting defs
+##############################################################################
+# Modokai palette for plotting ################################################
+def palette():
+    colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
+               'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
+               'mnk_lgrey': [96 / 255, 96 / 255, 84 / 255],
+               'mnk_green': [95 / 255, 164 / 255, 44 / 255],
+               'mnk_yellow': [229 / 255, 220 / 255, 90 / 255],
+               'mnk_blue': [75 / 255, 179 / 255, 232 / 255],
+               'mnk_orange': [224 / 255, 134 / 255, 31 / 255],
+               'mnk_pink': [180 / 255, 38 / 255, 86 / 255],
+               ####
+               'rmp_dblue': [12 / 255, 35 / 255, 218 / 255],
+               'rmp_lblue': [46 / 255, 38 / 255, 86 / 255],
+               'rmp_pink': [210 / 255, 76 / 255, 197 / 255],
+               'rmp_green': [90 / 255, 166 / 255, 60 / 255],
+               ####
+               'fibre9l_1': [234 / 255, 170 / 255, 255 / 255],
+               'fibre9l_2': [255 / 255, 108 / 255, 134 / 255],
+               'fibre9l_3': [255 / 255, 182 / 255, 100 / 255],
+               'fibre9l_4': [180 / 255, 151 / 255, 255 / 255],
+               'fibre9l_6': [248 / 255, 255 / 255, 136 / 255],
+               'fibre9l_7': [136 / 255, 172 / 255, 255 / 255],
+               'fibre9l_8': [133 / 255, 255 / 255, 226 / 255],
+               'fibre9l_9': [135 / 255, 255 / 255, 132 / 255],
+               'fibre9d_1': [95 / 255, 0 / 255, 125 / 255],
+               'fibre9d_2': [157 / 255, 0 / 255, 28 / 255],
+               'fibre9d_3': [155 / 255, 82 / 255, 0 / 255],
+               'fibre9d_4': [40 / 255, 0 / 255, 147 / 255],
+               'fibre9d_6': [119 / 255, 125 / 255, 0 / 255],
+               'fibre9d_7': [0 / 255, 39 / 255, 139 / 255],
+               'fibre9d_8': [0 / 255, 106 / 255, 85 / 255],
+               'fibre9d_9': [53 / 255, 119 / 255, 0 / 255],
+               ####
+               'ggred': [217 / 255, 83 / 255, 25 / 255],
+               'ggblue': [30 / 255, 144 / 255, 229 / 255],
+               'ggpurple': [145 / 255, 125 / 255, 240 / 255],
+               'ggyellow': [229 / 255, 220 / 255, 90 / 255],
+               'gglred': [237 / 255, 103 / 255, 55 / 255],
+               'gglblue': [20 / 255, 134 / 255, 209 / 255],
+               'gglpurple': [165 / 255, 145 / 255, 255 / 255],
+               'gglyellow': [249 / 255, 240 / 255, 110 / 255],
+               'ggdred': [197 / 255, 63 / 255, 5 / 255],
+               'ggdblue': [0 / 255, 94 / 255, 169 / 255],
+               'ggdpurple': [125 / 255, 105 / 255, 220 / 255],
+               'ggdyellow': [209 / 255, 200 / 255, 70 / 255],
+               }
+    return colours
+
+
+# set rcParams for nice plots #################################################
+def ggplot():
+    colours = palette()
+    plt.style.use('ggplot')
+    plt.rcParams['font.size'] = 8
+    plt.rcParams['font.family'] = 'monospace'
+    plt.rcParams['font.fantasy'] = 'Nimbus Mono'
+    plt.rcParams['axes.labelsize'] = 8
+    plt.rcParams['axes.labelweight'] = 'normal'
+    plt.rcParams['xtick.labelsize'] = 8
+    plt.rcParams['ytick.labelsize'] = 8
+    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['figure.titlesize'] = 8
+    plt.rcParams['lines.color'] = 'white'
+    plt.rcParams['text.color'] = colours['mnk_purple']
+    plt.rcParams['axes.labelcolor'] = colours['mnk_yellow']
+    plt.rcParams['xtick.color'] = colours['mnk_purple']
+    plt.rcParams['ytick.color'] = colours['mnk_purple']
+    plt.rcParams['axes.edgecolor'] = colours['mnk_lgrey']
+    plt.rcParams['savefig.edgecolor'] = colours['mnk_lgrey']
+    plt.rcParams['axes.facecolor'] = colours['mnk_dgrey']
+    plt.rcParams['savefig.facecolor'] = colours['mnk_dgrey']
+    plt.rcParams['grid.color'] = colours['mnk_lgrey']
+    plt.rcParams['grid.linestyle'] = ':'
+    plt.rcParams['axes.titlepad'] = 6
+
+
+cs = palette()
+
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # prep colour scheme for plots and paths to save figs to
-prd_plots.ggplot()
-# NPL path
-plot_path = r"C:\local files\Python\Plots"
-# Surface Pro path
-plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
+# prd_plots.ggplot()
+# # NPL path
+# plot_path = r"C:\local files\Python\Plots"
+# # Surface Pro path
+# plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
 # os.chdir(plot_path)
 
 # xy plot ####################################################################
-size = 4
-fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-ax1 = fig1.add_subplot(111)
-fig1.patch.set_facecolor(cs['mnk_dgrey'])
-ax1.set_xlabel('x axis')
-ax1.set_ylabel('y axis')
-plt.plot(ts, dBs, '.-')
-plt.title('res=' + str(hdr[0])
-          + 's  ' + 'dur=' + str(hdr[1])
-          + 's ' + '@' + str(hdr[2]))
-fig1.tight_layout()
-plt.show()
+# size = 4
+# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+# ax1 = fig1.add_subplot(111)
+# fig1.patch.set_facecolor(cs['mnk_dgrey'])
+# ax1.set_xlabel('x axis')
+# ax1.set_ylabel('y axis')
+# plt.plot(ts, dBs, '.-')
+# plt.title('res=' + str(hdr[0])
+#           + 's  ' + 'dur=' + str(hdr[1])
+#           + 's ' + '@' + str(hdr[2]))
+# fig1.tight_layout()
+# plt.show()
 
 # hist/bar plot ##############################################################
+# hists, bins = np.hist(δt0,100)
 # size = 9
 # fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
 # ax2 = fig2.add_subplot(111)
@@ -119,23 +187,4 @@ plt.show()
 # plt.show()
 # ax2.figure.savefig('funding' + '.png')
 # plot_file_name = plot_path + 'plot2.png'
-# prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
-                fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-                fig1.patch.set_facecolor(cs['mnk_dgrey'])
-                ax1 = fig1.add_subplot(111)
-
-                plt.plot(tt0_ns, '.--', lw=0.5,
-                         alpha=1, markersize=5, label='t0')
-                plt.plot(tt_x, tt_pad, '.--', lw=0.5,
-                         alpha=1, markersize=5, label='t1')
-                plt.plot(x_local, tt_temp, '.--',
-                         lw=0.5, alpha=1, markersize=5, label='|t1 - v0|')
-                plt.plot(i0, v0, 'o', mec=cs[
-                         'ggyellow'], mfc='none', label='v0')
-                plt.plot(x_local[HBT_idx], tt_temp[HBT_idx], 'o', mec=cs[
-                         'mnk_orange'], mfc='none', label='HBT value')
-                plt.plot([i_tt1 - 30, i_tt1 + 30], [1500, 1500])
-                ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-                ax1.set_ylim(0, 1.5 * v0)
-                ax1.set_xlim(i_tt1 - 30, i_tt1 + 30)
-                plt.show()
+# # prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)

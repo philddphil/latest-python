@@ -3,10 +3,10 @@
 ##############################################################################
 import sys
 import glob
+import time
 import numpy as np
-import scipy as sp
-import scipy.signal
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
 
 ##############################################################################
 # Import some extra special libraries from my own repo and do some other stuff
@@ -33,30 +33,25 @@ datafiles0 = glob.glob(d0 + r'\*0.txt')
 datafiles1 = glob.glob(d0 + r'\*1.txt')
 HBT_ss = []
 
-for i0, v0 in enumerate(datafiles0[0:3]):
-
+for i0, v0 in enumerate(datafiles0[0:1]):
+    loop_start_t = time.time()
     # i0 = 2
     print('file #', i0, ' ', datafiles0[i0])
     # 1e-7 is the saved resolution - this is 0.1 microsecond
     tta = np.loadtxt(datafiles0[i0])
     ttb = np.loadtxt(datafiles1[i0])
-
-    # conditional conversion of the time series.
-    # longer one is the start channel
-    if len(tta) > len(ttb):
-        tt0_ns = [j0 * 1e2 for j0 in tta]
-        tt1_ns = [j0 * 1e2 for j0 in ttb]
-    # convert to ns
-    else:
-        tt0_ns = [j0 * 1e2 for j0 in ttb]
-        tt1_ns = [j0 * 1e2 for j0 in tta]
+    tt0_ns = [j0 * 1e2 for j0 in ttb]
+    tt1_ns = [j0 * 1e2 for j0 in tta]
 
     total_t = np.max([np.max(tt0_ns), np.max(tt1_ns)]) * 1e-9
-    c0 = len(tt0_ns)
-    c1 = len(tt1_ns)
+    cs0 = len(tt0_ns)
+    cs1 = len(tt1_ns)
+    idx1 = np.arange(cs1)
 
-    cps0 = c0 / total_t
-    cps1 = c1 / total_t
+    load_time = time.time() - loop_start_t
+
+    cps0 = cs0 / total_t
+    cps1 = cs1 / total_t
     dydx0 = np.max(tt0_ns) / len(tt0_ns)
     dydx1 = np.max(tt1_ns) / len(tt1_ns)
     print('total time collected ', np.round(total_t, 5), 's')
@@ -66,11 +61,12 @@ for i0, v0 in enumerate(datafiles0[0:3]):
     ##########################################################################
     # Perform start-stop measurements
     ##########################################################################
-    locale = 1000
+    locale = 2000
     tt_pad = np.pad(tt1_ns, locale + 1)
 
     # loop through tt0_ns as our start channel
     for i1, v1 in enumerate(tt0_ns[0:]):
+        # loc1 = np.interp(v1, tt1_ns, idx1)
 
         # trunkate full tt1_ns list to a region of 200 values around the same
         # time as the value v0 is (need to use dydx1 to convert)
@@ -87,19 +83,18 @@ for i0, v0 in enumerate(datafiles0[0:3]):
 
         # find idx of min
         HBT_idx0 = np.argmin(tt_temp)
-
         # find time difference of min value
         HBT_test0 = tt_local[HBT_idx0] - v1
 
         # if time difference within range, analyse sub-region
         if -500 < HBT_test0 < 500:
-            
+
             # need loop to check another sub-region, around the minimum value
             for i2 in np.arange(-10, 10):
                 # find idx of min
 
                 HBT_idx1 = HBT_idx0 + i2
-                print(HBT_idx0, HBT_idx1)
+                # print(HBT_idx0, HBT_idx1)
                 # find time difference of min value
                 HBT_test1 = tt_local[HBT_idx1] - v1
 
@@ -107,7 +102,11 @@ for i0, v0 in enumerate(datafiles0[0:3]):
                 if -500 < HBT_test1 < 500:
                     HBT_ss.append(HBT_test1)
 
-    print(np.shape(HBT_ss))
+    proc_time = time.time() - loop_start_t
+    print('HBTs (#)', len(HBT_ss))
+    print('File load time (s) = ', np.round(load_time, 4))
+    print('Processing time (s) = ', np.round(proc_time, 4))
+
 ##############################################################################
 # Plot some figures
 ##############################################################################

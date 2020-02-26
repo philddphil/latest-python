@@ -37,7 +37,6 @@ size = 4
 
 for i0, v0 in enumerate(datafiles0[0:1]):
     print('file #', i0, ' ', v0)
-    i0 = 2
     # 1e-7 is the saved resolution - this is 0.1 microsecond
     tta = np.loadtxt(datafiles0[i0])
     ttb = np.loadtxt(datafiles1[i0])
@@ -53,13 +52,17 @@ for i0, v0 in enumerate(datafiles0[0:1]):
         tt1_ns = [j0 * 1e2 for j0 in tta]
 
     total_t = np.max([np.max(tt0_ns), np.max(tt1_ns)]) * 1e-9
-    c0 = len(tt0_ns)
-    c1 = len(tt1_ns)
+    cs0 = len(tt0_ns)
+    cs1 = len(tt1_ns)
 
-    cps0 = c0 / total_t
-    cps1 = c1 / total_t
+    cps0 = cs0 / total_t
+    cps1 = cs1 / total_t
+
     dydx0 = np.max(tt0_ns) / len(tt0_ns)
     dydx1 = np.max(tt1_ns) / len(tt1_ns)
+
+    idx1 = np.arange(cs1)
+
     print('total time collected ', np.round(total_t, 5), 's')
     print('Ctr 1 - ', np.round(cps0 / 1000, 2), 'k counts per second')
     print('Ctr 2 - ', np.round(cps1 / 1000, 2), 'k counts per second')
@@ -67,13 +70,15 @@ for i0, v0 in enumerate(datafiles0[0:1]):
     ##########################################################################
     # Perform start-stop measurements
     ##########################################################################
-    locale = 200
+    locale = 1500
     tt_pad = np.pad(tt1_ns, locale + 1)
     tt_x = np.arange(0, len(tt_pad)) - locale + 1
 
     # loop through tt0_ns as our start channel
     for i1, v1 in enumerate(tt0_ns[0:]):
-
+        chk = i1 // 10000
+        i1 = i1 + 10000
+        v1 = tt0_ns[i1]
         # trunkate full tt1_ns list to a region of 200 values around the same
         # time as the value v0 is (need to use dydx1 to convert)
 
@@ -107,26 +112,44 @@ for i0, v0 in enumerate(datafiles0[0:1]):
                 # check if value is of interest
                 if -1500 < HBT_test1 < 1500:
                     HBT_ss.append(HBT_test1)
+                    if chk == 0 & i2 == 0:
+                        print(i1)
+                        fig1 = plt.figure('fig1', figsize=(
+                            size * np.sqrt(2), size))
+                        fig1.patch.set_facecolor(cs['mnk_dgrey'])
+                        ax1 = fig1.add_subplot(111)
 
-                    fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-                    fig1.patch.set_facecolor(cs['mnk_dgrey'])
-                    ax1 = fig1.add_subplot(111)
-
-                    plt.plot(tt0_ns, '.--', lw=0.5,
-                             alpha=1, markersize=5, label='t0')
-                    plt.plot(tt_x, tt_pad, '.--', lw=0.5,
-                             alpha=1, markersize=5, label='t1')
-                    plt.plot(x_local, tt_temp, '.--',
-                             lw=0.5, alpha=1, markersize=5, label='|t1 - v0|')
-                    plt.plot(i2, v1, 'o', mec=cs[
-                             'ggyellow'], mfc='none', label='v0')
-                    plt.plot(x_local[HBT_idx1], tt_temp[HBT_idx1], 'o', mec=cs[
-                             'mnk_orange'], mfc='none', label='HBT value')
-                    plt.plot([i_tt1 - 30, i_tt1 + 30], [1500, 1500])
-                    ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-                    # ax1.set_ylim(0, 1.5 * v0)
-                    # ax1.set_xlim(i_tt1 - 30, i_tt1 + 30)
-                    plt.show()
+                        plt.plot(tt0_ns, '.',
+                                 alpha=0.8,
+                                 markersize=5,
+                                 label='t0',
+                                 mfc=cs['ggred'])
+                        plt.plot([0, np.max(cs0)], [0, dydx0 * np.max(cs0)],
+                                 lw=0.5,
+                                 color=cs['gglred'])
+                        plt.plot(tt_x, tt_pad, '.',
+                                 alpha=0.8,
+                                 markersize=5,
+                                 label='t1',
+                                 mfc=cs['ggblue'])
+                        plt.plot([0, np.max(cs1)], [0, dydx1 * np.max(cs1)],
+                                 lw=0.5,
+                                 color=cs['gglblue'])
+                        plt.plot(x_local, tt_temp, '.--',
+                                 lw=0.5, alpha=1, markersize=5,
+                                 label='|t1 - v0|')
+                        plt.plot(i1, v1, 'o', mec=cs[
+                                 'ggyellow'], mfc='none', label='v0')
+                        plt.plot(x_local[HBT_idx1], tt_temp[HBT_idx1], 'o',
+                                 mec=cs['mnk_orange'],
+                                 mfc='none',
+                                 label='HBT value')
+                        plt.plot([i_tt1 - 30, i_tt1 + 30], [1500, 1500])
+                        ax1.legend(loc='upper left',
+                                   fancybox=True, framealpha=0.5)
+                        # ax1.set_ylim(0, 1.5 * v0)
+                        # ax1.set_xlim(i_tt1 - 30, i_tt1 + 30)
+                        plt.show()
 
     print(np.shape(HBT_ss))
 ##############################################################################
@@ -134,7 +157,7 @@ for i0, v0 in enumerate(datafiles0[0:1]):
 ##############################################################################
 # plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
 prd_plots.ggplot()
-# ###### xy plot ###############################################################
+# ###### xy plot #########################################################
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
 # ax1 = fig1.add_subplot(111)

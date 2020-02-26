@@ -22,7 +22,7 @@ cs = prd_plots.palette()
 ##############################################################################
 # Specify results directory and change working directory to this location
 p0 = (r"C:\local files\Experimental Data") + \
-    (r"\F5 L10 Spectrometer\Spec data 20201301")
+    (r"\F5 L10 Spectrometer\Spec data 20200213")
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically

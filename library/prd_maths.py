@@ -13,6 +13,11 @@ from scipy import ndimage
 ###############################################################################
 
 # Functions (often used in fitting):
+# Sinusoid ####################################################################
+def Asinx(x, A, B, ϕ):
+    y = A * np.sin(B * x + ϕ)
+    return y
+
 
 # Saturation curve ############################################################
 def I_sat(x, I_sat, P_sat, P_bkg, bkg):
@@ -27,11 +32,32 @@ def straight_line(x, m, c=0):
 
 
 # Generic 1D Gaussian peak function ###########################################
-def Gaussian_1D(x, A, x_c, σ_x, bkg=0, N=1):
+def Gaussian_1D(x, A, x_c, σ, bkg=0, N=1):
     # Note the optional input N, used for super Gaussians (default = 1)
     x_c = float(x_c)
-    G = bkg + A * np.exp(- (((x - x_c) ** 2) / (2 * σ_x ** 2))**N)
+    G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
     return G
+
+
+# Generic 1D Lorentzian function ##############################################
+def Lorentzian_1D(x, A, x_c, γ, bkg=0):
+    L = (A * γ ** 2) / ((x - x_c)**2 + γ ** 2) + bkg
+    return L
+
+
+# Pseudo Voigt function as defined on wikepedia ###############################
+def Voigt_1D(x, A, x_c, γ, σ, η, bkg=0):
+    f_G = 2 * σ * 2 * np.sqrt(2 * np.log(2))
+    f_L = 2 * γ
+    f = (f_G**5 +
+         2.69269 * (f_G**4) * f_L +
+         2.42843 * (f_G**3) * (f_L**2) +
+         4.47163 * (f_G**2) * (f_L**3) +
+         0.07842 * f_L * (f_L**4) +
+         f_L**5)**0.2
+    V = (η * Gaussian_1D(x, A, x_c, f, bkg) +
+         (1 - η) * Lorentzian_1D(x, A, x_c, f, bkg))
+    return V
 
 
 # Generic 2D Gaussian peak function ###########################################
@@ -48,22 +74,19 @@ def Gaussian_2D(coords, A, x_c, y_c, σ_x, σ_y, θ=0, bkg=0, N=1):
     return G.ravel()
 
 
-# Generic 1D Lorentzian function ##############################################
-def Lorentzian_1D(x, x_c, γ, A, bkg=0):
-    L = (A * γ ** 2) / ((x - x_c)**2 + γ ** 2)
-    return L
-
-
 # g2 function taken from "Berthel et al 2015" for 3 level system ##############
-def g2_3_lvl(tau, a, b, c):
-    g = 1 - c * np.exp(- a * np.abs(tau)) + (c - 1) * np.exp(- b * np.abs(tau))
+def g2_3_lvl(τ, δτ, a, b, c):
+    g = 1 - c * np.exp(- a * np.abs(τ - δτ))
+    + (c - 1) * np.exp(- b * np.abs(τ - δτ))
     return g
 
 
-# as above but with experimental count rate envelope ##########################
-def g2_3_lvl_exp(tau, a, b, c, d):
-    g = 1 - c * np.exp(- a * np.abs(tau)) + (c - 1) * np.exp(- b * np.abs(tau))
-    h = g * np.exp(-d * np.abs(tau))
+# g2 function taken from "Berthel et al 2015" for 3 level system with #########
+# experimental count rate envelope ############################################
+def g2_3_lvl_exp(τ, δτ, a, b, c, d, bkg):
+    g1 = 1 - c * np.exp(- a * np.abs(τ - δτ))
+    g2 = (c - 1) * np.exp(- b * np.abs(τ - δτ))
+    h = (g1 + g2) * np.exp(-d * np.abs(τ - δτ)) + bkg
     return h
 
 

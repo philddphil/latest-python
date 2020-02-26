@@ -9,7 +9,7 @@ from scipy.ndimage.filters import gaussian_filter
 ###############################################################################
 # Plotting defs
 ###############################################################################
-# Modokai palette for plotting ################################################
+# Custom palette for plotting ################################################
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -106,6 +106,8 @@ def PPT_save_3d(fig, ax, name):
 
 # Save 2d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_2d(fig, ax, name):
+
+    # Set plot colours
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
     ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
@@ -113,6 +115,8 @@ def PPT_save_2d(fig, ax, name):
     ax.yaxis.label.set_color('xkcd:black')
     ax.tick_params(axis='x', colors='xkcd:black')
     ax.tick_params(axis='y', colors='xkcd:black')
+
+    # Loop to check for file - appends filename with _# if name already exists
     f_exist = True
     app_no = 0
     while f_exist is True:
@@ -123,9 +127,9 @@ def PPT_save_2d(fig, ax, name):
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
             ax.figure.savefig(name + '_' + str(app_no))
             f_exist = False
-            print(' # = ' + str(app_no)) 
+            print(' # = ' + str(app_no))
         else:
-            app_no = app_no + 1     
+            app_no = app_no + 1
             print('Base + # exists')
 
 
@@ -142,6 +146,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
     # cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
     plt.setp(cbytick_obj, color='xkcd:black')
 
+    # Loop to check for file - appends filename with _# if name already exists
     f_exist = True
     app_no = 0
     while f_exist is True:

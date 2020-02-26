@@ -28,11 +28,11 @@ cs = prd_plots.palette()
 ##############################################################################
 # Do some stuff
 ##############################################################################
-dirpath = r"C:\local files\Experimental Data\G5 A5 Norsonic\200124 0"
+dirpath = r"C:\local files\Experimental Data\G5 A5 Norsonic\200131 0"
 
-filepath1 = r"\NPL_INBOX_0006_Ch1-GLOBAL_LfFspl.txt"
-filepath2 = r"\NPL_INBOX_0006_Ch1-RPT1_LfFspl.txt"
-filepath3 = r"\NPL_INBOX_0006_Ch1-PROFILE_LfFspl.txt"
+filepath1 = r"\NPL_INBOX_0009_Ch1-GLOBAL_LfFspl.txt"
+filepath2 = r"\NPL_INBOX_0009_Ch1-RPT1_LfFspl.txt"
+filepath3 = r"\NPL_INBOX_0009_Ch1-PROFILE_LfFspl.txt"
 
 # read in the global and report files
 hdr1, fs, dBs_f = prd_file_import.load_NEA_Glob(dirpath + filepath1)
@@ -71,7 +71,7 @@ ax1 = fig1.add_subplot(111)
 fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_ylabel('frequency, Hz')
 ax1.set_yscale('log', basey=2)
-ax1.set_xlabel('dB')
+ax1.set_xlabel('Avg. dB over time')
 ax1.get_yaxis().set_visible(False)
 plt.title(' ')
 plt.barh(fs, dBs_f, ws, edgecolor=cs['mnk_dgrey'], label='integrated spectrum',
@@ -87,7 +87,7 @@ fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size / 2))
 ax2 = fig2.add_subplot(111)
 fig2.patch.set_facecolor(cs['mnk_dgrey'])
 ax2.set_xlabel('time, hrs')
-ax2.set_ylabel('dB')
+ax2.set_ylabel('Avg. dB over freq.')
 plt.plot(thrs, dBs_t, lw=0.1, color=cs['ggdred'])
 plt.plot(thrs, dBs_t, '.', alpha=0.1)
 
