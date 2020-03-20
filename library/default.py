@@ -7,18 +7,14 @@ import sys
 import glob
 import numpy as np
 import scipy as sp
+
 import scipy.signal
+import scipy.optimize as opt
 import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-
-##############################################################################
-# Do some stuff
-##############################################################################
-
-print(np.arange(0,1))
 
 ##############################################################################
 # Some plotting defs
@@ -99,14 +95,72 @@ def ggplot():
     plt.rcParams['axes.titlepad'] = 6
 
 
-cs = palette()
+# Save 2d plot with a colourscheme suitable for ppt, as a png #################
+def PPT_save_2d(fig, ax, name):
+
+    # Set plot colours
+    plt.rcParams['text.color'] = 'xkcd:black'
+    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
+    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
+
+    # Loop to check for file - appends filename with _# if name already exists
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no))
+        else:
+            app_no = app_no + 1
+            print('Base + # exists')
 
 
+# Generic straight line #######################################################
+def straight_line(x, m, c=0):
+    y = m * x + c
+    return y
+
+
+# dB to linear
+def dB_to_lin(a):
+    b = 10**(a/10)
+    return b
+
+
+# linear to dB
+def lin_to_dB(a):
+    b = 10 * np.log10(a)
+    return b
+##############################################################################
+# Do some stuff
+##############################################################################
+# Ps = [0.32, 7.11]
+# a_ND0 = [0.08653, 0.1926]
+# a_ND3 = [0.08936, 0.1926]
+# print(np.arange(0, 1))
+# initial_guess = (0.05, 0.07)
+# popt0, _ = opt.curve_fit(straight_line, Ps, a_ND0, p0=initial_guess)
+# popt3, _ = opt.curve_fit(straight_line, Ps, a_ND3, p0=initial_guess)
+# print('m = ', popt0[0], 'c = ', popt0[1])
+# print('m = ', popt3[0], 'c = ', popt3[1])
+# Ps_fit = np.linspace(0, 10, 1000)
+
+print(lin_to_dB(0.6))
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # prep colour scheme for plots and paths to save figs to
-# prd_plots.ggplot()
+ggplot()
+cs = palette()
 # # NPL path
 # plot_path = r"C:\local files\Python\Plots"
 # # Surface Pro path
@@ -114,16 +168,17 @@ cs = palette()
 # os.chdir(plot_path)
 
 # xy plot ####################################################################
-# size = 4
+# size = 2
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
 # ax1 = fig1.add_subplot(111)
 # fig1.patch.set_facecolor(cs['mnk_dgrey'])
 # ax1.set_xlabel('x axis')
 # ax1.set_ylabel('y axis')
-# plt.plot(ts, dBs, '.-')
-# plt.title('res=' + str(hdr[0])
-#           + 's  ' + 'dur=' + str(hdr[1])
-#           + 's ' + '@' + str(hdr[2]))
+# ax1.plot(Ps, a_ND0, '.', markersize=7, color=cs['gglred'])
+# ax1.plot(Ps_fit, straight_line(Ps_fit, *popt0), lw=0.5, color=cs['ggdred'])
+# ax1.plot(Ps, a_ND3, '.', markersize=7, color=cs['gglblue'])
+# ax1.plot(Ps_fit, straight_line(Ps_fit, *popt3), lw=0.5, color=cs['ggdblue'])
+# plt.title('')
 # fig1.tight_layout()
 # plt.show()
 
@@ -187,4 +242,4 @@ cs = palette()
 # plt.show()
 # ax2.figure.savefig('funding' + '.png')
 # plot_file_name = plot_path + 'plot2.png'
-# # prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
+# PPT_save_2d(fig1, ax1, 'plot_file_name')

@@ -250,7 +250,13 @@ def Monomial(x, a, k):
     return y
 
 
-# dB to ratio
+# dB to linear
 def dB_to_lin(a):
-    b = 10**(-a / 10)
+    b = 10**(a / 10)
+    return b
+
+
+# linear to dB
+def lin_to_dB(a):
+    b = 10 * np.log10(a / 10)
     return b
