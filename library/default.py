@@ -17,9 +17,22 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 ##############################################################################
+
 # Some plotting defs
 ##############################################################################
 # Modokai palette for plotting ################################################
+
+# Some defs
+##############################################################################
+def Gaussian_1D(x, A, x_c, σ, bkg=0, N=1):
+    # Note the optional input N, used for super Gaussians (default = 1)
+    x_c = float(x_c)
+    G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
+    return G
+
+# Modokai palette for plotting ###############################################
+
+
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -29,28 +42,7 @@ def palette():
                'mnk_blue': [75 / 255, 179 / 255, 232 / 255],
                'mnk_orange': [224 / 255, 134 / 255, 31 / 255],
                'mnk_pink': [180 / 255, 38 / 255, 86 / 255],
-               ####
-               'rmp_dblue': [12 / 255, 35 / 255, 218 / 255],
-               'rmp_lblue': [46 / 255, 38 / 255, 86 / 255],
-               'rmp_pink': [210 / 255, 76 / 255, 197 / 255],
-               'rmp_green': [90 / 255, 166 / 255, 60 / 255],
-               ####
-               'fibre9l_1': [234 / 255, 170 / 255, 255 / 255],
-               'fibre9l_2': [255 / 255, 108 / 255, 134 / 255],
-               'fibre9l_3': [255 / 255, 182 / 255, 100 / 255],
-               'fibre9l_4': [180 / 255, 151 / 255, 255 / 255],
-               'fibre9l_6': [248 / 255, 255 / 255, 136 / 255],
-               'fibre9l_7': [136 / 255, 172 / 255, 255 / 255],
-               'fibre9l_8': [133 / 255, 255 / 255, 226 / 255],
-               'fibre9l_9': [135 / 255, 255 / 255, 132 / 255],
-               'fibre9d_1': [95 / 255, 0 / 255, 125 / 255],
-               'fibre9d_2': [157 / 255, 0 / 255, 28 / 255],
-               'fibre9d_3': [155 / 255, 82 / 255, 0 / 255],
-               'fibre9d_4': [40 / 255, 0 / 255, 147 / 255],
-               'fibre9d_6': [119 / 255, 125 / 255, 0 / 255],
-               'fibre9d_7': [0 / 255, 39 / 255, 139 / 255],
-               'fibre9d_8': [0 / 255, 106 / 255, 85 / 255],
-               'fibre9d_9': [53 / 255, 119 / 255, 0 / 255],
+
                ####
                'ggred': [217 / 255, 83 / 255, 25 / 255],
                'ggblue': [30 / 255, 144 / 255, 229 / 255],
@@ -156,11 +148,24 @@ def lin_to_dB(a):
 
 print(lin_to_dB(0.6))
 ##############################################################################
+# Do some stuff
+##############################################################################
+pts = 200
+x = np.linspace(-30 * np.pi, 30 * np.pi, pts)
+t = 2
+w = 1
+k = 1
+z = Gaussian_1D(x, 20, 0, 15) * np.real(np.exp(1j * (k * x - w * t)))
+y = 0 * x
+
+
+##############################################################################
 # Plot some figures
 ##############################################################################
 # prep colour scheme for plots and paths to save figs to
 ggplot()
 cs = palette()
+
 # # NPL path
 # plot_path = r"C:\local files\Python\Plots"
 # # Surface Pro path
@@ -168,6 +173,7 @@ cs = palette()
 # os.chdir(plot_path)
 
 # xy plot ####################################################################
+
 # size = 2
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
 # ax1 = fig1.add_subplot(111)
@@ -181,6 +187,20 @@ cs = palette()
 # plt.title('')
 # fig1.tight_layout()
 # plt.show()
+
+size = 4
+fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+ax1 = fig1.add_subplot(111)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('x axis')
+ax1.set_ylabel('y axis')
+plt.plot(x, z, '.-')
+# plt.title('res=' + str(hdr[0])
+#           + 's  ' + 'dur=' + str(hdr[1])
+#           + 's ' + '@' + str(hdr[2]))
+fig1.tight_layout()
+plt.show()
+
 
 # hist/bar plot ##############################################################
 # hists, bins = np.hist(δt0,100)
