@@ -18,12 +18,11 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from itertools import permutations
 
+
 ##############################################################################
 # Some defs
 ##############################################################################
 # Custom palette for plotting ################################################
-
-
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -140,6 +139,16 @@ def PPT_save_2d(fig, ax, name):
             print('Base + # exists')
 
 
+# Poissonian distribution at values of k for mean value λ #####################
+def Poissonian_1D(k, λ):
+    P = []
+
+    for i0, j0 in enumerate(k):
+        P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
+
+    return P
+
+
 def POVM_N(k, eta, P_dc):
     N = ((1 - eta)**k) * (1 - P_dc)
     return N
@@ -188,7 +197,6 @@ def POVM_g(m, x, eta, P_dc):
 
                     g = numerator / denominator
                     g_tot += g
-    print('g again = ', g_tot)
     return g_tot
 
 
@@ -199,15 +207,41 @@ def POVM_xi(n, m, eta=1, P_dc=0, detector_number=4):
     X = list(set(permutations(x)))
     xi = 0
     for i0, v0 in enumerate(X):
-        print(v0)
         g = POVM_g(m, v0, eta, P_dc)
         xi += g
     return xi
-    ##########################################################################
-    # Do some stuff
-    ##########################################################################
 
+
+def POVM_Xi(n, m, eta=1, P_dc=0, detector_number=4):
+    Xi = np.zeros((n + 1, m + 1))
+    for i0 in np.arange(n + 1):
+        for i1 in np.arange(m + 1):
+            print(i0, i1)
+            Xi[i0, i1] = POVM_xi(i0, i1, eta)
+    return Xi
+
+
+##########################################################################
+# Do some stuff
+##########################################################################
+eta = 0.9
+mus = np.linspace(0.2, 0.3, 10)
 print(POVM_xi(4, 4))
+Xi = POVM_Xi(4, 4, eta)
+Xi_inv = np.linalg.inv(Xi)
+
+print(Xi)
+print(Xi_inv)
+
+p = np.asarray([0.877, 0.115, 0.0077, 0.0003, 3.4565e-06])
+rho = Xi_inv.dot(p)
+print(p)
+print(rho)
+n = np.arange(5)
+ns = np.linspace(0, 5, 100)
+
+Psi = Poissonian_1D(ns, mus)
+
 ##############################################################################
 # Plot some figures
 ##############################################################################
@@ -223,16 +257,14 @@ print(POVM_xi(4, 4))
 
 # xy plot ####################################################################
 
-# size = 2
-# ax1, fig1, cs = set_figure('BB radiation', 'wavelength / nm', 'Spectral radiance / W / sr m$^3$')
-# ax1.plot(λs * 1e9, B1, label=(str(T1) + ' K'))
-# ax1.plot(λs * 1e9, B2, label=(str(T2) + ' K'))
-# ax1.plot(λs * 1e9, B3, label=(str(T3) + ' K'))
-# ax1.plot(λs * 1e9, B4, label=(str(T4) + ' K'))
+ax1, fig1, cs = set_figure(
+    'BB radiation', 'wavelength / nm', 'Spectral radiance / W / sr m$^3$')
+ax1.plot(n, rho, '.', label=('η = ' + str(eta)))
+ax1.plot(ns, Psi, '-', lw=0.5, label=('Ψ = ' + str(mus)))
 # ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-# ax1.set_yscale('log')
-# fig1.tight_layout()
-# plt.show()
+ax1.set_yscale('log')
+fig1.tight_layout()
+plt.show()
 
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
@@ -255,7 +287,7 @@ print(POVM_xi(4, 4))
 # ax2 = fig2.add_subplot(111)
 # fig2.patch.set_facecolor(cs['mnk_dgrey'])
 # ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-# ax2.set_ylabel('Money (M$)', fontsize=28)
+# ax2.set_ylabel('Money (M$)', fontsize=28
 # plt.bar(1, 500, color=cs['ggred'])
 # plt.bar(2, 1000, color=cs['ggblue'])
 # plt.bar(3, 1275, color=cs['mnk_green'])

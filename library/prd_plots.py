@@ -46,6 +46,7 @@ def palette():
                'ggblue': [30 / 255, 144 / 255, 229 / 255],
                'ggpurple': [145 / 255, 125 / 255, 240 / 255],
                'ggyellow': [229 / 255, 220 / 255, 90 / 255],
+               'gggrey': [118 / 255, 118 / 255, 118 / 255],
                'gglred': [237 / 255, 103 / 255, 55 / 255],
                'gglblue': [20 / 255, 134 / 255, 209 / 255],
                'gglpurple': [165 / 255, 145 / 255, 255 / 255],
@@ -83,6 +84,18 @@ def ggplot():
     plt.rcParams['grid.color'] = colours['mnk_lgrey']
     plt.rcParams['grid.linestyle'] = ':'
     plt.rcParams['axes.titlepad'] = 6
+
+
+# Set up figure for plotting #################################################
+def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
+    ggplot()
+    cs = palette()
+    fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
+    ax1 = fig1.add_subplot(111)
+    fig1.patch.set_facecolor(cs['mnk_dgrey'])
+    ax1.set_xlabel(xaxis)
+    ax1.set_ylabel(yaxis)
+    return ax1, fig1, cs
 
 
 # Save 3d plot with a colourscheme suitable for ppt, as a png #################

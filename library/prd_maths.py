@@ -20,9 +20,19 @@ def Asinx(x, A, B, ϕ):
 
 
 # Saturation curve ############################################################
-def I_sat(x, I_sat, P_sat, P_bkg, bkg):
-    y = (I_sat * x) / (P_sat + x) + P_bkg * x + bkg
-    return y
+def I_sat(P, A, P_sat, B, C):
+    I = A * (P / (P_sat + P)) + B * P + C
+    return I
+
+
+# Inverse saturation curve ####################################################
+def I_sat_inv(I, A, P_sat, B, C):
+    a = B
+    b = A + B * P_sat + C - I
+    c = I + C
+    P1 = (-b + np.sqrt((b**2 - 4 * a * c))) / (2 * a)
+    P2 = (-b - np.sqrt((b**2 - 4 * a * c))) / (2 * a)
+    return P1, P2
 
 
 # Generic straight line #######################################################
@@ -74,19 +84,40 @@ def Gaussian_2D(coords, A, x_c, y_c, σ_x, σ_y, θ=0, bkg=0, N=1):
     return G.ravel()
 
 
-# g2 function taken from "Berthel et al 2015" for 3 level system ##############
-def g2_3_lvl(τ, δτ, a, b, c):
-    g = 1 - c * np.exp(- a * np.abs(τ - δτ))
-    + (c - 1) * np.exp(- b * np.abs(τ - δτ))
-    return g
+# g2 function taken from "Berthel et al 2015" for 3 level system with #########
+# experimental count rate envelope and multiple emitters ######################
+def g2_0(t, dt, a, b, c, d, z):
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    g3 = (g1 + g2)
+    g4 = g3 * (1 - 2 * z * (1 - z)) + 2 * z * (1 - z)
+    g5 = g4 * np.exp(-d * np.abs(t - dt))
+    return g5
 
 
 # g2 function taken from "Berthel et al 2015" for 3 level system with #########
-# experimental count rate envelope ############################################
-def g2_3_lvl_exp(τ, δτ, a, b, c, d, bkg):
-    g1 = 1 - c * np.exp(- a * np.abs(τ - δτ))
-    g2 = (c - 1) * np.exp(- b * np.abs(τ - δτ))
-    h = (g1 + g2) * np.exp(-d * np.abs(τ - δτ)) + bkg
+# experimental count rate envelope and background #############################
+def g2_1(t, dt, a, b, c, d, r):
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    g3 = (g1 + g2)
+    g4 = g3 * (r**2) + (1 - r**2)
+    g5 = g4 * np.exp(-d * np.abs(t - dt))
+    return g5
+
+
+# k rate using identities from Berthel et al 2015 #############################
+def k_rate_3lvl(t, dt, k12, k21, k31, k23, R, bkg):
+    a = k12 + k21
+    b = k31 + (k12 * k23) / (k12 + k21)
+    c = 1 + (k12 * k23) / (k31 * (k12 + k21))
+
+    # P = k31 / (k31 - k21 + (k21 + k23) * (1 + k31 / k12))
+    # T = R / (k21 * P)
+
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    h = (g1 + g2) * np.exp(- R * np.abs(t - dt)) + bkg
     return h
 
 

@@ -7,16 +7,9 @@ import sys
 import glob
 import matplotlib
 import numpy as np
-import scipy as sp
 
-import scipy.signal
-import scipy.optimize as opt
+
 import matplotlib.pyplot as plt
-
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from itertools import permutations
 
 ##############################################################################
 # Some defs
@@ -111,103 +104,17 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     return ax1, fig1, cs
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png #################
-def PPT_save_2d(fig, ax, name):
+# dB to linear
+def dB_to_lin(a):
+    b = 10**(a / 10)
+    return b
 
-    # Set plot colours
-    plt.rcParams['text.color'] = 'xkcd:black'
-    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
-    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:black')
-    ax.yaxis.label.set_color('xkcd:black')
-    ax.tick_params(axis='x', colors='xkcd:black')
-    ax.tick_params(axis='y', colors='xkcd:black')
-
-    # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
+##############################################################################
+# Do some stuff
+##############################################################################
+b = dB_to_lin(5)
 
 
-def POVM_N(k, eta, P_dc):
-    N = ((1 - eta)**k) * (1 - P_dc)
-    return N
-
-
-def POVM_C(k, eta, P_dc):
-    C = 1 - POVM_N(k, eta, P_dc)
-    return C
-
-
-def POVM_x(x):
-    a = POVM_C
-    b = POVM_C
-    c = POVM_C
-    d = POVM_C
-
-    if x[0] == 0:
-        a = POVM_N
-    if x[1] == 0:
-        b = POVM_N
-    if x[2] == 0:
-        c = POVM_N
-    if x[3] == 0:
-        d = POVM_N
-    return(a, b, c, d)
-
-
-def POVM_g(m, x, eta, P_dc):
-    a, b, c, d = POVM_x(x)
-    g_tot = 0
-    for i0 in np.arange(m + 1):
-        for i1 in np.arange(m + 1):
-            for i2 in np.arange(m + 1):
-                if i0 + i1 + i2 <= m:
-                    numerator = (np.math.factorial(m) *
-                                 a(i0, eta, P_dc) *
-                                 b(i1, eta, P_dc) *
-                                 c(i2, eta, P_dc) *
-                                 d(m - i0 - i1 - i2, eta, P_dc))
-
-                    denominator = ((4 ** m) *
-                                   np.math.factorial(i0) *
-                                   np.math.factorial(i1) *
-                                   np.math.factorial(i2) *
-                                   np.math.factorial(m - i0 - i1 - i2))
-
-                    g = numerator / denominator
-                    g_tot += g
-    print('g again = ', g_tot)
-    return g_tot
-
-
-def POVM_xi(n, m, eta=1, P_dc=0, detector_number=4):
-    x0 = np.zeros(detector_number - n)
-    x1 = np.ones(n)
-    x = np.append(x0, x1)
-    X = list(set(permutations(x)))
-    xi = 0
-    for i0, v0 in enumerate(X):
-        print(v0)
-        g = POVM_g(m, v0, eta, P_dc)
-        xi += g
-    return xi
-    ##########################################################################
-    # Do some stuff
-    ##########################################################################
-
-print(POVM_xi(4, 4))
 ##############################################################################
 # Plot some figures
 ##############################################################################
@@ -223,16 +130,12 @@ print(POVM_xi(4, 4))
 
 # xy plot ####################################################################
 
-# size = 2
-# ax1, fig1, cs = set_figure('BB radiation', 'wavelength / nm', 'Spectral radiance / W / sr m$^3$')
-# ax1.plot(λs * 1e9, B1, label=(str(T1) + ' K'))
-# ax1.plot(λs * 1e9, B2, label=(str(T2) + ' K'))
-# ax1.plot(λs * 1e9, B3, label=(str(T3) + ' K'))
-# ax1.plot(λs * 1e9, B4, label=(str(T4) + ' K'))
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-# ax1.set_yscale('log')
-# fig1.tight_layout()
-# plt.show()
+size = 2
+ax1, fig1, cs = set_figure()
+ax1.plot(data[0], data[2])
+plt.title('')
+fig1.tight_layout()
+plt.show()
 
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
@@ -306,7 +209,7 @@ print(POVM_xi(4, 4))
 # fig4.colorbar(im4, cax=cax)
 
 # save plot ###################################################################
+plt.show()
 # ax2.figure.savefig('funding' + '.png')
 # plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'BB radiation')
+# PPT_save_2d(fig1, ax1, 'plot_file_name')

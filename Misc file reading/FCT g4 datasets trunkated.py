@@ -3,27 +3,14 @@
 # Import some libraries
 ##############################################################################
 import os
-import sys
-import glob
-import matplotlib
 import numpy as np
-import scipy as sp
-
-import scipy.signal
-import scipy.optimize as opt
 import matplotlib.pyplot as plt
 
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from itertools import permutations
 
 ##############################################################################
 # Some defs
 ##############################################################################
 # Custom palette for plotting ################################################
-
-
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -60,6 +47,7 @@ def palette():
                'ggblue': [30 / 255, 144 / 255, 229 / 255],
                'ggpurple': [145 / 255, 125 / 255, 240 / 255],
                'ggyellow': [229 / 255, 220 / 255, 90 / 255],
+               'gggrey': [118 / 255, 118 / 255, 118 / 255],
                'gglred': [237 / 255, 103 / 255, 55 / 255],
                'gglblue': [20 / 255, 134 / 255, 209 / 255],
                'gglpurple': [165 / 255, 145 / 255, 255 / 255],
@@ -108,6 +96,7 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     fig1.patch.set_facecolor(cs['mnk_dgrey'])
     ax1.set_xlabel(xaxis)
     ax1.set_ylabel(yaxis)
+    fig1.tight_layout()
     return ax1, fig1, cs
 
 
@@ -140,173 +129,93 @@ def PPT_save_2d(fig, ax, name):
             print('Base + # exists')
 
 
-def POVM_N(k, eta, P_dc):
-    N = ((1 - eta)**k) * (1 - P_dc)
-    return N
+# Find clock resets ###########################################################
+def find_clk_resets(a):
+    b = []
+    for i0, v0 in enumerate(a):
+        if v0 < 0:
+            b.append(int(i0))
+    return b
 
 
-def POVM_C(k, eta, P_dc):
-    C = 1 - POVM_N(k, eta, P_dc)
-    return C
+# Find clock resets ###########################################################
+def find_dt_data_clk(data, clock):
+    dts = []
+    for i0, v0 in enumerate(data):
+        t0 = clk[int(np.floor(data[i0] / 10000))]
+        t1 = clk[int(np.ceil(data[i0] / 10000))]
+        dts.append(data[i0] - min([t0, t1]))
+    return dts
 
 
-def POVM_x(x):
-    a = POVM_C
-    b = POVM_C
-    c = POVM_C
-    d = POVM_C
+##############################################################################
+# Do some stuff
+##############################################################################
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200211")
+f1 = d0 + r'\1a.txt'
+f2 = d0 + r'\2a.txt'
+f3 = d0 + r'\3a.txt'
+f4 = d0 + r'\4a.txt'
+f6 = d0 + r'\6a.txt'
 
-    if x[0] == 0:
-        a = POVM_N
-    if x[1] == 0:
-        b = POVM_N
-    if x[2] == 0:
-        c = POVM_N
-    if x[3] == 0:
-        d = POVM_N
-    return(a, b, c, d)
+data6 = np.genfromtxt(f6, delimiter=',')
+data1 = np.genfromtxt(f1, delimiter=',') - np.min(data6)
+data2 = np.genfromtxt(f2, delimiter=',') - np.min(data6)
+data3 = np.genfromtxt(f3, delimiter=',') - np.min(data6)
+data4 = np.genfromtxt(f4, delimiter=',') - np.min(data6)
 
+print(len(data4))
 
-def POVM_g(m, x, eta, P_dc):
-    a, b, c, d = POVM_x(x)
-    g_tot = 0
-    for i0 in np.arange(m + 1):
-        for i1 in np.arange(m + 1):
-            for i2 in np.arange(m + 1):
-                if i0 + i1 + i2 <= m:
-                    numerator = (np.math.factorial(m) *
-                                 a(i0, eta, P_dc) *
-                                 b(i1, eta, P_dc) *
-                                 c(i2, eta, P_dc) *
-                                 d(m - i0 - i1 - i2, eta, P_dc))
+clk = (data6 - np.min(data6))
+clk_y = 0 * data6
+ch1_y = np.ones(len(data1))
+ch2_y = 2 * np.ones(len(data2))
+ch3_y = 3 * np.ones(len(data3))
+ch4_y = 4 * np.ones(len(data4))
 
-                    denominator = ((4 ** m) *
-                                   np.math.factorial(i0) *
-                                   np.math.factorial(i1) *
-                                   np.math.factorial(i2) *
-                                   np.math.factorial(m - i0 - i1 - i2))
-
-                    g = numerator / denominator
-                    g_tot += g
-    print('g again = ', g_tot)
-    return g_tot
-
-
-def POVM_xi(n, m, eta=1, P_dc=0, detector_number=4):
-    x0 = np.zeros(detector_number - n)
-    x1 = np.ones(n)
-    x = np.append(x0, x1)
-    X = list(set(permutations(x)))
-    xi = 0
-    for i0, v0 in enumerate(X):
-        print(v0)
-        g = POVM_g(m, v0, eta, P_dc)
-        xi += g
-    return xi
-    ##########################################################################
-    # Do some stuff
-    ##########################################################################
-
-print(POVM_xi(4, 4))
+dts1 = find_dt_data_clk(data1, clk)
+dts1 = np.asarray(dts1) / 10
+dts2 = find_dt_data_clk(data2, clk)
+dts2 = np.asarray(dts2) / 10
+dts3 = find_dt_data_clk(data3, clk)
+dts3 = np.asarray(dts3) / 10
+dts4 = find_dt_data_clk(data4, clk)
+dts4 = np.asarray(dts4) / 10
 ##############################################################################
 # Plot some figures
 ##############################################################################
-# prep colour scheme for plots and paths to save figs to
-# ggplot()
-# cs = palette()
-
-# # NPL path
-# plot_path = r"C:\local files\Python\Plots"
-# # Surface Pro path
-# plot_path = r"C:\Users\Phil\Documents\GitHub\plots"
-# os.chdir(plot_path)
 
 # xy plot ####################################################################
-
-# size = 2
-# ax1, fig1, cs = set_figure('BB radiation', 'wavelength / nm', 'Spectral radiance / W / sr m$^3$')
-# ax1.plot(λs * 1e9, B1, label=(str(T1) + ' K'))
-# ax1.plot(λs * 1e9, B2, label=(str(T2) + ' K'))
-# ax1.plot(λs * 1e9, B3, label=(str(T3) + ' K'))
-# ax1.plot(λs * 1e9, B4, label=(str(T4) + ' K'))
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-# ax1.set_yscale('log')
-# fig1.tight_layout()
-# plt.show()
-
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.plot(x + 50, a, '.')
-# plt.plot(x + 50, b, '.')
-# plt.plot(c, '.')
-# # plt.title()
-# fig1.tight_layout()
-# plt.show()
+ax0, fig0, cs = set_figure(
+    'fig0', 't / ns', 'channel #')
+ax0.plot(data1, ch1_y, '.')
+ax0.plot(data2, ch2_y, '.')
+ax0.plot(data3, ch3_y, '.')
+ax0.plot(data4, ch4_y, '.')
+ax0.plot(clk, clk_y, '.')
 
 
-# hist/bar plot ##############################################################
-# hists, bins = np.hist(δt0,100)
-# size = 9
-# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-# ax2 = fig2.add_subplot(111)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-# ax2.set_ylabel('Money (M$)', fontsize=28)
-# plt.bar(1, 500, color=cs['ggred'])
-# plt.bar(2, 1000, color=cs['ggblue'])
-# plt.bar(3, 1275, color=cs['mnk_green'])
-# plt.bar(4, 10000, color=cs['ggpurple'])
-# ax2.set_xlim(0.5, 4.5)
-# ax2.set_ylim(0, 11000)
-# ax2.set_yticklabels([])
-# ax2.set_xticklabels([])
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
+# hist plot ##################################################################
+bins = np.linspace(0, 1000, 30)
+ax1, fig1, cs = set_figure('fig1', 'dt / ns', '#')
+ax1.hist(dts1, bins, edgecolor=cs['mnk_dgrey'], facecolor=cs['ggred'])
+ax1.set_xlim(0, 1000)
+ax2, fig2, cs = set_figure('fig2', 'dt / ns', '#')
+ax2.hist(dts2, bins, edgecolor=cs['mnk_dgrey'], facecolor=cs['ggblue'])
+ax2.set_xlim(0, 1000)
+ax3, fig3, cs = set_figure('fig3', 'dt / ns', '#')
+ax3.hist(dts3, bins, edgecolor=cs['mnk_dgrey'], facecolor=cs['ggpurple'])
+ax3.set_xlim(0, 1000)
+ax4, fig4, cs = set_figure('fig4', 'dt / ns', '#')
+ax4.hist(dts4, bins, edgecolor=cs['mnk_dgrey'], facecolor=cs['gggrey'])
+ax4.set_xlim(0, 1000)
+plt.show()
 
-# xyz plot ###################################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# scatexp = ax3.scatter(*coords, z, '.', alpha=0.4,
-#                       color=cs['gglred'], label='')
-# surffit = ax3.contour(*coords, z, 10, cmap=cm.jet)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# set_zlim(min_value, max_value)
 
-# img plot ###################################################################
-# size = 4
-# fig4 = plt.figure('fig4', figsize=(size * np.sqrt(2), size))
-# ax4 = fig4.add_subplot(1, 1, 1)
-# fig4.patch.set_facecolor(cs['mnk_dgrey'])
-# ax4.set_xlabel('x dimension')
-# ax4.set_ylabel('y dimension')
-# plt.title('')
-# im4 = plt.imshow(Z, cmap='magma', extent=extents(y) +
-#                  extents(x))
-# divider = make_axes_locatable(ax4)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# fig4.colorbar(im4, cax=cax)
-
-# save plot ###################################################################
-# ax2.figure.savefig('funding' + '.png')
-# plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'BB radiation')
+# # save plot ################################################################
+os.chdir(d0)
+PPT_save_2d(fig0, ax0, 'plot')
+PPT_save_2d(fig1, ax1, 'plot')
+PPT_save_2d(fig2, ax2, 'plot')
+PPT_save_2d(fig3, ax3, 'plot')
+PPT_save_2d(fig4, ax4, 'plot')
