@@ -1,15 +1,44 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
-import sys
+import os
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
 
-##############################################################################
-# Some defs
-##############################################################################
+###############################################################################
+# Defs
+###############################################################################
+# Save 2d plot with a colourscheme suitable for ppt, as a png #################
+def PPT_save_2d(fig, ax, name):
+
+    # Set plot colours
+    plt.rcParams['text.color'] = 'xkcd:black'
+    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
+    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
+
+    # Loop to check for file - appends filename with _# if name already exists
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no))
+        else:
+            app_no = app_no + 1
+            print('Base + # exists')
+
+
 # Custom palette for plotting ################################################
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
@@ -59,7 +88,7 @@ def palette():
     return colours
 
 
-# set rcParams for nice plots ################################################
+# set rcParams for nice plots #################################################
 def ggplot():
     colours = palette()
     plt.style.use('ggplot')
@@ -86,110 +115,86 @@ def ggplot():
     plt.rcParams['axes.titlepad'] = 6
 
 
-# Set up figure for plotting #################################################
-def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
-    ggplot()
-    cs = palette()
-    fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
-    ax1 = fig1.add_subplot(111)
-    fig1.patch.set_facecolor(cs['mnk_dgrey'])
-    ax1.set_xlabel(xaxis)
-    ax1.set_ylabel(yaxis)
-    return ax1, fig1, cs
+# g2 function taken from "Berthel et al 2015" for 3 level system with #########
+# experimental count rate envelope ############################################
+def g2_3_lvl_exp(t, dt, a, b, c, d, bkg):
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    h = (g1 + g2) * np.exp(-d * np.abs(t - dt)) + bkg
+    return h
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png ################
-def PPT_save_2d(fig, ax, name):
+# k rate using identities from Berthel et al 2015
+def k_rate_3lvl(t, dt, k12, k21, k31, k23, R, bkg):
+    a = k12 + k21
+    b = k31 + (k12 * k23) / (k12 + k21)
+    c = 1 + (k12 * k23) / (k31 * (k12 + k21))
 
-    # Set plot colours
-    plt.rcParams['text.color'] = 'xkcd:black'
-    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
-    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:black')
-    ax.yaxis.label.set_color('xkcd:black')
-    ax.tick_params(axis='x', colors='xkcd:black')
-    ax.tick_params(axis='y', colors='xkcd:black')
+    # P = k31 / (k31 - k21 + (k21 + k23) * (1 + k31 / k12))
+    # T = R / (k21 * P)
 
-    # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
-
-
-# Poissonian distribution at values of k for mean value λ #####################
-def Poissonian_1D(k, λ):
-    P = []
-
-    for i0, j0 in enumerate(k):
-        P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
-
-    return P
-
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    h = (g1 + g2) * np.exp(- R * np.abs(t - dt)) + bkg
+    return h
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-n_max = 15
-res = n_max + 1
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200211")
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212"
+      r"\g4_1MHzPQ_48dB_cont_snippet_3e6")
+# d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212\
+#   g4_1MHzTxPIC_55dB_cont_snippet_3e6")
+d1 = d0 + r'\Py data'
+f0 = d1 + r"\g2_hist.csv"
+f1 = d1 + r"\g2_bins.csv"
+f2 = d1 + r"\other_global.csv"
 
-n_bar1 = 0.1
-n_bar2 = 3
+hist = np.genfromtxt(f0)
+bin_edges = np.genfromtxt(f1)
 
-n_ints = np.linspace(0, n_max, res)
-n_cont = np.linspace(0, n_max, 1024)
+bin_w = (bin_edges[1] - bin_edges[0]) / 2
+print(np.min(np.abs(bin_edges)))
 
-P_ints1 = Poissonian_1D(n_ints, n_bar1)
-P_cont1 = Poissonian_1D(n_cont, n_bar1)
+ts = np.linspace(bin_edges[1], bin_edges[-1] -
+                 bin_w, len(bin_edges) - 1)
 
-P_ints2 = Poissonian_1D(n_ints, n_bar2)
-P_cont2 = Poissonian_1D(n_cont, n_bar2)
+total_t, ctsps_0, ctsps_1 = np.genfromtxt(f2)
+g2s = hist / (ctsps_0 * ctsps_1 * 1e-9 * total_t * 2 * bin_w)
 
+print()
+print('total cps = ', np.round(ctsps_0 + ctsps_1))
 
 ##############################################################################
-# Plot some figures
+# Fits to data
 ##############################################################################
-plot_path = r"D:\Python\Plots\\"
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
-x_d = n_ints
-y_d1 = P_ints1
-y_d2 = P_ints2
+ts_fit = np.linspace(ts[0], ts[-1], 500000)
+a = (ctsps_0 + ctsps_1) * 1e-9
+decay_exp = np.exp(-1 * np.abs(ts_fit * a))
+##############################################################################
+# Plot data
+##############################################################################
+ggplot()
+cs = palette()
 
-x_c = n_cont
-y_c1 = P_cont1
-y_c2 = P_cont2
+# # os.chdir(plot_path)
 
-ax2, fig2, cs = set_figure('figure', r'$\langle n \rangle$', 'Probability')
+# xy plot ####################################################################
+size = 4
+fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+ax1 = fig1.add_subplot(111)
+fig1.patch.set_facecolor(cs['mnk_dgrey'])
+ax1.set_xlabel('τ, ns')
+ax1.set_ylabel('g2s')
+# ax1.set_ylim(0, 1.1 * np.max(hist))
 
-# plt.plot(x1, y1, '.', alpha=0.8, color=cs['gglred'], label=r'$\mathbb{N}$')
-plt.bar(1, 1, alpha=0.5, color=cs['mnk_green'], label=r'|1$\rangle$')
-plt.bar(x_d, y_d1, alpha=0.5, color=cs['gglred'], label=r'|α$_{0.1}\rangle$')
-# plt.bar(x_d, y_d2, alpha=0.5, color=cs['gglpurple'], label=r'|α$_3\rangle$')
-
-# plt.plot(x1, y1, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
-# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
-plt.plot(x_c, y_c1, alpha=1, color=cs['ggblue'], lw=0.5, label=r'$\mathbb{R}$')
-# plt.plot(x_c, y_c2, alpha=1, color=cs['ggblue'], lw=0.5)
-
-ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# os.chdir(p0)
-plt.tight_layout()
+ax1.plot(ts, g2s,
+         '.-', markersize=5,
+         lw=0.5,
+         alpha=1, label='')
+ax1.plot(ts_fit, decay_exp)
+# ax1.set_yscale('log')
 plt.show()
-plot_file_name = plot_path + 'blue nbar = ' + str(n_bar1) + '.png'
-ax2.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
+plotname = 'g2s'
+PPT_save_2d(fig1, ax1, plotname)

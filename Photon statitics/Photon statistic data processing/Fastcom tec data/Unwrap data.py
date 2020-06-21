@@ -1,28 +1,16 @@
-
 ##############################################################################
 # Import some libraries
 ##############################################################################
 import os
-import sys
-import glob
-import matplotlib
 import numpy as np
-import scipy as sp
-
-import scipy.signal
-import scipy.optimize as opt
 import matplotlib.pyplot as plt
-
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from itertools import permutations
-
 
 ##############################################################################
 # Some defs
 ##############################################################################
 # Custom palette for plotting ################################################
+
+
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -110,134 +98,156 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     return ax1, fig1, cs
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png ################
-def PPT_save_2d(fig, ax, name):
+# Find the elements immediately after the clock reset occurs #################
+def find_clk_resets(a):
+    b = []
+    for i0, v0 in enumerate(a):
+        if v0 < 0:
+            b.append(i0)
+    return b
 
-    # Set plot colours
-    plt.rcParams['text.color'] = 'xkcd:black'
-    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
-    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:black')
-    ax.yaxis.label.set_color('xkcd:black')
-    ax.tick_params(axis='x', colors='xkcd:black')
-    ax.tick_params(axis='y', colors='xkcd:black')
 
-    # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
+# Unwrap data to account for clock resets ####################################
+def unwrap_data(data, resets):
+    DATA = []
+    ni = 0
+    for i0, v0 in enumerate(resets):
+        DATA.append(data[ni:v0])
+        ni = resets[i0] + 1
+    return DATA
+
+
+# Find the clock tick before the channel arrival time (ch_t) #################
+def find_tick(ch_t, clk_tmp):
+    t_bin = int(np.floor(ch_t / 10000))
+
+    # handles the case where the click in the channel occur after the last
+    # clock tick of the cycle
+    if t_bin + 1 >= len(clk_tmp):
+        t_bin = len(clk_tmp) - 1
+
+    clk_t = clk_tmp[t_bin]
+    # handles a rounding error which results in the use of the next clock tick
+    # rather than the last clock tick
+    dt = (ch_t - clk_t) / 10
+    if dt < 0:
+        dt = dt + 1000
+
+    return dt, t_bin
+
+
+# This function histograms the arrival times and finds the maximum ###########
+def check_delay(DATAS, i0, i1):
+    dts = np.zeros((len(DATAS[i0][i1]), 1))
+    clk_tmp = DATAS[4][i1]
+    for j0 in np.arange(len(DATAS[i0][i1])):
+        ch_t = DATAS[i0][i1][j0]
+        dt, t_bin = find_tick(ch_t, clk_tmp)
+        dts[j0] = dt
+    histmin = 0
+    histmax = 1000
+    histn = 1000
+    edges = np.linspace(histmin, histmax, histn)
+    N, edges = np.histogram(dts, edges)
+    Idx = np.argmax(N)
+    delay = np.round(edges[Idx])
+    window = [delay - 15, delay + 15]
+    return window
+
+
+# Build of an array of coincidence occurances ################################
+def count_coincidence(DATAS, i0, i1, coinc, window):
+    dts_ct = []
+    ch_ts_filt = []
+    dts = np.zeros((len(DATAS[i0][i1]), 1))
+    t_bin_last = 0
+    clk_tmp = DATAS[4][i1]
+    for j0 in np.arange(len(DATAS[i0][i1])):
+        ch_t = DATAS[i0][i1][j0]
+        dt, t_bin = find_tick(ch_t, clk_tmp)
+        dts[j0] = dt
+
+        if dt > window[0] and dt < window[1] and t_bin != t_bin_last:
+            coinc[t_bin] = coinc[t_bin] + 1
+            dts_ct = [dts_ct, dt]
+            ch_ts_filt.append(ch_t)
+
+    t_bin_last = t_bin
+    return coinc, ch_ts_filt
 
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-t = np.linspace(-10, 10, 1000)
+# Specify directory and datasets
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200211")
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212"
+      r"\g4_1MHzPQ_48dB_cont_snippet_3e6")
+# d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212\
+#   g4_1MHzTxPIC_55dB_cont_snippet_3e6")
+d1 = d0 + r'\Py data'
 
+f1 = d0 + r'\1.txt'
+f2 = d0 + r'\2.txt'
+f3 = d0 + r'\3.txt'
+f4 = d0 + r'\4.txt'
+f6 = d0 + r'\6.txt'
+os.chdir(d0)
 
-SPS1 = 1 - np.exp(-np.abs(t))
-SPS2 = (1 / 2) * SPS1 + (1 / 2)
-SPS3 = (1 / 3) * SPS1 + (2 / 3)
-SPS4 = (1 / 4) * SPS1 + (3 / 4)
+fs = [f1, f2, f3, f4, f6]
+# Laser rep rate in Hz
+Laser_rep_rate = 1e6
+chns = 4
+print('# of channels', chns)
+# Deal with the clock channel seperately to get the offset
+data6 = np.genfromtxt(f6)
 
+# Time of the experiment in s
+t_tot = np.shape(data6)[0] / Laser_rep_rate
+clk_ticks = np.shape(data6)[0]
 
-##############################################################################
-# Plot some figures
-##############################################################################
-os.chdir(r"C:\local files\Python\Plots")
-# xy plot ####################################################################
+# Number of time bins for t series
+timebins_N = np.shape(data6)[0] * 10000
 
-ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='x axis',
-                           yaxis='y axis',
-                           size=4)
-ax1.plot(t, SPS1)
-ax1.plot(t, SPS2)
-ax1.plot(t, SPS3)
-ax1.plot(t, SPS4)
-ax1.set_ylim(-0.1, 1.1)
-fig1.tight_layout()
-plt.show()
+offset = np.min(data6)
+clk = data6 - offset
 
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.plot(x + 50, a, '.')
-# plt.plot(x + 50, b, '.')
-# plt.plot(c, '.')
-# # plt.title()
-# fig1.tight_layout()
-# plt.show()
+# Loop over data sets, unwrap around clock resets
+# initialise list of data to unwrap
+DATAS = []
 
+# loop through data set
+for i0, v0 in enumerate(fs):
+    # import channel data
+    data = np.genfromtxt(v0) - offset
+    # differentiate to get reset points
+    ddata = np.diff(data)
+    # locate clock reset values
+    resets = find_clk_resets(ddata)
+    cycles = len(resets)
+    print('# of clock cycles', cycles)
+    # unwrap data from n * various length vectors to a list of lists
+    DATAS.append(unwrap_data(data, resets))
 
-# hist/bar plot ##############################################################
-# hists, bins = np.hist(δt0,100)
-# size = 9
-# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-# ax2 = fig2.add_subplot(111)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-# ax2.set_ylabel('Money (M$)', fontsize=28)
-# plt.bar(1, 500, color=cs['ggred'])
-# plt.bar(2, 1000, color=cs['ggblue'])
-# plt.bar(3, 1275, color=cs['mnk_green'])
-# plt.bar(4, 10000, color=cs['ggpurple'])
-# ax2.set_xlim(0.5, 4.5)
-# ax2.set_ylim(0, 11000)
-# ax2.set_yticklabels([])
-# ax2.set_xticklabels([])
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
+coincs_all = []
+Ts_filt = DATAS
+# loop over clock cycles
+for i0, v0 in enumerate(np.arange(cycles)):
+    print(i0)
+    t_cycle = len(DATAS[4][i0])
+    coinc = np.zeros((t_cycle, 1))
+    window = check_delay(DATAS, 1, i0)
+    # loop over channels
+    for i1, v1 in enumerate(np.arange(chns)):
+        print(i1)
+        coinc, ch_ts_filt = count_coincidence(DATAS, i1, i0, coinc, window)
+        Ts_filt[i1][i0] = ch_ts_filt
 
-# xyz plot ###################################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# scattter = ax3.scatter(*coords, z, '.', alpha=0.4,
-#                       color=cs['gglred'], label='')
-# contour = ax3.contour(*coords, z, 10, cmap=cm.jet)
-# surface = ax3.plot_surface(*coords, z, 10, cmap=cm.jet)
-# wirefrace = ax3.plot_wireframe(*coords, z, 10, cmap=cm.jet)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# set_zlim(min_value, max_value)
+    coincs_all = np.append(coincs_all, coinc)
 
-# img plot ###################################################################
-# ax4, fig4, cs = set.figure('image', 'x axis', 'y axis')
-# im4 = plt.imshow(Z, cmap='magma', extent=extents(y) +
-#                  extents(x))
-# divider = make_axes_locatable(ax4)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# fig4.colorbar(im4, cax=cax)
-
-# save plot ###################################################################
-ax1.figure.savefig('g2s.svg')
-# plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-PPT_save_2d(fig1, ax1, 'g2')
+# Save datasets
+os.chdir(d1)
+for i0, v0 in enumerate(DATAS):
+    for i1, v1 in enumerate(DATAS[i0]):
+        fname = 'ch' + str(i0) + ' data' + str(i1)
+        np.savetxt(fname, Ts_filt[i0][i1])

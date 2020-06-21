@@ -3,19 +3,10 @@
 # Import some libraries
 ##############################################################################
 import os
-import sys
-import glob
-import matplotlib
 import numpy as np
 import scipy as sp
-
 import scipy.signal
-import scipy.optimize as opt
 import matplotlib.pyplot as plt
-
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
 from itertools import permutations
 
 
@@ -183,11 +174,11 @@ def POVM_g(m, x, eta, P_dc):
         for i1 in np.arange(m + 1):
             for i2 in np.arange(m + 1):
                 if i0 + i1 + i2 <= m:
-                    numerator = (np.math.factorial(m) *
-                                 a(i0, eta, P_dc) *
-                                 b(i1, eta, P_dc) *
-                                 c(i2, eta, P_dc) *
-                                 d(m - i0 - i1 - i2, eta, P_dc))
+                    numerator = (np.math.factorial(m)
+                                 * a(i0, eta, P_dc)
+                                 * b(i1, eta, P_dc)
+                                 * c(i2, eta, P_dc)
+                                 * d(m - i0 - i1 - i2, eta, P_dc))
 
                     denominator = ((4 ** m) *
                                    np.math.factorial(i0) *
@@ -200,11 +191,12 @@ def POVM_g(m, x, eta, P_dc):
     return g_tot
 
 
-def POVM_xi(n, m, eta=1, P_dc=0, detector_number=4):
-    x0 = np.zeros(detector_number - n)
+def POVM_xi(n, m, eta=1, P_dc=0):
+    x0 = np.zeros(4 - n)
     x1 = np.ones(n)
     x = np.append(x0, x1)
     X = list(set(permutations(x)))
+    print(X)
     xi = 0
     for i0, v0 in enumerate(X):
         g = POVM_g(m, v0, eta, P_dc)
@@ -212,11 +204,11 @@ def POVM_xi(n, m, eta=1, P_dc=0, detector_number=4):
     return xi
 
 
-def POVM_Xi(n, m, eta=1, P_dc=0, detector_number=4):
+def POVM_Xi(n, m, eta=1, P_dc=0):
     Xi = np.zeros((n + 1, m + 1))
     for i0 in np.arange(n + 1):
         for i1 in np.arange(m + 1):
-            print(i0, i1)
+            print('n =', i0, 'm =', i1)
             Xi[i0, i1] = POVM_xi(i0, i1, eta)
     return Xi
 
@@ -224,23 +216,8 @@ def POVM_Xi(n, m, eta=1, P_dc=0, detector_number=4):
 ##########################################################################
 # Do some stuff
 ##########################################################################
-eta = 0.9
-mus = np.linspace(0.2, 0.3, 10)
-print(POVM_xi(4, 4))
-Xi = POVM_Xi(4, 4, eta)
-Xi_inv = np.linalg.inv(Xi)
 
-print(Xi)
-print(Xi_inv)
-
-p = np.asarray([0.877, 0.115, 0.0077, 0.0003, 3.4565e-06])
-rho = Xi_inv.dot(p)
-print(p)
-print(rho)
-n = np.arange(5)
-ns = np.linspace(0, 5, 100)
-
-Psi = Poissonian_1D(ns, mus)
+print(POVM_Xi(4, 4))
 
 ##############################################################################
 # Plot some figures
@@ -257,14 +234,14 @@ Psi = Poissonian_1D(ns, mus)
 
 # xy plot ####################################################################
 
-ax1, fig1, cs = set_figure(
-    'BB radiation', 'wavelength / nm', 'Spectral radiance / W / sr m$^3$')
-ax1.plot(n, rho, '.', label=('η = ' + str(eta)))
-ax1.plot(ns, Psi, '-', lw=0.5, label=('Ψ = ' + str(mus)))
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
-ax1.set_yscale('log')
-fig1.tight_layout()
-plt.show()
+# ax1, fig1, cs = set_figure(
+#     'BB radiation', 'wavelength / nm', 'Spectral radiance / W / sr m$^3$')
+# ax1.plot(n, rho, '.', label=('η = ' + str(eta)))
+# ax1.plot(ns, Psi, '-', lw=0.5, label=('Ψ = ' + str(mus)))
+# # ax1.legend(loc='upper left', fancybox=True, framealpha=0.5)
+# ax1.set_yscale('log')
+# fig1.tight_layout()
+# plt.show()
 
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))

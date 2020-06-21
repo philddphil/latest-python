@@ -3,26 +3,21 @@
 # Import some libraries
 ##############################################################################
 import os
-import sys
+import csv
 import glob
-import matplotlib
 import numpy as np
-import scipy as sp
-
-import scipy.signal
-import scipy.optimize as opt
 import matplotlib.pyplot as plt
 
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from itertools import permutations
-
+from mpl_toolkits.mplot3d import Axes3D
 
 ##############################################################################
-# Some defs
+# Define functions to be used
 ##############################################################################
 # Custom palette for plotting ################################################
+
+
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -110,134 +105,53 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     return ax1, fig1, cs
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png ################
-def PPT_save_2d(fig, ax, name):
-
-    # Set plot colours
-    plt.rcParams['text.color'] = 'xkcd:black'
-    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
-    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:black')
-    ax.yaxis.label.set_color('xkcd:black')
-    ax.tick_params(axis='x', colors='xkcd:black')
-    ax.tick_params(axis='y', colors='xkcd:black')
-
-    # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
+# For use with extents in imshow ##############################################
+def extents(f):
+    delta = f[1] - f[0]
+    return [f[0] - delta / 2, f[-1] + delta / 2]
 
 
 ##############################################################################
-# Do some stuff
+# Load the data and histogram values
 ##############################################################################
-t = np.linspace(-10, 10, 1000)
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200211")
+d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212"
+      r"\g4_1MHzPQ_48dB_cont_snippet_3e6")
+# d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212\
+#   g4_1MHzTxPIC_55dB_cont_snippet_3e6")
+d1 = d0 + r'\Py data'
+os.chdir(d1)
+datafiles = glob.glob(d1 + r'\2d_dts*')
+res = 1000
+t_range = 25100
 
+nbins = int(2 * t_range / res) + 1
+x_edges = np.linspace(-t_range, t_range, nbins + 1)
+y_edges = np.linspace(-t_range, t_range, nbins + 1)
+dts = []
 
-SPS1 = 1 - np.exp(-np.abs(t))
-SPS2 = (1 / 2) * SPS1 + (1 / 2)
-SPS3 = (1 / 3) * SPS1 + (2 / 3)
-SPS4 = (1 / 4) * SPS1 + (3 / 4)
+data = list(csv.reader(open(datafiles[0])))
+dt1s = []
+dt2s = []
+hists = np.zeros((nbins, nbins))
 
+hist = []
 
-##############################################################################
-# Plot some figures
-##############################################################################
-os.chdir(r"C:\local files\Python\Plots")
-# xy plot ####################################################################
+for i0, v0 in enumerate(datafiles[0:]):
+    data = list(csv.reader(open(datafiles[i0])))
+    dt1s = []
+    dt2s = []
+    for i0, v0 in enumerate(data):
+        if len(v0) == 2:
+            dt1s.append(int(float(v0[0])))
+            dt2s.append(int(float(v0[1])))
+    dt1s_a = np.asarray(dt1s)
+    dt2s_a = np.asarray(dt2s)
+    # dt1s_int = dt1s_a.astype(np.int32)
+    # dt2s_int = dt2s_a.astype(np.int32)
+    hist, _, _ = np.histogram2d(dt1s_a, dt2s_a, [x_edges, y_edges])
+    hists = hists + hist
 
-ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='x axis',
-                           yaxis='y axis',
-                           size=4)
-ax1.plot(t, SPS1)
-ax1.plot(t, SPS2)
-ax1.plot(t, SPS3)
-ax1.plot(t, SPS4)
-ax1.set_ylim(-0.1, 1.1)
-fig1.tight_layout()
-plt.show()
-
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.plot(x + 50, a, '.')
-# plt.plot(x + 50, b, '.')
-# plt.plot(c, '.')
-# # plt.title()
-# fig1.tight_layout()
-# plt.show()
-
-
-# hist/bar plot ##############################################################
-# hists, bins = np.hist(δt0,100)
-# size = 9
-# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-# ax2 = fig2.add_subplot(111)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-# ax2.set_ylabel('Money (M$)', fontsize=28)
-# plt.bar(1, 500, color=cs['ggred'])
-# plt.bar(2, 1000, color=cs['ggblue'])
-# plt.bar(3, 1275, color=cs['mnk_green'])
-# plt.bar(4, 10000, color=cs['ggpurple'])
-# ax2.set_xlim(0.5, 4.5)
-# ax2.set_ylim(0, 11000)
-# ax2.set_yticklabels([])
-# ax2.set_xticklabels([])
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
-
-# xyz plot ###################################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# scattter = ax3.scatter(*coords, z, '.', alpha=0.4,
-#                       color=cs['gglred'], label='')
-# contour = ax3.contour(*coords, z, 10, cmap=cm.jet)
-# surface = ax3.plot_surface(*coords, z, 10, cmap=cm.jet)
-# wirefrace = ax3.plot_wireframe(*coords, z, 10, cmap=cm.jet)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# set_zlim(min_value, max_value)
-
-# img plot ###################################################################
-# ax4, fig4, cs = set.figure('image', 'x axis', 'y axis')
-# im4 = plt.imshow(Z, cmap='magma', extent=extents(y) +
-#                  extents(x))
-# divider = make_axes_locatable(ax4)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# fig4.colorbar(im4, cax=cax)
-
-# save plot ###################################################################
-ax1.figure.savefig('g2s.svg')
-# plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-PPT_save_2d(fig1, ax1, 'g2')
+np.savetxt("g3_hist.csv", hists, delimiter=",")
+np.savetxt("g3_xbins.csv", x_edges, delimiter=",")
+np.savetxt("g3_ybins.csv", y_edges, delimiter=",")
