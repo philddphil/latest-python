@@ -170,8 +170,8 @@ def load_SCM_F5L10(filepath):
         if 'Y wait period / ms' in j0:
             data_start_line = i0 + 2
 
-    x = np.linspace(x_init, x_fin, x_res)
-    y = np.linspace(y_fin, y_init, y_res)
+    x = np.linspace(x_init, x_fin, int(x_res))
+    y = np.linspace(y_fin, y_init, int(y_res))
     img = np.loadtxt(data[data_start_line:])
     return (x, y, img)
 

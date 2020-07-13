@@ -232,7 +232,7 @@ def g3_2d_alt(coords, a):
 ts = np.linspace(-201, 201, 201)
 coords = np.meshgrid(ts, ts)
 
-z = 0.9
+z = 0.7
 x = 1 - z
 
 perm_sum = z * z * z  + \
@@ -295,31 +295,31 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 cb = fig4.colorbar(im4, cax=cax)
 
 # xyz plot ####################################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# # ax3.contour(*coords, g3_1, 50, cmap='magma')
-# ax3.plot_surface(*coords, g3_plot, cmap='magma', alpha=0.5)
-# norm = plt.Normalize(g3_plot.min(), g3_1.max())
-# # colors = cm.magma(norm(g3_1_a))
-# # surf = ax3.plot_surface(*coords_a, g3_1_a, facecolors=colors, shade=False)
-# # surf.set_facecolor((0, 0, 0, 0))
-# # ax3.plot_wireframe(*coords_a, g3_1_a, color=cs['ggred'], lw=0.5)
+size = 4
+fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
+ax3 = fig3.add_subplot(111, projection='3d')
+fig3.patch.set_facecolor(cs['mnk_dgrey'])
+ax3.set_xlabel('x axis')
+ax3.set_ylabel('y axis')
+# ax3.contour(*coords, g3_1, 50, cmap='magma')
+ax3.plot_surface(*coords, g3_plot, cmap='magma', alpha=0.8)
+norm = plt.Normalize(g3_plot.min(), g3_plot.max())
+# colors = cm.magma(norm(g3_1_a))
+# surf = ax3.plot_surface(*coords_a, g3_1_a, facecolors=colors, shade=False)
+# surf.set_facecolor((0, 0, 0, 0))
+# ax3.plot_wireframe(*coords_a, g3_1_a, color=cs['ggred'], lw=0.5)
 # ax3.legend(loc='upper right', fancybox=True, framealpha=0.1)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.set_zlim(0, 1)
-# ax3.view_init(elev=75, azim=40)
+# os.chdir(p0)
+plt.tight_layout()
+ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+ax3.set_zlim(0, 1)
+ax3.view_init(elev=75, azim=64)
 # save plot ###################################################################
 plt.show()
 # ax2.figure.savefig('funding' + '.png')
 # plot_file_name = plot_path + 'plot2.png'
 PPT_save_2d_im(fig4, ax4, cb, 'g3')
 PPT_save_2d(fig1, ax1, 'g3 profiles')
-# PPT_save_3d(fig3, ax3, '3d plot')
+PPT_save_3d(fig3, ax3, '3d plot')

@@ -141,15 +141,13 @@ def k_rate_3lvl(t, dt, k12, k21, k31, k23, R, bkg):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200211")
-d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212"
-      r"\g4_1MHzPQ_48dB_cont_snippet_3e6")
-# d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212\
-#   g4_1MHzTxPIC_55dB_cont_snippet_3e6")
-d1 = d0 + r'\Py data'
-f0 = d1 + r"\g2_hist.csv"
-f1 = d1 + r"\g2_bins.csv"
-f2 = d1 + r"\other_global.csv"
+d0 = (r"C:\local files\Experimental Data"
+      r"\F5 L10 Confocal measurements\SCM Data 20200707")
+d1 = d0 + r'\HH T3 145149'
+d2 = d1 + r'\time difference files'
+f0 = d2 + r"\g2_hist.csv"
+f1 = d2 + r"\g2_bins.csv"
+f2 = d2 + r"\other_global.csv"
 
 hist = np.genfromtxt(f0)
 bin_edges = np.genfromtxt(f1)
@@ -171,7 +169,7 @@ print('total cps = ', np.round(ctsps_0 + ctsps_1))
 ##############################################################################
 ts_fit = np.linspace(ts[0], ts[-1], 500000)
 a = (ctsps_0 + ctsps_1) * 1e-9
-decay_exp = np.exp(-1 * np.abs(ts_fit * a))
+decay_exp = np.exp(-1 * np.abs(ts_fit * a / 3))
 ##############################################################################
 # Plot data
 ##############################################################################
@@ -188,6 +186,7 @@ fig1.patch.set_facecolor(cs['mnk_dgrey'])
 ax1.set_xlabel('τ, ns')
 ax1.set_ylabel('g2s')
 # ax1.set_ylim(0, 1.1 * np.max(hist))
+ax1.set_xlim(-100, 100)
 
 ax1.plot(ts, g2s,
          '.-', markersize=5,

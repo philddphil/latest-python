@@ -1,4 +1,3 @@
-
 ##############################################################################
 # Import some libraries
 ##############################################################################
@@ -17,6 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from itertools import permutations
+from itertools import combinations
 
 
 ##############################################################################
@@ -142,14 +142,15 @@ def PPT_save_2d(fig, ax, name):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-t = np.linspace(-10, 10, 1000)
+d0 = (r"C:\local files\Experimental Data"
+      r"\F5 L10 Confocal measurements\SCM Data 20200707")
+d1 = d0 + r'\HH T3 145149'
+d2 = d1 + r'\time difference files'
 
-
-SPS1 = 1 - np.exp(-np.abs(t))
-SPS2 = (1 / 2) * SPS1 + (1 / 2)
-SPS3 = (1 / 3) * SPS1 + (2 / 3)
-SPS4 = (1 / 4) * SPS1 + (3 / 4)
-
+print(os.path.split(d2))
+Chs = ['ch0','ch1','ch2','ch3']
+X = list(set(combinations(Chs,2)))
+print(X[:])
 
 ##############################################################################
 # Plot some figures
@@ -161,13 +162,14 @@ ax1, fig1, cs = set_figure(name='figure',
                            xaxis='x axis',
                            yaxis='y axis',
                            size=4)
-ax1.plot(t, SPS1)
-ax1.plot(t, SPS2)
-ax1.plot(t, SPS3)
-ax1.plot(t, SPS4)
+# ax1.plot(t, SPS1)
+# ax1.plot(t, SPS2)
+# ax1.plot(t, SPS3)
+# ax1.plot(t, SPS4)
 ax1.set_ylim(-0.1, 1.1)
-fig1.tight_layout()
-plt.show()
+plt.close(fig1)
+# fig1.tight_layout()
+# plt.show()
 
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
@@ -231,13 +233,13 @@ plt.show()
 # img plot ###################################################################
 # ax4, fig4, cs = set.figure('image', 'x axis', 'y axis')
 # im4 = plt.imshow(Z, cmap='magma', extent=extents(y) +
-#                  extents(x))
+#                  extents(x),vmin=0,vmax=100)
 # divider = make_axes_locatable(ax4)
 # cax = divider.append_axes("right", size="5%", pad=0.05)
-# fig4.colorbar(im4, cax=cax)
+# cb4 = fig4.colorbar(im4, cax=cax)
 
 # save plot ###################################################################
-ax1.figure.savefig('g2s.svg')
+# ax1.figure.savefig('g2s.svg')
 # plot_file_name = plot_path + 'plot2.png'
 # ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-PPT_save_2d(fig1, ax1, 'g2')
+# PPT_save_2d(fig1, ax1, 'g2')
