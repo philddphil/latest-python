@@ -142,15 +142,10 @@ def PPT_save_2d(fig, ax, name):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\local files\Experimental Data"
-      r"\F5 L10 Confocal measurements\SCM Data 20200707")
-d1 = d0 + r'\HH T3 145149'
-d2 = d1 + r'\time difference files'
-
-print(os.path.split(d2))
-Chs = ['ch0','ch1','ch2','ch3']
-X = list(set(combinations(Chs,2)))
-print(X[:])
+a = 1e-1
+x = np.linspace(-200, 200, 1000)
+y1 = 1 - np.exp(-np.abs(a * x))
+y2 = 1 - 0.5 * np.exp(-np.abs(a * x))
 
 ##############################################################################
 # Plot some figures
@@ -162,14 +157,15 @@ ax1, fig1, cs = set_figure(name='figure',
                            xaxis='x axis',
                            yaxis='y axis',
                            size=4)
-# ax1.plot(t, SPS1)
+ax1.plot(x, y1, c=cs['ggdred'])
+ax1.plot(x, y2, c=cs['ggdred'])
 # ax1.plot(t, SPS2)
 # ax1.plot(t, SPS3)
 # ax1.plot(t, SPS4)
-ax1.set_ylim(-0.1, 1.1)
-plt.close(fig1)
-# fig1.tight_layout()
-# plt.show()
+# ax1.set_ylim(-0.1, 1.1)
+# plt.close(fig1)
+fig1.tight_layout()
+plt.show()
 
 # size = 4
 # fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
@@ -242,4 +238,4 @@ plt.close(fig1)
 # ax1.figure.savefig('g2s.svg')
 # plot_file_name = plot_path + 'plot2.png'
 # ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'g2')
+PPT_save_2d(fig1, ax1, 'g2')

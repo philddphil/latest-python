@@ -10,6 +10,7 @@ from scipy.optimize import curve_fit
 from itertools import combinations
 from itertools import islice
 
+
 ##############################################################################
 # Some defs
 ##############################################################################
@@ -179,7 +180,6 @@ def gen_dts_from_tts(d2, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
     else:
         print("Successfully created the directory %s " % d2)
     last_file = np.min([len(datafiles0), len(datafiles1)])
-    dt_chs = 'dts_chs01_'
     dt_chs = 'dts_chs' + a + b + '_'
     os.chdir(d3)
     # define a ROI range to check for co-incidences over
@@ -190,7 +190,7 @@ def gen_dts_from_tts(d2, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
 
     for i0, v0 in enumerate(datafiles0[0:last_file]):
         os.chdir(d1)
-        print('file', i0, 'of', len(datafiles0))
+        print('calc ',dt_chs, ' file', i0, 'of', len(datafiles0))
         # 1e-7 is the saved resolution - this is 0.1 microsecond
         tta = np.loadtxt(datafiles0[i0])
         ttb = np.loadtxt(datafiles1[i0])
@@ -384,7 +384,7 @@ def proc_lst(d0):
                     next_n_lines = list(islice(input_file, lines_per_slice))
                     proc_n_lines(next_n_lines)
                     current_slice += 1
-                    print('slice', current_slice, 'of',
+                    print('processing lsts, slice', current_slice, 'of',
                           int(tot_lines / lines_per_slice))
             current_line += 1
 
@@ -521,21 +521,21 @@ def unwrap_4ch_data(d0):
   for i0, v0 in enumerate(DATAS):
       for i1, v1 in enumerate(DATAS[i0]):
           fname = 'ch' + str(i0) + ' data' + str(i1)
-          print('saving', fname)
+          print('unwsaving unwrapped', fname)
           np.savetxt(fname, DATAS[i0][i1])
 
 
 ##############################################################################
 # Import data (saved by python code filter data.py)
 ##############################################################################
-d0 = r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200710\3"
+d0 = r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200714\0"
 d1 = d0 + r'\Py data'
 d2 = d1 + r'\time difference files'
 Chs = ['ch0','ch1','ch2','ch3']
 Chs_combs = list(set(combinations(Chs,2)))
 
-proc_lst(d0)
-unwrap_4ch_data(d0)
+# proc_lst(d0)
+# unwrap_4ch_data(d0)
 
 for i0, v0 in enumerate(Chs_combs):
 	chA = v0[0]

@@ -116,6 +116,22 @@ def PPT_save_3d(fig, ax, name):
     ax.tick_params(axis='z', colors='xkcd:black')
     fig.savefig(name)
 
+    # Loop to check for file - appends filename with _# if name already exists
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no))
+        else:
+            app_no = app_no + 1
+            print('Base + # exists')
+
 
 # Save 2d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_2d(fig, ax, name):

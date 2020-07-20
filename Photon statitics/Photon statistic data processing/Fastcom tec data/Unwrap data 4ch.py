@@ -149,6 +149,6 @@ def unwrap_4ch_data(d0):
 # Do some stuff
 ##############################################################################
 # Specify directory and datasets
-d0 = r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200710\"
+d0 = r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200710"
  
 unwrap_4ch_data(d0)

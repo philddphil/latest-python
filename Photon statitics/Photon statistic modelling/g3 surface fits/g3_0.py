@@ -232,7 +232,7 @@ def g3_2d_alt(coords, a):
 ts = np.linspace(-201, 201, 201)
 coords = np.meshgrid(ts, ts)
 
-z = 0.7
+z = 0
 x = 1 - z
 
 perm_sum = z * z * z  + \
@@ -243,7 +243,7 @@ perm_sum = z * z * z  + \
     z * x * x + \
     z * x * x  + \
     x * x * x
-print(perm_sum)
+
 
 g1, g2, g3 = g3_2d(Exp_decay, coords)
 f1, f2, f3 = g3_2d(Exp_decay, coords)
@@ -251,17 +251,14 @@ f1 = CW_coh(coords[0])
 f2 = f1
 f3 = f1
 
-print(np.max((g1 + g2 + g3)/3))
-print(np.max((f1 * f2 * f3)))
-
 
 g3_plot = z * z * z * (g1 * g2 * g3) + \
-    z * z * x * (1 / 3) * (g1 + g2 + f3) + \
-    z * z * x * (1 / 3) * (g1 + f2 + g3) + \
-    z * z * x * (1 / 3) * (f1 + g2 + g3) + \
-    z * x * x * (1 / 3) * (g1 + f2 + f3) + \
-    z * x * x * (1 / 3) * (f1 + f2 + g3) + \
-    z * x * x * (1 / 3) * (f1 + g2 + f3) + \
+    z * z * x * g1 + \
+    z * z * x * g2 + \
+    z * z * x * g3 + \
+    z * x * x * f1 + \
+    z * x * x * f2 + \
+    z * x * x * f3 + \
     x * x * x * (f1 * f2 * f3)
 
 ###############################################################################
@@ -286,8 +283,9 @@ ax1.set_ylim(-0.1, 1.1)
 # cb = fig3.colorbar(im3, cax=cax)
 
 ax4, fig4, cs = set_figure('img plot 1', 'τ1 / ns', 'τ2 / ns')
-im4 = plt.imshow(np.flipud(g3_plot), cmap='magma',
-                 extent=extents(ts) + extents(ts))
+im4 = plt.imshow(g3_plot, cmap='magma',
+                 extent=extents(ts) + extents(ts), 
+                 origin='lower',vmin=0,vmax=1)
 ax4.plot(ts, -ts)
 ax4.plot(ts, ts[50] * np.ones(len(ts)))
 divider = make_axes_locatable(ax4)
@@ -302,6 +300,10 @@ fig3.patch.set_facecolor(cs['mnk_dgrey'])
 ax3.set_xlabel('x axis')
 ax3.set_ylabel('y axis')
 # ax3.contour(*coords, g3_1, 50, cmap='magma')
+scattter = ax3.plot(ts, -ts, np.diagonal(np.fliplr(g3_plot)),
+                    color=cs['ggred'], label='')
+scattter = ax3.plot(ts, ts[50] * np.ones(len(ts)), g3_plot[50],
+                    color=cs['ggblue'], label='')
 ax3.plot_surface(*coords, g3_plot, cmap='magma', alpha=0.8)
 norm = plt.Normalize(g3_plot.min(), g3_plot.max())
 # colors = cm.magma(norm(g3_1_a))
@@ -315,7 +317,7 @@ ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 ax3.set_zlim(0, 1)
-ax3.view_init(elev=75, azim=64)
+ax3.view_init(elev=75, azim=-110)
 # save plot ###################################################################
 plt.show()
 # ax2.figure.savefig('funding' + '.png')
