@@ -169,7 +169,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 
 p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200629\Raster scans")
+      r"\SCM Data 20200812\Raster scans")
 
 
 datafiles = glob.glob(p0 + r'\*.txt')
@@ -203,7 +203,7 @@ for i0, v0 in enumerate(datafiles[0:]):
                      extents(x),
                      label=lb,
                      # vmin=np.min(img),
-                     vmax=1e-2 * np.max(img)
+                     vmax=1e-0 * np.max(img)
                      )
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -251,5 +251,5 @@ for i0, v0 in enumerate(datafiles[0:]):
     ax2.figure.savefig(plotname2 + 'dark.png')
     ax2.figure.savefig(plotname2 + 'dark.svg')
     os.chdir(p0)
-    prd_plots.PPT_save_2d_im(fig2, ax2, cbar1, plotname2)
+    PPT_save_2d_im(fig2, ax2, cbar1, plotname2)
 ##############################################################################

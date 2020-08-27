@@ -11,6 +11,7 @@ from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.optimize import curve_fit
+from itertools import combinations
 
 
 ###############################################################################
@@ -169,108 +170,95 @@ def extents(f):
     return [f[0] - delta / 2, f[-1] + delta / 2]
 
 
+# Prepare the directories and channel names
+def prep_dirs_chs(d0):
+    d1 = d0 + r'\py data'
+    d2 = d1 + r'\time difference files'
+    d3 = d1 + r"\arrival time files"
+
+    try:
+        os.mkdir(d1)
+    except OSError:
+        print("Creation of the directory %s failed" % d1)
+    else:
+        print("Successfully created the directory %s " % d1)
+
+    try:
+        os.mkdir(d2)
+    except OSError:
+        print("Creation of the directory %s failed" % d2)
+    else:
+        print("Successfully created the directory %s " % d2)
+
+    try:
+        os.mkdir(d3)
+    except OSError:
+        print("Creation of the directory %s failed" % d2)
+    else:
+        print("Successfully created the directory %s " % d2)
+
+    Chs = ['ch0', 'ch1', 'ch2', 'ch3']
+    Chs_combs = list(set(combinations(Chs, 3)))
+    return d1, d2, d3, Chs_combs
+
+
+def plot_1set_2d_hist(d2, chA, chB, chC):
+  d4 = (d2 + r"\dts " + chA + " & " + chB +
+          " and " + chA + " & " + chC)
+  f0 = d4 + r"\g3_hist.csv"
+  f0 = d4 + r"\g3_hist.csv"
+  f1 = d4 + r"\g3_xbins.csv"
+  f2 = d4 + r"\g3_ybins.csv"
+  f3 = d4 + r"\other_globals_g3.csv"
+
+  hist = np.loadtxt(f0, delimiter=',')
+  print(np.max(hist))
+  x_edges = np.genfromtxt(f1)
+  y_edges = np.genfromtxt(f2)
+
+  bin_w = (x_edges[1] - x_edges[0]) / 2
+
+  ts = np.linspace(x_edges[0] +
+                   bin_w, x_edges[-1] -
+                   bin_w, len(x_edges) - 1)
+
+  total_t, ctsps_0, ctsps_1, ctsps_2 = np.genfromtxt(f3)
+  print('time =', total_t)
+  print('cts 0 =', ctsps_0)
+  print('cts 1 =', ctsps_1)
+  print('cts 2 =', ctsps_2)
+  print('bin_w =', 2 * bin_w)
+
+  # normalise the Glauber function
+  g3s = hist / (ctsps_2 * ctsps_0 * ctsps_1 * 4 * total_t *
+                (2 * bin_w * 1e-9) ** 2)
+  g3s = g3s
+  print('total cps = ', np.round(ctsps_0 + ctsps_1 + ctsps_2))
+
+  ##############################################################################
+  # Plot data
+  ##############################################################################
+
+  # profile plots ##############################################################
+  hist_x, hist_y = np.shape(hist)
+  ax1, fig1, cs = set_figure('profiles', 'time', 'g^3')
+  ax1.plot(ts, hist[int(np.floor(hist_x / 2)), :])
+  ax1.plot(ts, hist[:, int(np.floor(hist_x / 2))], lw=0.5)
+
+  # img plot ###################################################################
+  ax4, fig4, cs = set_figure('image', 'x axis', 'y axis')
+  ax4.plot(ts, g3s[int(np.floor(hist_x / 2)), :], lw=0.5)
+  ax4.plot(g3s[:, int(np.floor(hist_x / 2))], ts, lw=0.5)
+  im4 = plt.imshow(hist, cmap='magma',
+                   extent=extents(x_edges) + extents(y_edges))
+  divider = make_axes_locatable(ax4)
+  cax = divider.append_axes("right", size="5%", pad=0.05)
+  cb = fig4.colorbar(im4, cax=cax)
+  print(np.sum(np.sum(hist)))
+  print(hist[int(np.floor(hist_x / 2)), int(np.floor(hist_x / 2))])
+  PPT_save_2d_im(fig4, ax4, cb, 'image')
+
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200211")
-d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212"
-      r"\g4_1MHzPQ_48dB_cont_snippet_3e6")
-# d0 = (r"C:\local files\Experimental Data\F5 L9 SNSPD Fastcom tech\20200212\
-#   g4_1MHzTxPIC_55dB_cont_snippet_3e6")
-d1 = d0 + r'\Py data'
-f0 = d1 + r"\g3_hist.csv"
-f0 = d1 + r"\g3_hist.csv"
-f1 = d1 + r"\g3_xbins.csv"
-f2 = d1 + r"\g3_ybins.csv"
-f3 = d1 + r"\other_globals_g3.csv"
 
-hist = np.loadtxt(f0, delimiter=',')
-x_edges = np.genfromtxt(f1)
-y_edges = np.genfromtxt(f2)
-
-bin_w = (x_edges[1] - x_edges[0]) / 2
-print(np.min(np.abs(x_edges)))
-print(np.min(np.abs(y_edges)))
-ts = np.linspace(x_edges[0] +
-                 bin_w, x_edges[-1] -
-                 bin_w, len(x_edges) - 1)
-
-total_t, ctsps_0, ctsps_1, ctsps_2 = np.genfromtxt(f3)
-print('time =', total_t)
-print('cts 0 =', ctsps_0)
-print('cts 1 =', ctsps_1)
-print('cts 2 =', ctsps_2)
-print('bin_w =', 2 * bin_w)
-
-# normalise the Glauber function
-g3s = hist / (ctsps_2 * ctsps_0 * ctsps_1 * 4 * total_t *
-              (2 * bin_w * 1e-9) ** 2)
-g3s = g3s
-print('total cps = ', np.round(ctsps_0 + ctsps_1 + ctsps_2))
-
-##############################################################################
-# Fits to data
-##############################################################################
-ts_fit = np.linspace(ts[0], ts[-1], 5000000)
-a = (ctsps_0 + ctsps_1) * 1e-9
-decay_exp = np.exp(-1 * np.abs(ts_fit * a))
-##############################################################################
-# Plot data
-##############################################################################
-
-# profile plots ##############################################################
-hist_x, hist_y = np.shape(hist)
-ax1, fig1, cs = set_figure('profiles', 'time', 'g^3')
-ax1.plot(ts, g3s[int(np.floor(hist_x / 2)), :])
-ax1.plot(ts, g3s[:, int(np.floor(hist_x / 2))], lw=0.5)
-
-# img plot ###################################################################
-ax4, fig4, cs = set_figure('image', 'x axis', 'y axis')
-# ax4.plot(ts, g3s[int(np.floor(hist_x / 2)), :], lw=0.5)
-# ax4.plot(g3s[:, int(np.floor(hist_x / 2))], ts, lw=0.5)
-im4 = plt.imshow(g3s, cmap='magma',
-                 extent=extents(x_edges) + extents(y_edges))
-divider = make_axes_locatable(ax4)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-cb = fig4.colorbar(im4, cax=cax)
-print(np.sum(np.sum(hist)))
-print(hist[int(np.floor(hist_x / 2)), int(np.floor(hist_x / 2))])
-# xyz plot ###################################################################
-# res = len(ts)
-# print(res)
-# coords = np.meshgrid(ts, ts)
-# X = coords[0].ravel()
-# Y = coords[1].ravel()
-# Z = 0 * X
-# dX = 1000 * np.ones((res, res)).ravel()
-# dY = dX
-# dZ = hist.ravel()
-# size = 4
-# ax3, fig3, cs = set_figure()
-# ax3 = fig3.add_subplot(111, projection='3d')
-
-# cmap = cm.get_cmap('magma')  # Get desired colormap - you can change this!
-# max_height = np.max(dZ)   # get range of colorbars so we can normalize
-# min_height = np.min(dZ)
-# # scale each z to [0,1], and get their rgb values
-# rgba = [cmap((k - min_height) / max_height) for k in dZ]
-
-# scatter = ax3.scatter(*coords, hist, '.', s=4, alpha=1.0,
-#                       color=rgba, label='')
-# # contour = ax3.contour(*coords, hist, 100, cmap=cm.magma)
-# # wirefrace = ax3.plot_wireframe(*coords, hist, cmap=cm.magma)
-# # surface = ax3.plot_surface(*coords, hist, cmap=cm.magma)
-# # trisurf = ax3.plot_trisurf(*coords, hist, cmap=cm.jet)
-# # bar3d = ax3.bar3d(X, Y, Z, dX, dY, dZ, color=rgba, alpha=0.5)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# # ax3.set_zlim(min_value, max_value)
-
-# show / save plots ##########################################################
-plt.show()
-
-PPT_save_2d_im(fig4, ax4, cb, 'image')

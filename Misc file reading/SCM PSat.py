@@ -2,6 +2,7 @@
 # Import some libraries
 ##############################################################################
 import os
+import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
@@ -65,6 +66,18 @@ def ggplot():
     plt.rcParams['axes.titlepad'] = 6
 
 
+# Set up figure for plotting #################################################
+def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
+    ggplot()
+    cs = palette()
+    fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
+    ax1 = fig1.add_subplot(111)
+    fig1.patch.set_facecolor(cs['mnk_dgrey'])
+    ax1.set_xlabel(xaxis)
+    ax1.set_ylabel(yaxis)
+    return ax1, fig1, cs
+
+
 # Save 2d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_2d(fig, ax, name):
 
@@ -94,71 +107,67 @@ def PPT_save_2d(fig, ax, name):
             print('Base + # exists')
 
 
-# Saturation curve ############################################################
+# Saturation curve ###########################################################
 def I_sat(x, I_sat, P_sat, P_bkg, bkg):
     y = (I_sat * x) / (P_sat + x) + P_bkg * x + bkg
     return y
 
 
+# Plot the I sat curve for data stored in file. Note plt.show() ##############
+def I_sat_plot(file, title=''):
+    data = np.genfromtxt(file, delimiter=',', skip_header=0)
+    Ps = data[0]
+    kcps = data[1] / 1000
+
+    initial_guess = (1.5e2, 1e-1, 1e3, 1e0)
+    popt, _ = opt.curve_fit(I_sat, Ps, kcps, p0=initial_guess,
+                            bounds=((0, 0, 0, 0),
+                                    (np.inf, np.inf, np.inf, np.inf)))
+
+    Ps_fit = np.linspace(np.min(Ps), np.max(Ps), 1000)
+    Isat_fit = I_sat(Ps_fit, *popt)
+
+    Sat_cts = np.round(popt[0])
+    P_sat = np.round(popt[1] * 1e3, 3)
+    Prop_bkg = np.round(popt[2])
+    bkg = np.round(popt[3])
+
+    lb0 = 'fit'
+    lb1 = 'I$_{sat}$ = ' + str(Sat_cts) + 'kcps'
+    lb2 = 'bkg = ' + str(Prop_bkg) + 'P + ' + str(bkg)
+    lb3 = 'I$_{sat}$ = ' + str(Sat_cts) + 'kcps, ' + \
+        'P$_{sat}$ = ' + str(P_sat) + 'mW'
+
+    ##########################################################################
+    # Plot some figures
+    ##########################################################################
+    ax1, fig1, cs = set_figure(name='figure',
+                               xaxis='Power (mW)', 
+                               yaxis='kcounts per secound', 
+                               size=4)
+
+    plt.plot(Ps, kcps, 'o:', label='data')
+    plt.plot(Ps_fit, Isat_fit, '-', label=lb0)
+    plt.plot(Ps_fit, I_sat(Ps_fit, popt[0], popt[1], 0, popt[3]),
+             '--', label=lb1)
+    plt.plot(Ps_fit, I_sat(Ps_fit, 0, popt[1], popt[2], popt[3]),
+             '--', label=lb2)
+
+    ax1.legend(loc='lower right', fancybox=True, framealpha=1)
+
+    plt.title(lb3)
+    plt.tight_layout()
+    # plt.show()
+    ax1.legend(loc='lower right', fancybox=True,
+               facecolor=(1.0, 1.0, 1.0, 0.0))
+    PPT_save_2d(fig1, ax1, 'Psat1')
+    plt.close(fig1)
+
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements") +\
-    (r"\SCM Data 20200309\PSats")
-f0 = r"\10Mar20-001 - Peak3_Isat_1.txt"
-
-data = np.genfromtxt(p0 + f0, delimiter=',', skip_header=0)
-
-with open(p0 + f0) as f:
-    content = f.readlines()
-peakxy = content[0].rstrip()
-Ps = data[0]
-kcps = data[1] / 1000
-
-initial_guess = (1.5e2, 1e-1, 1e3, 1e0)
-popt, _ = opt.curve_fit(I_sat, Ps, kcps, p0=initial_guess,
-                        bounds=((0, 0, 0, 0),
-                                (np.inf, np.inf, np.inf, np.inf)))
-
-Ps_fit = np.linspace(np.min(Ps), np.max(Ps), 1000)
-Isat_fit = I_sat(Ps_fit, *popt)
-
-Sat_cts = np.round(popt[0])
-P_sat = np.round(popt[1] * 1e3, 3)
-Prop_bkg = np.round(popt[2])
-bkg = np.round(popt[3])
-
-lb0 = 'fit'
-lb1 = 'I$_{sat}$ = ' + str(Sat_cts) + 'kcps'
-lb2 = 'bkg = ' + str(Prop_bkg) + 'P + ' + str(bkg)
-lb3 = 'I$_{sat}$ = ' + str(Sat_cts) + 'kcps, ' + \
-    'P$_{sat}$ = ' + str(P_sat) + 'mW'
-
-
-##############################################################################
-# Plot some figures
-##############################################################################
-size = 2.5
-fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-ggplot()
-cs = palette()
-
-ax2 = fig2.add_subplot(1, 1, 1)
-fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('Inferred power (mW)')
-ax2.set_ylabel('kcounts per secound')
-plt.plot(Ps, kcps, 'o:', label='data')
-plt.plot(Ps_fit, Isat_fit, '-', label=lb0)
-plt.plot(Ps_fit, I_sat(Ps_fit, popt[0], popt[1], 0, popt[3]),
-         '--', label=lb1)
-plt.plot(Ps_fit, I_sat(Ps_fit, 0, popt[1], popt[2], popt[3]),
-         '--', label=lb2)
-
-ax2.legend(loc='lower right', fancybox=True, framealpha=1)
-
-plt.title(lb3)
-plt.tight_layout()
-plt.show()
-os.chdir(p0)
-ax2.legend(loc='lower right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-PPT_save_2d(fig2, ax2, 'peak3 0.png')
+d0 = r'C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20200709\Sequences\09Jul20-006\0\PSats'
+fs = glob.glob(d0+r'\*.txt')
+f0 = fs[0]
+os.chdir(d0)
+I_sat_plot(f0)

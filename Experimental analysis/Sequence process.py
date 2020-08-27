@@ -2,6 +2,7 @@
 # Import some libraries
 ##############################################################################
 import os
+import re
 import sys
 import glob
 import matplotlib
@@ -14,9 +15,6 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from itertools import permutations
-from itertools import combinations
 
 
 ##############################################################################
@@ -139,11 +137,9 @@ def PPT_save_2d(fig, ax, name):
             print('Base + # exists')
 
 
-# Prepare the directories and channel names
+# Prepare the directories and channel names ##################################
 def prep_dirs_chs(d0):
-    d1 = d0 + r'\py data'
-    d2 = d1 + r'\time difference files'
-    d3 = d1 + r"\arrival time files"
+    d1 = d0 + r'\time difference files'
 
     try:
         os.mkdir(d1)
@@ -152,26 +148,10 @@ def prep_dirs_chs(d0):
     else:
         print("Successfully created the directory %s " % d1)
 
-    try:
-        os.mkdir(d2)
-    except OSError:
-        print("Creation of the directory %s failed" % d2)
-    else:
-        print("Successfully created the directory %s " % d2)
-
-    try:
-        os.mkdir(d3)
-    except OSError:
-        print("Creation of the directory %s failed" % d2)
-    else:
-        print("Successfully created the directory %s " % d2)
-
-    Chs = ['ch0', 'ch1', 'ch2', 'ch3']
-    Chs_combs = list(set(combinations(Chs, 3)))
-    return d1, d2, d3, Chs_combs
+    return d1
 
 
-# Check if string is number
+# Check if string is number ##################################################
 def is_number(s):
     try:
         float(s)
@@ -240,8 +220,10 @@ def I_sat_plot(file, directory=None, title=''):
     os.chdir(directory)
     PPT_save_2d(fig1, ax1, 'Isat')
     plt.close(fig1)
+    return Sat_cts, P_sat
 
 
+# Plot the x/y tracking sweep ################################################
 def plot_int_profile(directory):
     csvs = glob.glob(directory + r'\*.csv')
     x_data = np.genfromtxt(csvs[0], delimiter=',')
@@ -266,54 +248,274 @@ def plot_int_profile(directory):
     plt.close(fig1)
 
 
+# Run start-stop to get dt list & save #######################################
+def gen_dts_from_tts(d0, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
+
+    # d0 is the directory containing the arrival time files
+
+    d1 = os.path.split(d0)[0] + r"\time difference files"
+    # d1 is ths directory to save the dt files to
+    os.chdir(d0)
+
+    datafiles0 = glob.glob(d0 + r'\*' + chA + r'*')
+    datafiles1 = glob.glob(d0 + r'\*' + chB + r'*')
+
+    d3 = d1 + r"\dts " + chA + " & " + chB
+    a = re.findall('\d+', chA)[0]
+    b = re.findall('\d+', chB)[0]
+    try:
+        os.mkdir(d3)
+    except OSError:
+        print("Creation of the directory %s failed" % d3)
+    else:
+        print("Successfully created the directory %s " % d3)
+
+    last_file = np.min([len(datafiles0), len(datafiles1)])
+    print(last_file)
+
+    dt_chs = 'dts for chs ' + a + b
+    # define a ROI range to check for co-incidences over
+    glob_dts = []
+    global_cps0 = []
+    global_cps1 = []
+    global_t = 0
+    for i0, v0 in enumerate(datafiles0):
+        os.chdir(d0)
+        # print output for keeping track of progress
+        print('calc', dt_chs, 'file', i0, 'of', len(datafiles0))
+        tta = np.loadtxt(datafiles0[i0])
+        ttb = np.loadtxt(datafiles1[i0])
+
+        # convert to ns
+        # note the conversion factor is 1e2 for HH & 1e-1 for FCT
+        if TCSPC == 'HH':
+            tt0 = [j0 * 1e2 for j0 in tta]
+            tt1 = [j0 * 1e2 for j0 in ttb]
+        elif TCSPC == 'FCT':
+            tt0 = [j0 * 1e-1 for j0 in tta]
+            tt1 = [j0 * 1e-1 for j0 in ttb]
+        else:
+            print('Choose hardware, HH or FCT')
+            break
+
+        # calc total time and # counts, count rates & gradient functions
+        tot_t = np.max([np.max(tt0), np.max(tt1)]) * 1e-9
+        global_t += tot_t
+        c0 = len(tt0)
+        c1 = len(tt1)
+
+        cps0 = c0 / tot_t
+        cps1 = c1 / tot_t
+
+        global_cps0.append(cps0)
+        global_cps1.append(cps1)
+
+        dydx0 = np.max(tt0) / len(tt0)
+        dydx1 = np.max(tt1) / len(tt1)
+
+        #######################################################################
+        # Perform start-stop measurements
+        #######################################################################
+        q, glob_dts = start_stop(
+            tt0, tt1, dydx1, t_lim, i0, d3, glob_dts, dt_chs)
+
+    print('saving final dts')
+    os.chdir(d3)
+    dt_file = dt_chs + str(q - 1) + '.csv'
+    np.savetxt(dt_file, glob_dts, delimiter=",")
+    global_dts = []
+    global_cps0 = np.mean(global_cps0)
+    global_cps1 = np.mean(global_cps1)
+
+    ##########################################################################
+    # Save global Histogram values & info
+    ##########################################################################
+    np.savetxt("other_global.csv", [global_t, global_cps0, global_cps1],
+               delimiter=',')
+
+
+# Generate histogram vals and bins from dt list & save #######################
+def gen_hist_cvs_from_dts(d1, res=0.4, t_range=25100, chA='ch0', chB='ch1'):
+    d3 = d1 + r"\dts " + chA + " & " + chB
+    os.chdir(d3)
+    a = re.findall('\d+', chA)[0]
+    b = re.findall('\d+', chB)[0]
+    print(d3)
+    datafiles = glob.glob(d3 + r'\dts for chs ' + a + b + r'*')
+    print(d3 + r'\dts for chs' + a + b + r'*')
+    print(len(datafiles))
+    nbins = int(2 * t_range / res + 1)
+    edges = np.linspace(-t_range, t_range, nbins + 1)
+    hists = np.zeros(nbins)
+
+    for i0, v0 in enumerate(datafiles[0:]):
+        print('saving hist & bins csv - ', i0, 'of', len(datafiles))
+        dts = np.genfromtxt(v0)
+        hist, bin_edges = np.histogram(dts, edges)
+        hists += hist
+
+    np.savetxt("g2_hist.csv", hists, delimiter=",")
+    np.savetxt("g2_bins.csv", bin_edges, delimiter=",")
+
+
+# Plot g2 from histogram of counts ###########################################
+def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
+    d3 = d2 + r"\dts " + chA + " & " + chB
+    f0 = d3 + r"\g2_hist.csv"
+    f1 = d3 + r"\g2_bins.csv"
+    f2 = d3 + r"\other_global.csv"
+
+    hist = np.genfromtxt(f0)
+    bin_edges = np.genfromtxt(f1)
+
+    bin_w = (bin_edges[1] - bin_edges[0]) / 2
+
+    ts = np.linspace(bin_edges[1], bin_edges[-1] -
+                     bin_w, len(bin_edges) - 1)
+
+    total_t, ctsps_0, ctsps_1 = np.genfromtxt(f2)
+    g2s = hist / (ctsps_0 * ctsps_1 * 1e-9 * total_t * 2 * bin_w)
+
+
+    ##########################################################################
+    # Fits to data
+    ##########################################################################
+    ts_fit = np.linspace(ts[0], ts[-1], 500000)
+    a = (ctsps_0 + ctsps_1) * 1e-9
+    decay_exp = np.exp(-1 * np.abs(ts_fit * a / 3))
+    ##########################################################################
+    # Plot data
+    ##########################################################################
+
+    os.chdir(d3)
+
+    # xy plot ################################################################
+    ax1, fig1, cs = set_figure(
+        name='figure', xaxis='τ, ns', yaxis='#', size=4)
+    plt.title(chA + ' & ' + chB)
+    ax1.set_xlim(-1 * xlim, xlim)
+
+    ax1.plot(ts, hist,
+             '.-', markersize=5,
+             lw=0.5,
+             alpha=1, label='')
+    ax1.plot(ts_fit, decay_exp)
+    # ax1.set_yscale('log')
+    # plt.show()
+    plotname = 'HBT hist'
+    os.chdir(os.path.split(d1)[0])
+    PPT_save_2d(fig1, ax1, plotname)
+    plt.close(fig1)
+
+
+# Set up figure for plotting #################################################
+def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
+    loc = 1000
+    # pad stop channel for region searching
+    tt_pad = np.pad(stops, loc + 1)
+    # loop through tt0_ns as our start channel
+    for i1, v1 in enumerate(starts[0:]):
+
+        # trunkate full tt1_ns list to a region of 2 * locale values around
+        # the same time as the value v1 is (need to use dydx1 to convert)
+
+        # 1. find the corresponding index in tt1_ns
+        i_tt1 = int(v1 / dydx1)
+
+        # 2.  specify locale around idx to check - get both times & idx vals
+        tt_local = stops[i_tt1:i_tt1 + 2 * loc]
+        x_local = np.arange(i_tt1, i_tt1 + 2 * loc) - loc + 1
+
+        # substract ith value of tt0_ns (v1) from tt1_ns & use abs operator
+        tt_temp = np.abs(tt_local - v1)
+
+        # find idx of min
+        try:
+            dt_idx = np.argmin(tt_temp)
+        except:
+            break
+
+        # find time difference of min value
+        dt = tt_local[dt_idx] - v1
+
+        # check if value is of interest
+        if -t_range < dt < t_range:
+            glob_dts.append(dt)
+
+    (q, r) = divmod(i0, 10)
+    if r == 0 and q != 0:
+        os.chdir(d3)
+        # print('saving dts')
+        dt_file = dt_chs + ' ' + str(q - 1) + '.csv'
+        np.savetxt(dt_file, glob_dts, delimiter=",")
+        print('length = ', len(glob_dts))
+        glob_dts = []
+    return q, glob_dts
+
+
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0\py data\arrival time files 0\ch1 data0"
-p1 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0\py data\arrival time files\ch1 f.npy"
-p2 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0\py data\arrival time files 0 npy\ch1 slice 1.npy"
-p3 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0\TEST.lst"
-p4 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0\ch2.txt"
-
-data0 = np.genfromtxt(p0)
-data1 = np.load(p1, allow_pickle=True)
-data2 = np.load(p2, allow_pickle=True)
-
-# f0 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0\py data\time difference files\dts ch0 & ch1\dts ch0 ch1 0.npy"
-# dt0 = np.load(f0, allow_pickle=True)
-
-# tot_lines = sum(1 for line in open(p3))
-# print('Total lines in .lst = ', tot_lines)
+d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
+      r"\SCM Data 20200710\Sequences\10Jul20-001")
+os.chdir(d0)
+f = open('Summary.txt', 'w')
+all_dirs = glob.glob(d0 + '\*')
+peak_dirs = []
+for i0, v0 in enumerate(all_dirs):
+    head, tail = os.path.split(v0)
+    if is_number(tail) == True:
+        peak_dirs.append(v0)
 
 
-tot_lines_ch1 = sum(1 for line in open(p4))
-print('Total lines in ch1 = ', tot_lines_ch1)
+for i0, v0 in enumerate(peak_dirs):
+    # print(v0)
+    peak_number = os.path.split(v0)[1]
+    # Plot profiles
+    os.chdir(v0)
+    plot_int_profile(v0)
+    print('###### Peak no.', peak_number, '##############################')
 
-tot_lines_ch1_uw = 0
-for i0, v0 in enumerate(data1):
-  tot_lines_ch1_uw += len(data1[i0])
-print('Total unwrapped lines in ch1 = ', tot_lines_ch1_uw)
-print('Total resets in ch1', len(data1))
+    # Plot ISat curve
+    Psat_dir = v0 + r'\PSats'
+    os.chdir(Psat_dir)
+    fs = glob.glob(Psat_dir + r'\*.txt')
+    f0 = fs[0]
+    Sat_cts, P_sat = I_sat_plot(f0, v0)
+    s0 = ('Peak '+ str(peak_number) + ' Saturation counts = ' + str(Sat_cts) + 'kps')
+    s1 = ('Peak '+ str(peak_number) + ' Saturation power = ' + str(P_sat) + 'mW')
+    print(s0)
+    f.write(s0 + '\n')
+    print(s1)
+    f.write(s1+ '\n')
+    # Process and plot HBT
+    if Sat_cts < 30 or P_sat > 10:
+      print('not suitable for HBT')
+      f.write('Peak '+ str(peak_number) + ' not suitable for HBT'+ '\n')
+    else:
+      d1 = prep_dirs_chs(v0)
+      d0 = glob.glob(v0 + r'\HH*')[0]
+      gen_dts_from_tts(d0, 'HH', 100000)
+      gen_hist_cvs_from_dts(d1, 10, 2000)
+      g2_plot_from_hist_cvs(d1, 2000)
+      f.write('Peak '+ str(peak_number) + ' HBT plotted'+ '\n')
+f.close()
 
-print('data0', len(data0))
-print(data0[0:5])
-print('data1', len(data1))
-print(data1[0][0:5])
-print('data2', len(data2))
-print(data2[0][0:5])
 ##############################################################################
 # Plot some figures
 ##############################################################################
-# os.chdir(r"C:\local files\Python\Plots")
+os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
 
 # ax1, fig1, cs = set_figure(name='figure',
-#                            xaxis='wavelengths (λ) / nm',
-#                            yaxis='a.u',
+#                            xaxis='τ / ns',
+#                            yaxis='probability of detection',
 #                            size=4)
-# ax1.plot(wavelengths_nm, I, c=cs['ggred'])
+# ax1.plot(x, y1, c=cs['ggdred'])
 # ax1.plot(x, y2, c=cs['ggdred'])
-
+# ax1.plot(t, SPS2)
+# ax1.plot(t, SPS3)
+# ax1.plot(t, SPS4)
 # ax1.set_ylim(-0.1, 1.1)
 # plt.close(fig1)
 # fig1.tight_layout()
@@ -387,7 +589,7 @@ print(data2[0][0:5])
 # cb4 = fig4.colorbar(im4, cax=cax)
 
 # save plot ###################################################################
-# ax1.figure.savefig('spec.svg')
+# ax1.figure.savefig('g2s.svg')
 # plot_file_name = plot_path + 'plot2.png'
 # ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'spec')
+# PPT_save_2d(fig1, ax1, 'g2')
