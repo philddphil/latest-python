@@ -158,9 +158,9 @@ def PPT_save_2d_im(fig, ax, cb, name):
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
             ax.figure.savefig(name + '_' + str(app_no))
             f_exist = False
-            print(' # = ' + str(app_no)) 
+            print(' # = ' + str(app_no))
         else:
-            app_no = app_no + 1     
+            app_no = app_no + 1
             print('Base + # exists')
 
 
@@ -168,17 +168,19 @@ def PPT_save_2d_im(fig, ax, cb, name):
 # Def some functions
 ##############################################################################
 
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200812\Raster scans")
+p0 = r'C:\Data\SCM\SCM Data 20200908'
+# p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
+      # r"\SCM Data 20200812\Raster scans")
 
+p1 = p0 + r'\Raster scans'
 
-datafiles = glob.glob(p0 + r'\*.txt')
+datafiles = glob.glob(p1 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
 
-size=5
+size = 5
 for i0, v0 in enumerate(datafiles[0:]):
     print(os.path.split(v0)[1])
-    
+
     x, y, img = load_SCM_F5L10(v0)
     img = img
     log_img = np.log(img)
@@ -199,8 +201,7 @@ for i0, v0 in enumerate(datafiles[0:]):
                                yaxis='y distance (μm)',
                                size=5)
     im1 = plt.imshow(np.flipud(img), cmap='magma',
-                     extent=extents(y) +
-                     extents(x),
+                     extent=extents(y) + extents(x),
                      label=lb,
                      # vmin=np.min(img),
                      vmax=1e-0 * np.max(img)

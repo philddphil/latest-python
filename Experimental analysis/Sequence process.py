@@ -168,7 +168,7 @@ def I_sat(x, I_sat, P_sat, P_bkg, bkg):
 
 # Plot the I sat curve for data stored in file. Note plt.show() ##############
 def I_sat_plot(file, directory=None, title=''):
-    if directory == None:
+    if directory is None:
         head, tail = os.path.split(v0)
         directory = tail
 
@@ -376,7 +376,6 @@ def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
     total_t, ctsps_0, ctsps_1 = np.genfromtxt(f2)
     g2s = hist / (ctsps_0 * ctsps_1 * 1e-9 * total_t * 2 * bin_w)
 
-
     ##########################################################################
     # Fits to data
     ##########################################################################
@@ -456,15 +455,14 @@ def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200710\Sequences\10Jul20-001")
+d0 = (r"C:\Data\SCM\SCM Data 20200909\Sequences\09Sep20-001")
 os.chdir(d0)
 f = open('Summary.txt', 'w')
-all_dirs = glob.glob(d0 + '\*')
+all_dirs = glob.glob(d0 + r'\*')
 peak_dirs = []
 for i0, v0 in enumerate(all_dirs):
     head, tail = os.path.split(v0)
-    if is_number(tail) == True:
+    if is_number(tail) is True:
         peak_dirs.append(v0)
 
 
@@ -481,24 +479,34 @@ for i0, v0 in enumerate(peak_dirs):
     os.chdir(Psat_dir)
     fs = glob.glob(Psat_dir + r'\*.txt')
     f0 = fs[0]
-    Sat_cts, P_sat = I_sat_plot(f0, v0)
-    s0 = ('Peak '+ str(peak_number) + ' Saturation counts = ' + str(Sat_cts) + 'kps')
-    s1 = ('Peak '+ str(peak_number) + ' Saturation power = ' + str(P_sat) + 'mW')
+    Sat_kcts, P_sat = I_sat_plot(f0, v0)
+    s0 = ('Peak ' + str(peak_number) +
+          ' Saturation counts = ' + str(Sat_kcts) + 'kps')
+    s1 = ('Peak ' + str(peak_number) +
+          ' Saturation power = ' + str(P_sat) + 'mW')
     print(s0)
     f.write(s0 + '\n')
     print(s1)
-    f.write(s1+ '\n')
+    f.write(s1 + '\n')
+    d0s = glob.glob(v0 + r'\HH*')
+    plots = glob.glob(v0 + r"\HBT hist*")
     # Process and plot HBT
-    if Sat_cts < 30 or P_sat > 10:
-      print('not suitable for HBT')
-      f.write('Peak '+ str(peak_number) + ' not suitable for HBT'+ '\n')
+    if not d0s:
+        print('not suitable for HBT')
+        f.write('Peak ' + str(peak_number) + ' not suitable for HBT' + '\n')
+    elif plots:
+        print('HBT already exists')
+    elif Sat_kcts < 30:
+        print('Too few counts')
+        f.write('Peak ' + str(peak_number)
+                + ' not suitable for HBT, too dim' + '\n')
     else:
-      d1 = prep_dirs_chs(v0)
-      d0 = glob.glob(v0 + r'\HH*')[0]
-      gen_dts_from_tts(d0, 'HH', 100000)
-      gen_hist_cvs_from_dts(d1, 10, 2000)
-      g2_plot_from_hist_cvs(d1, 2000)
-      f.write('Peak '+ str(peak_number) + ' HBT plotted'+ '\n')
+        d1 = prep_dirs_chs(v0)
+        d0 = d0s[0]
+        gen_dts_from_tts(d0, 'HH', 100000)
+        gen_hist_cvs_from_dts(d1, 2, 1000)
+        g2_plot_from_hist_cvs(d1, 1000)
+        f.write('Peak ' + str(peak_number) + ' HBT plotted' + '\n')
 f.close()
 
 ##############################################################################
