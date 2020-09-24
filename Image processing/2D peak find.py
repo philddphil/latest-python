@@ -197,18 +197,17 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 # File paths
 ##############################################################################
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200629\Raster scans\30Jun20 scan-001.txt")
+p0 = (r"C:\Data\SCM\SCM Data 20200923\Raster scans\23Sep20 scan-004.txt")
 
 
 ##############################################################################
 # Image processing to retrieve peak locations
 ##############################################################################
-Ulim = 35000
+Ulim = 13000
 clim = [0, Ulim]
 
 x_img, y_img, img = load_SCM_F5L10(p0)
-y_img = y_img[::-1] 
+y_img = y_img[::-1]
 krnl_size = 10
 x_k = np.arange(krnl_size)
 y_k = np.arange(krnl_size)
@@ -261,8 +260,8 @@ for x, y in centroids_px:
 ax1, fig1, cs = set_figure('fig1', size=7)
 im1 = plt.imshow(np.log(img), cmap='magma',
                  extent=extents(x_img) + extents(y_img),
-                 vmin=np.min(np.log(img)),
-                 vmax=0.9 * np.max(np.log(img)),
+                 vmin=6,
+                 vmax=9,
                  origin='lower'
                  )
 
@@ -271,12 +270,14 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar1 = fig1.colorbar(im1, cax=cax)
 cbar1.ax.get_yaxis().labelpad = 15
 cbar1.set_label('log counts / second', rotation=270)
-
+peak_number = 0
 for x, y in centroids_img:
+    peak_number += 1
     ax1.plot(x, y, 'o',
              ms=15,
-             mec=cs['ggdred'],
+             mec=cs['mnk_green'],
              fillstyle='none')
+    ax1.text(x, y, '  ' + str(peak_number), c=cs['mnk_green'])
 
 ax2, fig2, cs = set_figure('fig2',  size=7)
 im2 = plt.imshow(img, cmap='magma',

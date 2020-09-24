@@ -455,7 +455,7 @@ def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Data\SCM\SCM Data 20200909\Sequences\09Sep20-001")
+d0 = (r"C:\Data\SCM\SCM Data 20200923\Sequences\23Sep20-009")
 os.chdir(d0)
 f = open('Summary.txt', 'w')
 all_dirs = glob.glob(d0 + r'\*')
@@ -496,7 +496,7 @@ for i0, v0 in enumerate(peak_dirs):
         f.write('Peak ' + str(peak_number) + ' not suitable for HBT' + '\n')
     elif plots:
         print('HBT already exists')
-    elif Sat_kcts < 30:
+    elif Sat_kcts < 3:
         print('Too few counts')
         f.write('Peak ' + str(peak_number)
                 + ' not suitable for HBT, too dim' + '\n')
@@ -512,7 +512,6 @@ f.close()
 ##############################################################################
 # Plot some figures
 ##############################################################################
-os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
 
 # ax1, fig1, cs = set_figure(name='figure',

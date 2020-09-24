@@ -168,7 +168,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 # Def some functions
 ##############################################################################
 
-p0 = r'C:\Data\SCM\SCM Data 20200908'
+p0 = r'C:\Data\SCM\SCM Data 20200923'
 # p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       # r"\SCM Data 20200812\Raster scans")
 
@@ -176,7 +176,7 @@ p1 = p0 + r'\Raster scans'
 
 datafiles = glob.glob(p1 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
-
+print(datafiles)
 size = 5
 for i0, v0 in enumerate(datafiles[0:]):
     print(os.path.split(v0)[1])
@@ -203,7 +203,7 @@ for i0, v0 in enumerate(datafiles[0:]):
     im1 = plt.imshow(np.flipud(img), cmap='magma',
                      extent=extents(y) + extents(x),
                      label=lb,
-                     # vmin=np.min(img),
+                     vmin=np.min(img),
                      vmax=1e-0 * np.max(img)
                      )
     divider = make_axes_locatable(ax1)
@@ -214,8 +214,6 @@ for i0, v0 in enumerate(datafiles[0:]):
     plt.tight_layout()
     plt.show()
     os.chdir(p0)
-    ax1.figure.savefig(plotname1 + 'dark.svg')
-    ax1.figure.savefig(plotname1 + 'dark.png')
     PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
 
     # plt.axis('off')
@@ -238,8 +236,8 @@ for i0, v0 in enumerate(datafiles[0:]):
                      extent=extents(y) +
                      extents(x),
                      label=lb,
-                     vmin=np.min(log_img),
-                     vmax=1 * np.max(log_img)
+                     vmin=6,
+                     vmax=9
                      )
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -249,8 +247,6 @@ for i0, v0 in enumerate(datafiles[0:]):
     cbar2.set_label('log [counts / second]', rotation=270)
     plt.tight_layout()
     plt.show()
-    ax2.figure.savefig(plotname2 + 'dark.png')
-    ax2.figure.savefig(plotname2 + 'dark.svg')
     os.chdir(p0)
     PPT_save_2d_im(fig2, ax2, cbar1, plotname2)
 ##############################################################################
