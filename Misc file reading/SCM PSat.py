@@ -142,8 +142,8 @@ def I_sat_plot(file, title=''):
     # Plot some figures
     ##########################################################################
     ax1, fig1, cs = set_figure(name='figure',
-                               xaxis='Power (mW)', 
-                               yaxis='kcounts per secound', 
+                               xaxis='Power (mW)',
+                               yaxis='kcounts per secound',
                                size=4)
 
     plt.plot(Ps, kcps, 'o:', label='data')
@@ -163,11 +163,13 @@ def I_sat_plot(file, title=''):
     PPT_save_2d(fig1, ax1, 'Psat1')
     plt.close(fig1)
 
+
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = r'C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20200709\Sequences\09Jul20-006\0\PSats'
-fs = glob.glob(d0+r'\*.txt')
+d0 = (r'C:\local files\Experimental Data\F5 L10 Confocal measurements'
+      r'\SCM Data 20200709\Sequences\09Jul20-006\0\PSats')
+fs = glob.glob(d0 + r'\*.txt')
 f0 = fs[0]
 os.chdir(d0)
 I_sat_plot(f0)
