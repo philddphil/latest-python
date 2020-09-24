@@ -169,7 +169,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 
 p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200812\Raster scans")
+      r"\SCM Data 20200908\Raster scans")
 
 
 datafiles = glob.glob(p0 + r'\*.txt')

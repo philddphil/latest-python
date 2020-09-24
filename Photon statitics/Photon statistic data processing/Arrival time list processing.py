@@ -112,7 +112,7 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
 
 # Set up figure for plotting #################################################
 def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
-	loc = 100
+	loc = 1000
 	# pad stop channel for region searching
 	tt_pad = np.pad(stops, loc + 1)
 	# loop through tt0_ns as our start channel
@@ -305,9 +305,10 @@ def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
 
 	# xy plot ################################################################
 	ax1, fig1, cs = set_figure(
-		name='figure', xaxis='τ, ns', yaxis='g2s', size=4)
+		name='figure', xaxis='τ, ns', yaxis='hist', size=4)
 	plt.title(chA + ' & ' + chB)
 	ax1.set_xlim(-1 * xlim, xlim)
+	ax1.set_ylim(-0.1*np.max(hist), 1.1*np.max(hist))
 
 	ax1.plot(ts, hist,
 			 '.-', markersize=5,
@@ -315,7 +316,7 @@ def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
 			 alpha=1, label='')
 	# ax1.set_yscale('log')
 	# plt.show()
-	plotname = 'g2s'
+	plotname = 'hist'
 	PPT_save_2d(fig1, ax1, plotname)
 	plt.close(fig1)
 
@@ -557,15 +558,15 @@ def prep_dirs_chs(d0):
 ##############################################################################
 # Import data (saved by python code filter data.py)
 ##############################################################################
-d0 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\0"
+d0 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\1"
 d1, d2, d3, Chs_combs = prep_dirs_chs(d0)
 
-# proc_lst(d0)
-# unwrap_4ch_data(d0)
+proc_lst(d0)
+unwrap_4ch_data(d0)
 
 for i0, v0 in enumerate(Chs_combs):
 	chA, chB = v0[0:2]
 	print('channels:', chA, ' & ', chB)
-	# gen_dts_from_tts(d2, 'FCT', 100000, chA, chB)
-	gen_hist_csv_from_dts(d2, 0.4, 100000, chA, chB)
+	gen_dts_from_tts(d2, 'FCT', 100000, chA, chB)
+	gen_hist_csv_from_dts(d2, 0.1, 100000, chA, chB)
 	g2_plot_from_hist_cvs(d2, 200, chA, chB)

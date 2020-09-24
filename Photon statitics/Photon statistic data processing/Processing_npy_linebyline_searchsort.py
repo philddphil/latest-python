@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from itertools import combinations
 
 
-# Prepare the directories and channel names
+# Prepare the directories and channel names ##################################
 def prep_dirs_chs(d0):
     d1 = d0 + r'\py data'
     d2 = d1 + r'\time difference files'
@@ -20,23 +20,18 @@ def prep_dirs_chs(d0):
     try:
         os.mkdir(d1)
     except OSError:
-        print("Creation of the directory %s failed" % d1)
     else:
-        print("Successfully created the directory %s " % d1)
-
+ 
     try:
         os.mkdir(d2)
     except OSError:
-        print("Creation of the directory %s failed" % d2)
     else:
-        print("Successfully created the directory %s " % d2)
 
     try:
         os.mkdir(d3)
     except OSError:
-        print("Creation of the directory %s failed" % d2)
     else:
-        print("Successfully created the directory %s " % d2)
+
 
     Chs = ['ch0', 'ch1', 'ch2', 'ch3']
     Chs_combs = list(set(combinations(Chs, 2)))
@@ -62,7 +57,6 @@ def proc_lst(d0):
             current_line += 1
             if '[DATA]' in line:
                 data_start = current_line
-                print('Data starts at line', current_line)
             if current_line > data_start:
                 missed_counts = 0
                 line_hex = line.rstrip('\n')
@@ -83,7 +77,6 @@ def proc_lst(d0):
                         f4.write(str(t_int) + '\n')
                 except:
                     missed_counts += 1
-                    print(missed_counts, '@', line, 'hex ', line_hex)
                     pass
     f1.close()
     f2.close()
@@ -147,7 +140,7 @@ def unwrap_4ch_data(d0):
 
 
 # Generate histogram vals and bins from dt list & save #######################
-def gen_dts_from_tts(d2, d3, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
+def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
     os.chdir(d3)
     file_str = r"\dts " + chA + " & " + chB
@@ -156,9 +149,7 @@ def gen_dts_from_tts(d2, d3, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
     try:
         os.mkdir(d_dt)
     except OSError:
-        print("Creation of the directory %s failed" % d2)
     else:
-        print("Successfully created the directory %s " % d2)
 
     dts = []
     global_cps0 = []
@@ -179,7 +170,7 @@ def gen_dts_from_tts(d2, d3, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
         TTs = [TT0, TT1]
         TTs.sort(key=len)
         print(len(TT0),len(TT1))
-        for i1, v1 in enumerate(TTs[0]):
+        for i1, v1 in enumerate(TTs[0][0]):
             
             # convert to ns
             # note the conversion factor is 1e2 for HH & 1e-1 for FCT
@@ -205,7 +196,7 @@ def gen_dts_from_tts(d2, d3, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
             global_cps1.append(cps1)
 
             # calculate closest values
-            dts = closest_val(tt0, tt1, dts, t_lim)
+            dts = closest_val(tt0, tt1, dts)
 
             (q, r) = divmod(i1, 10000)
             if r == 0 and q != 0:
@@ -219,7 +210,6 @@ def gen_dts_from_tts(d2, d3, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
     os.chdir(d_dt)
     dt_file = dt_file = 'dts ' + chA + ' ' + chB + ' ' + 'f'
     np.save(dt_file, np.asarray(dts))
-    print('final save')
     dts = []
     global_cps0 = np.mean(global_cps0)
     global_cps1 = np.mean(global_cps1)
@@ -228,8 +218,8 @@ def gen_dts_from_tts(d2, d3, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
                delimiter=',')
 
 
-# Function which calculates closest time differences
-def closest_val(a, b, dts, t_lim):
+# Function which calculates closest time differences #########################
+def closest_val(a, b, dts):
     c = np.searchsorted(a, b)
     for i0, v0 in enumerate(c):
         if v0 > 0 and v0 < len(a) and v0 < len(b):
@@ -239,8 +229,7 @@ def closest_val(a, b, dts, t_lim):
                 dt = dt0
             else:
                 dt = dt1
-            if -t_lim < dt < t_lim:
-                dts.append(dt)
+            dts.append(dt)
     return dts
 
 
@@ -313,7 +302,7 @@ def g2_plot_from_hist_csv(d2, xlim=1000, chA='ch0', chB='ch1'):
     plt.close(fig1)
 
 
-
+# Save plot for powerpoint ###################################################
 def PPT_save_2d(fig, ax, name):
 
     # Set plot colours
@@ -411,15 +400,22 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
 ##############################################################################
 # Import data (saved by python code filter data.py)
 ##############################################################################
+start_time = time.time()
 d0 = r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech\20200717\1"
 d1, d2, d3, Chs_combs = prep_dirs_chs(d0)
-
 proc_lst(d0)
+lst_end = time.time()
+print("lst proc", lst_end - start_time)
 unwrap_4ch_data(d0)
+uw_end = time.time()
+print("uw chs", uw_end - lst_end) 
 
 for i0, v0 in enumerate(Chs_combs):
     chA, chB = v0[0:2]
     print('channels:', chA, ' & ', chB)
-    gen_dts_from_tts(d2, d3,'FCT', 100000, chA, chB)
+    gen_dts_from_tts(d2, d3,'FCT', chA, chB)
     gen_hist_csv_from_dts(d2, 0.1, 100000, chA, chB)
     g2_plot_from_hist_csv(d2, 200, chA, chB)
+
+dt_hist_end = time.time()
+print('dt_hist', dt_hist_end - uw_end)

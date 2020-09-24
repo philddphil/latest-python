@@ -260,29 +260,30 @@ def gen_dts_from_tts(d0, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
     datafiles0 = glob.glob(d0 + r'\*' + chA + r'*')
     datafiles1 = glob.glob(d0 + r'\*' + chB + r'*')
 
-    d3 = d1 + r"\dts " + chA + " & " + chB
+    d_dt = d1 + r"\dts " + chA + " & " + chB
     a = re.findall('\d+', chA)[0]
     b = re.findall('\d+', chB)[0]
     try:
-        os.mkdir(d3)
+        os.mkdir(d_dt)
     except OSError:
-        print("Creation of the directory %s failed" % d3)
+        print("Creation of the directory %s failed" % d_dt)
     else:
-        print("Successfully created the directory %s " % d3)
+        print("Successfully created the directory %s " % d_dt)
 
     last_file = np.min([len(datafiles0), len(datafiles1)])
     print(last_file)
 
     dt_chs = 'dts for chs ' + a + b
     # define a ROI range to check for co-incidences over
-    glob_dts = []
+    dts = []
     global_cps0 = []
     global_cps1 = []
     global_t = 0
+    dt_file_number = 0
     for i0, v0 in enumerate(datafiles0):
-        os.chdir(d0)
+        os.chdir(d_dt)
         # print output for keeping track of progress
-        print('calc', dt_chs, 'file', i0, 'of', len(datafiles0))
+        # print('calc', dt_chs, 'file', i0, 'of', len(datafiles0))
         tta = np.loadtxt(datafiles0[i0])
         ttb = np.loadtxt(datafiles1[i0])
 
@@ -310,47 +311,46 @@ def gen_dts_from_tts(d0, TCSPC, t_lim=100000, chA='ch0', chB='ch1'):
         global_cps0.append(cps0)
         global_cps1.append(cps1)
 
-        dydx0 = np.max(tt0) / len(tt0)
-        dydx1 = np.max(tt1) / len(tt1)
 
-        #######################################################################
-        # Perform start-stop measurements
-        #######################################################################
-        q, glob_dts = start_stop(
-            tt0, tt1, dydx1, t_lim, i0, d3, glob_dts, dt_chs)
+        # calculate closest values
+        dts = closest_val(tt1, tt0, dts)
+        q, r = divmod(i0, 10)
+        if i0 % 10 == 0:
+            dt_file_number += 1
+            print('saving dts', dt_file_number)
+            dt_file = 'dts ' + chA + ' ' + chB + ' ' + str(dt_file_number)
+            np.save(dt_file, np.asarray(dts))
+            dts = []
 
-    print('saving final dts')
-    os.chdir(d3)
-    dt_file = dt_chs + str(q - 1) + '.csv'
-    np.savetxt(dt_file, glob_dts, delimiter=",")
-    global_dts = []
+    os.chdir(d_dt)
+    dt_file = dt_file = 'dts ' + chA + ' ' + chB + ' ' + 'f'
+    np.save(dt_file, np.asarray(dts))
+    dts = []
     global_cps0 = np.mean(global_cps0)
     global_cps1 = np.mean(global_cps1)
 
-    ##########################################################################
-    # Save global Histogram values & info
-    ##########################################################################
     np.savetxt("other_global.csv", [global_t, global_cps0, global_cps1],
                delimiter=',')
 
 
 # Generate histogram vals and bins from dt list & save #######################
-def gen_hist_cvs_from_dts(d1, res=0.4, t_range=25100, chA='ch0', chB='ch1'):
-    d3 = d1 + r"\dts " + chA + " & " + chB
+def hist_1d(d2, res=0.4, t_range=25100, chA='ch0', chB='ch1'):
+    d3 = d2 + r"\dts " + chA + " & " + chB
     os.chdir(d3)
     a = re.findall('\d+', chA)[0]
     b = re.findall('\d+', chB)[0]
-    print(d3)
-    datafiles = glob.glob(d3 + r'\dts for chs ' + a + b + r'*')
-    print(d3 + r'\dts for chs' + a + b + r'*')
+    file_str = (r'\dts ' + chA + ' ' + chB)
+    print(file_str)
+    datafiles = glob.glob(d3 + file_str + r'*')
     print(len(datafiles))
+
     nbins = int(2 * t_range / res + 1)
     edges = np.linspace(-t_range, t_range, nbins + 1)
     hists = np.zeros(nbins)
 
     for i0, v0 in enumerate(datafiles[0:]):
-        print('saving hist & bins csv - ', i0, 'of', len(datafiles))
-        dts = np.genfromtxt(v0)
+        # print('saving hist & bins csv - ', i0, 'of', len(datafiles))
+        dts = np.load(v0, allow_pickle=True)
         hist, bin_edges = np.histogram(dts, edges)
         hists += hist
 
@@ -359,7 +359,7 @@ def gen_hist_cvs_from_dts(d1, res=0.4, t_range=25100, chA='ch0', chB='ch1'):
 
 
 # Plot g2 from histogram of counts ###########################################
-def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
+def plot_1d_hist(d2, xlim=1000, chA='ch0', chB='ch1'):
     d3 = d2 + r"\dts " + chA + " & " + chB
     f0 = d3 + r"\g2_hist.csv"
     f1 = d3 + r"\g2_bins.csv"
@@ -369,6 +369,7 @@ def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
     bin_edges = np.genfromtxt(f1)
 
     bin_w = (bin_edges[1] - bin_edges[0]) / 2
+    print('max hist value:', np.max(hist))
 
     ts = np.linspace(bin_edges[1], bin_edges[-1] -
                      bin_w, len(bin_edges) - 1)
@@ -376,13 +377,8 @@ def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
     total_t, ctsps_0, ctsps_1 = np.genfromtxt(f2)
     g2s = hist / (ctsps_0 * ctsps_1 * 1e-9 * total_t * 2 * bin_w)
 
+    print('total cps:', np.round(ctsps_0 + ctsps_1))
 
-    ##########################################################################
-    # Fits to data
-    ##########################################################################
-    ts_fit = np.linspace(ts[0], ts[-1], 500000)
-    a = (ctsps_0 + ctsps_1) * 1e-9
-    decay_exp = np.exp(-1 * np.abs(ts_fit * a / 3))
     ##########################################################################
     # Plot data
     ##########################################################################
@@ -391,66 +387,41 @@ def g2_plot_from_hist_cvs(d2, xlim=1000, chA='ch0', chB='ch1'):
 
     # xy plot ################################################################
     ax1, fig1, cs = set_figure(
-        name='figure', xaxis='τ, ns', yaxis='#', size=4)
+        name='figure', xaxis='τ, ns', yaxis='cts', size=4)
     plt.title(chA + ' & ' + chB)
     ax1.set_xlim(-1 * xlim, xlim)
+    ax1.set_ylim(-0.1 * np.max(hist), 1.1 * np.max(hist))
 
     ax1.plot(ts, hist,
              '.-', markersize=5,
              lw=0.5,
              alpha=1, label='')
-    ax1.plot(ts_fit, decay_exp)
-    # ax1.set_yscale('log')
     # plt.show()
-    plotname = 'HBT hist'
-    os.chdir(os.path.split(d1)[0])
+    os.chdir(d2)
+    a = re.findall('\d+', chA)[0]
+    b = re.findall('\d+', chB)[0]
+    plotname = 'hist ' + a + b
     PPT_save_2d(fig1, ax1, plotname)
     plt.close(fig1)
 
 
-# Set up figure for plotting #################################################
-def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
-    loc = 1000
-    # pad stop channel for region searching
-    tt_pad = np.pad(stops, loc + 1)
-    # loop through tt0_ns as our start channel
-    for i1, v1 in enumerate(starts[0:]):
+# Function which calculates closest time differences #########################
+def closest_val(a, b, dts):
+    c = np.searchsorted(a, b)
 
-        # trunkate full tt1_ns list to a region of 2 * locale values around
-        # the same time as the value v1 is (need to use dydx1 to convert)
-
-        # 1. find the corresponding index in tt1_ns
-        i_tt1 = int(v1 / dydx1)
-
-        # 2.  specify locale around idx to check - get both times & idx vals
-        tt_local = stops[i_tt1:i_tt1 + 2 * loc]
-        x_local = np.arange(i_tt1, i_tt1 + 2 * loc) - loc + 1
-
-        # substract ith value of tt0_ns (v1) from tt1_ns & use abs operator
-        tt_temp = np.abs(tt_local - v1)
-
-        # find idx of min
-        try:
-            dt_idx = np.argmin(tt_temp)
-        except:
-            break
-
-        # find time difference of min value
-        dt = tt_local[dt_idx] - v1
-
-        # check if value is of interest
-        if -t_range < dt < t_range:
-            glob_dts.append(dt)
-
-    (q, r) = divmod(i0, 10)
-    if r == 0 and q != 0:
-        os.chdir(d3)
-        # print('saving dts')
-        dt_file = dt_chs + ' ' + str(q - 1) + '.csv'
-        np.savetxt(dt_file, glob_dts, delimiter=",")
-        print('length = ', len(glob_dts))
-        glob_dts = []
-    return q, glob_dts
+    for i0, v0 in enumerate(c):
+        if v0 < len(a):
+            dt0 = b[i0] - a[v0 - 1]
+            dt1 = b[i0] - a[v0]
+            if np.abs(dt1) >= np.abs(dt0):
+                dt = dt0
+            else:
+                dt = dt1
+            dts.append(dt)
+        else:
+            dt0 = b[i0] - a[v0 - 1]
+            dts.append(dt)
+    return dts
 
 
 ##############################################################################
@@ -468,37 +439,38 @@ for i0, v0 in enumerate(all_dirs):
         peak_dirs.append(v0)
 
 
-for i0, v0 in enumerate(peak_dirs):
+for i0, v0 in enumerate(peak_dirs[64:]):
     # print(v0)
     peak_number = os.path.split(v0)[1]
     # Plot profiles
     os.chdir(v0)
     plot_int_profile(v0)
-    print('###### Peak no.', peak_number, '##############################')
+    print('###### Peak no.', peak_number, 'interation', i0, '###############')
 
     # Plot ISat curve
-    Psat_dir = v0 + r'\PSats'
-    os.chdir(Psat_dir)
-    fs = glob.glob(Psat_dir + r'\*.txt')
-    f0 = fs[0]
-    Sat_cts, P_sat = I_sat_plot(f0, v0)
-    s0 = ('Peak '+ str(peak_number) + ' Saturation counts = ' + str(Sat_cts) + 'kps')
-    s1 = ('Peak '+ str(peak_number) + ' Saturation power = ' + str(P_sat) + 'mW')
-    print(s0)
-    f.write(s0 + '\n')
-    print(s1)
-    f.write(s1+ '\n')
-    # Process and plot HBT
-    if Sat_cts < 30 or P_sat > 10:
-      print('not suitable for HBT')
-      f.write('Peak '+ str(peak_number) + ' not suitable for HBT'+ '\n')
-    else:
-      d1 = prep_dirs_chs(v0)
-      d0 = glob.glob(v0 + r'\HH*')[0]
-      gen_dts_from_tts(d0, 'HH', 100000)
-      gen_hist_cvs_from_dts(d1, 10, 2000)
-      g2_plot_from_hist_cvs(d1, 2000)
-      f.write('Peak '+ str(peak_number) + ' HBT plotted'+ '\n')
+    try:
+        Psat_dir = v0 + r'\PSats'
+        os.chdir(Psat_dir)
+        fs = glob.glob(Psat_dir + r'\*.txt')
+        f0 = fs[0]
+        Sat_cts, P_sat = I_sat_plot(f0, v0)
+        s0 = ('Peak '+ str(peak_number) + ' Saturation counts = ' + str(Sat_cts) + 'kps')
+        s1 = ('Peak '+ str(peak_number) + ' Saturation power = ' + str(P_sat) + 'mW')
+        # Process and plot HBT
+        if Sat_cts < 30 or P_sat > 10:
+          print('not suitable for HBT')
+          f.write('Peak '+ str(peak_number) + ' not suitable for HBT'+ '\n')
+        else:
+          d1 = prep_dirs_chs(v0)
+          d0 = glob.glob(v0 + r'\HH*')[0]
+          gen_dts_from_tts(d0, 'HH', 100000)
+          hist_1d(d1, 10, 2000)
+          plot_1d_hist(d1, 2000)
+          f.write('Peak '+ str(peak_number) + ' HBT plotted'+ '\n')
+    except:
+        f.write('Peak '+ str(peak_number) + ' PSat data not found'+ '\n')
+        pass
+
 f.close()
 
 ##############################################################################

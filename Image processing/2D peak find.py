@@ -198,7 +198,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 # File paths
 ##############################################################################
 p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200629\Raster scans\30Jun20 scan-001.txt")
+      r"\SCM Data 20200908\Raster scans\08Sep20 scan-001.txt")
 
 
 ##############################################################################
@@ -208,7 +208,7 @@ Ulim = 35000
 clim = [0, Ulim]
 
 x_img, y_img, img = load_SCM_F5L10(p0)
-y_img = y_img[::-1] 
+y_img = y_img[::-1]
 krnl_size = 10
 x_k = np.arange(krnl_size)
 y_k = np.arange(krnl_size)
@@ -272,11 +272,15 @@ cbar1 = fig1.colorbar(im1, cax=cax)
 cbar1.ax.get_yaxis().labelpad = 15
 cbar1.set_label('log counts / second', rotation=270)
 
+pk_number = 0
 for x, y in centroids_img:
+    pk_number += 1
     ax1.plot(x, y, 'o',
              ms=15,
-             mec=cs['ggdred'],
+             mec=cs['mnk_green'],
              fillstyle='none')
+    ax1.text(x, y, '  ' + str(pk_number),
+             c=cs['mnk_green'])
 
 ax2, fig2, cs = set_figure('fig2',  size=7)
 im2 = plt.imshow(img, cmap='magma',
@@ -289,11 +293,17 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar2 = fig2.colorbar(im2, cax=cax)
 cbar2.ax.get_yaxis().labelpad = 15
 cbar2.set_label('counts / second', rotation=270)
+
+pk_number = 0
 for x, y in centroids_img:
+    pk_number += 1
     ax2.plot(x, y, 'o',
              ms=15,
              mec=cs['mnk_green'],
              fillstyle='none')
+    ax2.text(x, y, '  ' + str(pk_number),
+             c=cs['mnk_green'])
+
 
 # ax3, fig3, cs = set_figure('fig3')
 # im3 = plt.imshow(img_2, cmap='magma',
