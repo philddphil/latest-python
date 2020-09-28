@@ -167,7 +167,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 # Def some functions
 ##############################################################################
-pX = (r"C:\Data\SCM\SCM Data 20200924\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20200928\Raster scans")
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20200908\Raster scans")
 
@@ -177,7 +177,7 @@ datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
 print(len(datafiles),'images found')
 size=5
-for i0, v0 in enumerate(datafiles[0:]):
+for i0, v0 in enumerate(datafiles[-4:]):
     print(os.path.split(v0)[1])
     
     x, y, img = load_SCM_F5L10(v0)
@@ -214,8 +214,8 @@ for i0, v0 in enumerate(datafiles[0:]):
     plt.tight_layout()
     plt.show()
     os.chdir(p0)
-    ax1.figure.savefig(plotname1 + 'dark.svg')
-    ax1.figure.savefig(plotname1 + 'dark.png')
+    # ax1.figure.savefig(plotname1 + 'dark.svg')
+    # ax1.figure.savefig(plotname1 + 'dark.png')
     PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
 
     # plt.axis('off')

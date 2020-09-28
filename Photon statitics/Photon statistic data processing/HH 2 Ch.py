@@ -464,15 +464,15 @@ def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Data\SCM\SCM Data 20200924")
+d0 = (r"C:\Data\SCM\SCM Data 20200928")
 os.chdir(d0)
 
-d0s = glob.glob(d0 + r'\*850*')
+d0s = glob.glob(d0 + r'\*222*')
 print(d0s)
 d0 = d0s[0]
 d1 = prep_dirs_chs(d0)
-# gen_dts_from_tts(d1, d0, 'HH')
-hist_1d(d1, 0.04, 100000)
+gen_dts_from_tts(d1, d0, 'HH')
+hist_1d(d1, 0.256, 100000)
 plot_1d_hist(d1, 1000)
 
 
