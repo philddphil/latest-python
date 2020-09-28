@@ -362,7 +362,7 @@ def plot_1d_hist(d2, xlim=1000, chA='ch0', chB='ch1'):
     plt.close(fig1)
 
 
-# Plot a 2d histogram from data in d2
+# Plot a 2d histogram from data in d2 ########################################
 def plot_2d_hist(d2, x_lim, res, t_range, chA='ch0', chB='ch1', chC='ch2'):
     hist_csv_name = ("g3_hist_res_" + str(1000*res) + 'ps' +
                      "_range_" + str(t_range) + ".csv")
