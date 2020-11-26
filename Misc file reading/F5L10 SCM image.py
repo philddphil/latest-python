@@ -177,7 +177,7 @@ datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
 print(len(datafiles),'images found')
 size=5
-for i0, v0 in enumerate(datafiles[-4:]):
+for i0, v0 in enumerate(datafiles[-2:]):
     print(os.path.split(v0)[1])
     
     x, y, img = load_SCM_F5L10(v0)
