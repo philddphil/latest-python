@@ -8,12 +8,14 @@ import time
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+
+from pylab import *
+from mpl_toolkits.mplot3d import Axes3D
+from scipy import ndimage as ndi
 from itertools import permutations
 from itertools import combinations
 from scipy.ndimage.filters import uniform_filter1d
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from nptdms import TdmsFile
-from nptdms import TdmsFile
 
 
 ##############################################################################
@@ -174,52 +176,95 @@ def count_rate(d3, chA, N, TCSPC):
     return crs_avg
 
 
-# Load Agilent Verbose XY ascii ###############################################
-def load_AgilentDCA_ascii(filepath):
-    a = open(filepath, 'r', encoding='ascii')
-    data = a.readlines()
-    a.close()
-    for i0, j0 in enumerate(data):
-        if 'Points' in j0:
-            Points = float(data[i0].split(":")[-1])
-        if 'Count' in j0:
-            Count = float(data[i0].split(":")[-1])
-        if 'XInc' in j0:
-            XInc = float(data[i0].split(":")[-1])
-        if 'XOrg' in j0:
-            XOrg = float(data[i0].split(":")[-1])
-        if 'YData range' in j0:
-            YData_range = float(data[i0].split(":")[-1])
-        if 'YData center' in j0:
-            YData_center = float(data[i0].split(":")[-1])
-        if 'Coupling' in j0:
-            Coupling = data[i0].split(":")[-1]
-        if 'XRange' in j0:
-            XRange = float(data[i0].split(":")[-1])
-        if 'XOffset' in j0:
-            XOffset = float(data[i0].split(":")[-1])
-        if 'YRange' in j0:
-            YRange = float(data[i0].split(":")[-1])
-        if 'YOffset' in j0:
-            YOffset = float(data[i0].split(":")[-1])
-        if 'Date' in j0:
-            Date = data[i0].split(":")[-1]
-        if 'Time' in j0:
-            Time = data[i0].split(":")[-1]
-        if 'Frame' in j0:
-            Frame = data[i0].split(":")[-1]
-        if 'X Units' in j0:
-            X_unit = data[i0].split(":")[-1]
-        if 'Y Units' in j0:
-            Y_unit = data[i0].split(":")[-1]
-        if 'XY Data' in j0:
-            data_start_line = i0 + 1
+# Find regions/objects in image
+def image_object_find(x_img, y_img, img, u_lim):
+    y_img = y_img[::-1]
+    krnl_size = 10
+    x_k = np.arange(krnl_size)
+    y_k = np.arange(krnl_size)
 
-    XY_scope_data = np.loadtxt(data[data_start_line:], delimiter=',')
-    return (XY_scope_data, YOffset)
+    coords = np.meshgrid(x_k, y_k)
+
+    G = Gaussian_2D(coords, 1, int(krnl_size - 1) / 2,
+                    int(krnl_size - 1) / 2, 1, 1)
+    G = np.reshape(G, (krnl_size, krnl_size))
+
+    img_1 = ndi.convolve(img, G)
+
+    img_2 = img_1
+    super_threshold_indices = img_1 < u_lim
+    img_1[super_threshold_indices] = 0
+
+    img_3, label_nmbr = ndi.label(img_2)
+
+    peak_slices = ndi.find_objects(img_3)
+    centroids_px = []
+    for peak_slice in peak_slices:
+        dy, dx = peak_slice
+        x, y = dx.start, dy.start
+        cx, cy = centroid(img_3[peak_slice])
+        centroids_px.append((x + cx, y + cy))
+
+    return centroids_px, peak_slices
 
 
-def tdms()
+# Generic 2D Gaussian peak function ###########################################
+def Gaussian_2D(coords, A, x_c, y_c, σ_x, σ_y, θ=0, bkg=0, N=1):
+    x, y = coords
+    x_c = float(x_c)
+    y_c = float(y_c)
+    a = (np.cos(θ) ** 2) / (2 * σ_x ** 2) + (np.sin(θ) ** 2) / (2 * σ_y ** 2)
+    b = -(np.sin(2 * θ)) / (4 * σ_x ** 2) + (np.sin(2 * θ)) / (4 * σ_y ** 2)
+    c = (np.sin(θ) ** 2) / (2 * σ_x ** 2) + (np.cos(θ) ** 2) / (2 * σ_y ** 2)
+    G = (bkg + A * np.exp(- (a * ((x - x_c) ** 2) +
+                             2 * b * (x - x_c) * (y - y_c) +
+                             c * ((y - y_c) ** 2))**N))
+    return G.ravel()
+
+
+# find the central value for rectangular region w x h of data array ##########
+def centroid(data):
+    h, w = np.shape(data)
+    x = np.arange(0, w)
+    y = np.arange(0, h)
+
+    X, Y = np.meshgrid(x, y)
+
+    cx = np.sum(X * data) / np.sum(data)
+    cy = np.sum(Y * data) / np.sum(data)
+
+    return cx, cy
+
+
+# Save 2d image with a colourscheme suitable for ppt, as a png ###############
+def PPT_save_2d_im(fig, ax, cb, name):
+    plt.rcParams['text.color'] = 'xkcd:black'
+    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
+    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
+    cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
+    plt.setp(cbytick_obj, color='xkcd:black')
+
+    # Loop to check for file - appends filename with _# if name already exists
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no))
+        else:
+            app_no = app_no + 1
+            print('Base + # exists')
+
+
 # Save 2d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_2d(fig, ax, name):
 
@@ -235,14 +280,13 @@ def PPT_save_2d(fig, ax, name):
     # Loop to check for file - appends filename with _# if name already exists
     f_exist = True
     app_no = 0
-    dpi = 600
     while f_exist is True:
         if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name,  dpi=dpi)
+            ax.figure.savefig(name)
             f_exist = False
             print('Base exists')
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
+            ax.figure.savefig(name + '_' + str(app_no))
             f_exist = False
             print(' # = ' + str(app_no))
         else:
@@ -253,41 +297,125 @@ def PPT_save_2d(fig, ax, name):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Users\pd10\OneDrive - National Physical Laboratory"
-      r"\Projects\2018\3QN\HWU Transmitter\Data\Keysight N7747A")
-f0 = (r"\Main.vi 18.11.2020 12.42.40 - IM output.tdms")
-f1 = (r"\Main.vi 18.11.2020 12.53.53 - IM output.tdms")
-f1 = (r"\Main.vi 18.11.2020 13.15.45 - MBC output.tdms")
+d0 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020")
 
+f0 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020\One z per line.txt")
+f1 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020\wavelengths.txt")
+f2 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020\mean image.txt")
 
-tdms_file = TdmsFile.read(d0 + f1)
-time_g = tdms_file['Time']
-time_ch = time_g['Time (UTC 1904) / s']
-times1 = time_ch[:]
-times1 = times1 - np.min(times1)
-power_g = tdms_file['Power']
-power_ch = power_g['S1 Power / W']
-powers1 = power_ch[:]
+mean_image_data = np.genfromtxt(f2)
+img = mean_image_data
 
+log_img = np.log(mean_image_data)
+
+y_px, x_px = np.shape(mean_image_data)
+x_range = 56.2
+y_range = 54.2
+x_img = np.linspace(0, x_range, x_px)
+y_img = np.linspace(0, y_range, y_px)
+y_m = y_img[1] - y_img[0]
+x_m = x_img[1] - x_img[0]
+y_c = np.min(y_img)
+x_c = np.min(x_img)
+
+u_lim = 15
+
+d1_name = str(u_lim) + ' thresh'
+d1 = os.path.join(d0, d1_name) 
+
+clim = [0, 10]
+centroids_px, peak_slices = image_object_find(
+    x_img, y_img, mean_image_data, u_lim)
+print('Objects found (#) = ', len(centroids_px))
+
+wavelengths_data = np.genfromtxt(f1, skip_header=3)
+wavelengths_micron = [1e9 * pair[1] for pair in wavelengths_data]
+
+# find regions and all the spectra contained within
+specs_all = []
+for i0, v0 in enumerate(peak_slices[0:]):
+  specs_object = []
+  indices = []
+  yslice, xslice = v0
+  x_range = np.arange(xslice.start, xslice.stop)
+  y_range = np.arange(yslice.start, yslice.stop)
+  X, Y = meshgrid(x_range,y_range)
+  for i1, v1 in enumerate(x_range):
+    for i2, v2 in enumerate(y_range):
+      index = x_px * v2 + v1
+      indices.append(index)
+  print(i0, len(indices)) 
+  with open(f0, 'r') as input_file:
+    for position, line in enumerate(input_file):
+      if position in indices:
+        data_raw = line
+        data_split = re.split(r'\t+', line)
+        data_floats = [float(value) for value in data_split]
+        specs_object.append(data_floats)
+  specs_all.append(specs_object)
+
+print(np.shape(specs_all[0]))
+print(np.shape(specs_all[1]))
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
-ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='time (ns)',
-                           yaxis='mV',
-                           size=4)
-ax1.plot(times0, powers0, '.', ms=1)
-ax1.plot(times0, powers0, '-', alpha=0.5, lw=0.1, c=cs['gglred'])
-ax1.plot(times1, powers1, '.', ms=1)
-ax1.plot(times1, powers1, '-', alpha=0.5, lw=0.1, c=cs['gglblue'])
-ax1.set_yscale('log')
-fig1.tight_layout()
-plt.show()
-os.chdir(d0)
-ax1.figure.savefig('IM output.png')
-PPT_save_2d(fig1, ax1, 'IM output.png')
+
+ax1, fig1, cs = set_figure('fig1', size=7)
+im1 = plt.imshow(np.log(img), cmap='magma',
+                 vmin=np.min(np.log(img)),
+                 vmax=0.9 * np.max(np.log(img)))
+
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar1 = plt.colorbar(im1, cax=cax)
+cbar1.ax.get_yaxis().labelpad = 15
+cbar1.set_label('log counts / second', rotation=270)
+
+
+for i0, v0 in enumerate(centroids_px):
+    x, y = v0
+    ax1.plot(x, y, 'o',
+             ms=15,
+             mec=cs['mnk_green'],
+             fillstyle='none')
+    ax1.text(x, y, '  ' + str(i0),
+             c=cs['mnk_green'])
+
+ax2, fig2, cs = set_figure('fig2',  size=7)
+im2 = plt.imshow(img, cmap='magma',
+                 vmin=clim[0] + 1, vmax=0.5 * clim[1]
+                 )
+divider = make_axes_locatable(ax2)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar2 = fig2.colorbar(im2, cax=cax)
+cbar2.ax.get_yaxis().labelpad = 15
+cbar2.set_label('counts / second', rotation=270)
+
+for i0, v0 in enumerate(centroids_px[0:]):
+    x, y = v0
+    ax2.plot(x, y,
+             'o',
+             ms=15,
+             mec=cs['mnk_green'],
+             fillstyle='none')
+    ax2.text(x, y,
+             '  ' + str(i0),
+             c=cs['mnk_green'])
+ 
+    os.chdir(d1)
+    ax3, fig3, cs = set_figure('fig3', '', '', size=4)
+    specs_object = specs_all[i0]
+    
+    for i1, v1 in enumerate(specs_object):
+      plt.plot(wavelengths_micron, v1)
+
+    plt.tight_layout()
+    name = 'obj' + str(i0) + ' x' + str(int(x)) + ' y' + str(int(y))
+    PPT_save_2d(fig3, ax3, name)
+    plt.close()
+
 
 # hist/bar plot ##############################################################
 # hists, bins = np.hist(δt0,100)
@@ -315,54 +443,20 @@ PPT_save_2d(fig1, ax1, 'IM output.png')
 # plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
 
 # xyz plot ###################################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# scattter = ax3.scatter(*coords, z, '.', alpha=0.4,
-#                       color=cs['gglred'], label='')
-# contour = ax3.contour(*coords, z, 10, cmap=cm.jet)
-# surface = ax3.plot_surface(*coords, z, 10, cmap=cm.jet)
-# wirefrace = ax3.plot_wireframe(*coords, z, 10, cmap=cm.jet)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# set_zlim(min_value, max_value)
 
-# img plot ###################################################################
-# ax4, fig4, cs = set_figure('lin image', 'x axis', 'y axis')
-# im4 = plt.imshow(mean_image_data, cmap='magma')
-# im4 = plt.imshow(mean_image_data, cmap='magma',
-#                  extent=extents(y) + extents(x),
-#                  vmin=0,
-#                  vmax=10)
-# divider = make_axes_locatable(ax4)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# cb4 = fig4.colorbar(im4, cax=cax)
-
-
-# ax5, fig5, cs = set_figure('log image', 'x axis', 'y axis')
-# im5 = plt.imshow(log_img, cmap='magma',
-#                  extent=extents(y) +
-#                  extents(x),
-#                  vmin=np.min(log_img),
-#                  vmax=1 * np.max(log_img))
-# divider = make_axes_locatable(ax5)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# fig5.colorbar(im5, cax=cax)
-# cb5 = fig5.colorbar(im5, cax=cax)
-# cb5.ax.get_yaxis().labelpad = 15
-# cb5.set_label('log [counts / second]', rotation=270)
-# plt.tight_layout()
-# plt.show()
 
 # save plot ###################################################################
-# ax1.figure.savefig('spec.svg')
-# plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'spec')
+plt.show()
+
+os.chdir(d0)
+ax1.figure.savefig('mean log counts.svg')
+ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
+ax2.figure.savefig('mean counts.svg')
+ax2.legend(loc='upper left', fancybox=True, framealpha=0.0)
+
+cbar1.set_label('log counts / second', rotation=270, color='xkcd:black')
+cbar2.set_label('counts / second', rotation=270, color='xkcd:black')
+
+PPT_save_2d_im(fig1, ax1, cbar1, 'mean log counts')
+# PPT_save_2d_im(fig2, ax2, cbar2, 'mean counts')
+# PPT_save_2d(fig3, ax3, 'spec')

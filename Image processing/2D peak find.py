@@ -194,6 +194,56 @@ def PPT_save_2d_im(fig, ax, cb, name):
             print('Base + # exists')
 
 
+def image_object_find(x_img, y_img, img, u_lim):
+
+  y_img = y_img[::-1]
+  krnl_size = 10
+  x_k = np.arange(krnl_size)
+  y_k = np.arange(krnl_size)
+
+  coords = np.meshgrid(x_k, y_k)
+
+  G = Gaussian_2D(coords, 1, int(krnl_size - 1) / 2,
+                  int(krnl_size - 1) / 2, 1, 1)
+  G = np.reshape(G, (krnl_size, krnl_size))
+
+  img_1 = ndi.convolve(img, G)
+
+  img_2 = img_1
+  super_threshold_indices = img_1 < Ulim
+  img_1[super_threshold_indices] = 0
+
+  img_3, label_nmbr = ndi.label(img_2)
+
+
+  peak_slices = ndi.find_objects(img_3)
+  print('Objects found (#) = ', len(peak_slices))
+  centroids_px = []
+  for peak_slice in peak_slices:
+      dy, dx = peak_slice
+      x, y = dx.start, dy.start
+      cx, cy = centroid(img_3[peak_slice])
+      centroids_px.append((x + cx, y + cy))
+
+
+  shape_img = np.shape(img)
+  x_px = np.arange(0, shape_img[0])
+  y_px = np.arange(0, shape_img[1])
+
+  x_px_m = (x_px[-1] - x_px[0]) / len(x_px)
+  y_px_m = (y_px[-1] - y_px[0]) / len(y_px)
+
+  x_img_m = (x_img[-1] - x_img[0]) / len(x_img)
+  y_img_m = (y_img[-1] - y_img[0]) / len(y_img)
+  centroids_img = []
+
+  for x, y in centroids_px:
+      centroids_img.append(((x * (x_img_m / x_px_m) - (x_px[0] - x_img[0])),
+                            (y * (y_img_m / y_px_m) - (y_px[0] - y_img[0]))))
+
+  return centroids_img
+
+
 ##############################################################################
 # File paths
 ##############################################################################
@@ -208,50 +258,8 @@ Ulim = 35000
 clim = [0, Ulim]
 
 x_img, y_img, img = load_SCM_F5L10(p0)
-y_img = y_img[::-1]
-krnl_size = 10
-x_k = np.arange(krnl_size)
-y_k = np.arange(krnl_size)
 
-coords = np.meshgrid(x_k, y_k)
-
-G = Gaussian_2D(coords, 1, int(krnl_size - 1) / 2,
-                int(krnl_size - 1) / 2, 1, 1)
-G = np.reshape(G, (krnl_size, krnl_size))
-
-img_1 = ndi.convolve(img, G)
-
-img_2 = img_1
-super_threshold_indices = img_1 < Ulim
-img_1[super_threshold_indices] = 0
-
-img_3, label_nmbr = ndi.label(img_2)
-
-
-peak_slices = ndi.find_objects(img_3)
-print('Objects found (#) = ', len(peak_slices))
-centroids_px = []
-for peak_slice in peak_slices:
-    dy, dx = peak_slice
-    x, y = dx.start, dy.start
-    cx, cy = centroid(img_3[peak_slice])
-    centroids_px.append((x + cx, y + cy))
-
-
-shape_img = np.shape(img)
-x_px = np.arange(0, shape_img[0])
-y_px = np.arange(0, shape_img[1])
-
-x_px_m = (x_px[-1] - x_px[0]) / len(x_px)
-y_px_m = (y_px[-1] - y_px[0]) / len(y_px)
-
-x_img_m = (x_img[-1] - x_img[0]) / len(x_img)
-y_img_m = (y_img[-1] - y_img[0]) / len(y_img)
-centroids_img = []
-
-for x, y in centroids_px:
-    centroids_img.append(((x * (x_img_m / x_px_m) - (x_px[0] - x_img[0])),
-                          (y * (y_img_m / y_px_m) - (y_px[0] - y_img[0]))))
+centroids_img = image_object_find(x_img, y_img, img, Ulim)
 
 
 ##############################################################################
@@ -262,8 +270,7 @@ ax1, fig1, cs = set_figure('fig1', size=7)
 im1 = plt.imshow(np.log(img), cmap='magma',
                  extent=extents(x_img) + extents(y_img),
                  vmin=np.min(np.log(img)),
-                 vmax=0.9 * np.max(np.log(img)),
-                 origin='lower'
+                 vmax=0.9 * np.max(np.log(img))
                  )
 
 divider = make_axes_locatable(ax1)
@@ -285,12 +292,11 @@ for x, y in centroids_img:
 ax2, fig2, cs = set_figure('fig2',  size=7)
 im2 = plt.imshow(img, cmap='magma',
                  extent=extents(x_img) + extents(y_img),
-                 vmin=clim[0], vmax=clim[1],
-                 origin='lower'
+                 vmin=clim[0], vmax=clim[1]
                  )
 divider = make_axes_locatable(ax2)
 cax = divider.append_axes("right", size="5%", pad=0.05)
-cbar2 = fig2.colorbar(im2, cax=cax)
+cbar2 = plt.colorbar(im2, cax=cax)
 cbar2.ax.get_yaxis().labelpad = 15
 cbar2.set_label('counts / second', rotation=270)
 

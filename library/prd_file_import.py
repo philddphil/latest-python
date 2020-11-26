@@ -175,6 +175,50 @@ def load_SCM_F5L10(filepath):
     img = np.loadtxt(data[data_start_line:])
     return (x, y, img)
 
+# Load Agilent Verbose XY ascii ###############################################
+def load_AgilentDCA_ascii(filepath):
+    a = open(filepath, 'r', encoding='ascii')
+    data = a.readlines()
+    a.close()
+    for i0, j0 in enumerate(data):
+        if 'Points' in j0:
+            Points = float(data[i0].split("\t")[-1])
+        if 'Count' in j0:
+            Count = float(data[i0].split("\t")[-1])
+        if 'XInc' in j0:
+            XInc = float(data[i0].split("\t")[-1])
+        if 'XOrg' in j0:
+            XOrg = float(data[i0].split("\t")[-1])
+        if 'YData range' in j0:
+            YData_range = float(data[i0].split("\t")[-1])
+        if 'YData center' in j0:
+            YData_center = float(data[i0].split("\t")[-1])
+        if 'Coupling' in j0:
+            Coupling = data[i0].split("\t")[-1]
+        if 'XRange' in j0:
+            XRange = float(data[i0].split("\t")[-1])
+        if 'XOffset' in j0:
+            XOffset = float(data[i0].split("\t")[-1])
+        if 'YRange' in j0:
+            YRange = float(data[i0].split("\t")[-1])
+        if 'YOffset' in j0:
+            YOffset = float(data[i0].split("\t")[-1])
+        if 'Date' in j0:
+            Date = data[i0].split("\t")[-1]
+        if 'Time' in j0:
+            Time = data[i0].split("\t")[-1]
+        if 'Frame' in j0:
+            Frame = data[i0].split("\t")[-1]
+        if 'X Units' in j0:
+            X_unit = data[i0].split("\t")[-1]
+        if 'Y Units' in j0:
+            Y_unit = data[i0].split("\t")[-1]        
+        if 'XY Data' in j0:
+            data_start_line = i0 + 1
+
+    XY_scope_data = np.loadtxt(data[data_start_line:])
+    return (XY_scope_data)
+
 
 # Load multiple .csvs ########################################################
 def load_multicsv(directory):

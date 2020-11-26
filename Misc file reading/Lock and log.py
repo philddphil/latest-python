@@ -89,7 +89,7 @@ def PPT_save_2d(fig, ax, name):
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
     ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
     ax.xaxis.label.set_color('xkcd:black')
-    
+
     ax.tick_params(axis='x', colors='xkcd:black')
     ax.tick_params(axis='y', colors='xkcd:black')
 
@@ -114,7 +114,7 @@ def PPT_save_2d(fig, ax, name):
 # Do some stuff
 ##############################################################################
 p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200807\Lock and log data 102914")
+      r"\SCM Data 20200806\Lock and log data 175203")
 
 datafiles = glob.glob(p0 + r"\*.txt")
 
@@ -126,14 +126,14 @@ for i0, v0 in enumerate(datafiles):
     with open(v0, 'r') as input_file:
         line_number = 0
         for line in input_file:
-          (q, r) = divmod(line_number, 3)
-          if r == 0:
-            ts.append(float(line.rstrip()))
-          if r == 1:
-            Is.append(float(line.rstrip()))
-          if r == 2:
-            Ps.append(float(line.rstrip()))
-          line_number += 1
+            (q, r) = divmod(line_number, 3)
+            if r == 0:
+                ts.append(float(line.rstrip()))
+            if r == 1:
+                Is.append(float(line.rstrip()))
+            if r == 2:
+                Ps.append(float(line.rstrip()))
+            line_number += 1
 
 
 os.chdir(p0)
@@ -143,20 +143,43 @@ os.chdir(p0)
 # os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
 
-ax1, fig1, cs = set_figure(name='figure',
+ax1, fig1, cs = set_figure(name='figure1',
                            xaxis='time (s)',
                            yaxis='cts',
                            size=4)
-ax2 = ax1.twinx()
+ax1a = ax1.twinx()
 
-ax1.plot(ts, Is, '.', c=cs['ggred'])
-ax2.plot(ts, Ps, '.', c=cs['ggblue'])
+ax1.plot(ts[0:36000], Is[0:36000], '.', c=cs['ggred'])
+ax1a.plot(ts[0:36000], Ps[0:36000], '.', c=cs['ggblue'])
 ax1.set_ylabel('counts per second', color=cs['ggred'])
-ax2.set_ylabel('laser power (mW)', color=cs['ggblue'])
+ax1a.set_ylabel('laser power (mW)', color=cs['ggblue'])
 
 # ax1.set_ylim(-0.1, 1.1)
 # plt.close(fig1)
 fig1.tight_layout()
+
+ax2, fig2, cs = set_figure(name='figure2',
+                           xaxis='cts',
+                           yaxis='number',
+                           size=4)
+plt.hist(Is[0:36000], bins=50,
+         facecolor=cs['ggred'],
+         edgecolor=cs['mnk_dgrey'],
+         alpha=0.8)
+
+
+ax3, fig3, cs = set_figure(name='figure3',
+                           xaxis='powers',
+                           yaxis='number',
+                           size=4)
+
+plt.hist(Ps[0:36000], bins=15,
+         facecolor=cs['ggblue'],
+         edgecolor=cs['mnk_dgrey'],
+         alpha=0.8)
+
 plt.show()
-ax2.tick_params(axis='y', colors='xkcd:black')
+
+
+ax1a.tick_params(axis='y', colors='xkcd:black')
 PPT_save_2d(fig1, ax1, 'Laser and cts')

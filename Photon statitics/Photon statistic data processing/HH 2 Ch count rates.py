@@ -11,9 +11,6 @@ import matplotlib.pyplot as plt
 from itertools import permutations
 from itertools import combinations
 from scipy.ndimage.filters import uniform_filter1d
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from nptdms import TdmsFile
-from nptdms import TdmsFile
 
 
 ##############################################################################
@@ -107,12 +104,6 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     return ax1, fig1, cs
 
 
-# For use with extents in imshow #############################################
-def extents(f):
-    delta = f[1] - f[0]
-    return [f[0] - delta / 2, f[-1] + delta / 2]
-
-
 # Prepare the directories and channel names ##################################
 def prep_dirs(d0):
     d1 = d0 + r'\py data'
@@ -165,129 +156,54 @@ def count_rate(d3, chA, N, TCSPC):
                 print('Choose hardware, HH or FCT')
                 break
 
-            dt = np.diff(tt)
-            cr = 1 / (dt * 1e-9)
+            dt = np.diff(tt) * 1e-9
+            cr = dt
             cr_avg = np.convolve(cr, np.ones((N,)) / N, mode='valid')
-            cr_avg0 = uniform_filter1d(cr, N)
+            cr_avg0  = uniform_filter1d(cr, N)
             crs_avg.append(cr_avg)
 
     return crs_avg
 
 
-# Load Agilent Verbose XY ascii ###############################################
-def load_AgilentDCA_ascii(filepath):
-    a = open(filepath, 'r', encoding='ascii')
-    data = a.readlines()
-    a.close()
-    for i0, j0 in enumerate(data):
-        if 'Points' in j0:
-            Points = float(data[i0].split(":")[-1])
-        if 'Count' in j0:
-            Count = float(data[i0].split(":")[-1])
-        if 'XInc' in j0:
-            XInc = float(data[i0].split(":")[-1])
-        if 'XOrg' in j0:
-            XOrg = float(data[i0].split(":")[-1])
-        if 'YData range' in j0:
-            YData_range = float(data[i0].split(":")[-1])
-        if 'YData center' in j0:
-            YData_center = float(data[i0].split(":")[-1])
-        if 'Coupling' in j0:
-            Coupling = data[i0].split(":")[-1]
-        if 'XRange' in j0:
-            XRange = float(data[i0].split(":")[-1])
-        if 'XOffset' in j0:
-            XOffset = float(data[i0].split(":")[-1])
-        if 'YRange' in j0:
-            YRange = float(data[i0].split(":")[-1])
-        if 'YOffset' in j0:
-            YOffset = float(data[i0].split(":")[-1])
-        if 'Date' in j0:
-            Date = data[i0].split(":")[-1]
-        if 'Time' in j0:
-            Time = data[i0].split(":")[-1]
-        if 'Frame' in j0:
-            Frame = data[i0].split(":")[-1]
-        if 'X Units' in j0:
-            X_unit = data[i0].split(":")[-1]
-        if 'Y Units' in j0:
-            Y_unit = data[i0].split(":")[-1]
-        if 'XY Data' in j0:
-            data_start_line = i0 + 1
-
-    XY_scope_data = np.loadtxt(data[data_start_line:], delimiter=',')
-    return (XY_scope_data, YOffset)
-
-
-def tdms()
-# Save 2d plot with a colourscheme suitable for ppt, as a png #################
-def PPT_save_2d(fig, ax, name):
-
-    # Set plot colours
-    plt.rcParams['text.color'] = 'xkcd:black'
-    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
-    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:black')
-    ax.yaxis.label.set_color('xkcd:black')
-    ax.tick_params(axis='x', colors='xkcd:black')
-    ax.tick_params(axis='y', colors='xkcd:black')
-
-    # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    dpi = 600
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name,  dpi=dpi)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
-
-
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Users\pd10\OneDrive - National Physical Laboratory"
-      r"\Projects\2018\3QN\HWU Transmitter\Data\Keysight N7747A")
-f0 = (r"\Main.vi 18.11.2020 12.42.40 - IM output.tdms")
-f1 = (r"\Main.vi 18.11.2020 12.53.53 - IM output.tdms")
-f1 = (r"\Main.vi 18.11.2020 13.15.45 - MBC output.tdms")
+d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
+      r"\SCM Data 20200928\HH T3 175222")
+d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
+      r"\SCM Data 20200924\HH T3 163443")
+cr_avg = count_rate(d0, 'ch0', 1800, 'HH')
 
-
-tdms_file = TdmsFile.read(d0 + f1)
-time_g = tdms_file['Time']
-time_ch = time_g['Time (UTC 1904) / s']
-times1 = time_ch[:]
-times1 = times1 - np.min(times1)
-power_g = tdms_file['Power']
-power_ch = power_g['S1 Power / W']
-powers1 = power_ch[:]
+print(len(cr_avg[0]))
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
+
 ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='time (ns)',
-                           yaxis='mV',
+                           xaxis='x',
+                           yaxis='cps',
                            size=4)
-ax1.plot(times0, powers0, '.', ms=1)
-ax1.plot(times0, powers0, '-', alpha=0.5, lw=0.1, c=cs['gglred'])
-ax1.plot(times1, powers1, '.', ms=1)
-ax1.plot(times1, powers1, '-', alpha=0.5, lw=0.1, c=cs['gglblue'])
-ax1.set_yscale('log')
+ax1.plot(cr_avg[0])
+ax1.set_ylim(0, np.max(cr_avg[0]))
 fig1.tight_layout()
 plt.show()
-os.chdir(d0)
-ax1.figure.savefig('IM output.png')
-PPT_save_2d(fig1, ax1, 'IM output.png')
+
+# size = 4
+# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
+# ax1 = fig1.add_subplot(111)
+# fig1.patch.set_facecolor(cs['mnk_dgrey'])
+# ax1.set_xlabel('x axis')
+# ax1.set_ylabel('y axis')
+# plt.plot(x + 50, a, '.')
+# plt.plot(x + 50, b, '.')
+# plt.plot(c, '.')
+# # plt.title()
+# fig1.tight_layout()
+# plt.show()
+
 
 # hist/bar plot ##############################################################
 # hists, bins = np.hist(δt0,100)
@@ -335,31 +251,12 @@ PPT_save_2d(fig1, ax1, 'IM output.png')
 # set_zlim(min_value, max_value)
 
 # img plot ###################################################################
-# ax4, fig4, cs = set_figure('lin image', 'x axis', 'y axis')
-# im4 = plt.imshow(mean_image_data, cmap='magma')
-# im4 = plt.imshow(mean_image_data, cmap='magma',
-#                  extent=extents(y) + extents(x),
-#                  vmin=0,
-#                  vmax=10)
+# ax4, fig4, cs = set.figure('image', 'x axis', 'y axis')
+# im4 = plt.imshow(Z, cmap='magma', extent=extents(y) +
+#                  extents(x),vmin=0,vmax=100)
 # divider = make_axes_locatable(ax4)
 # cax = divider.append_axes("right", size="5%", pad=0.05)
 # cb4 = fig4.colorbar(im4, cax=cax)
-
-
-# ax5, fig5, cs = set_figure('log image', 'x axis', 'y axis')
-# im5 = plt.imshow(log_img, cmap='magma',
-#                  extent=extents(y) +
-#                  extents(x),
-#                  vmin=np.min(log_img),
-#                  vmax=1 * np.max(log_img))
-# divider = make_axes_locatable(ax5)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# fig5.colorbar(im5, cax=cax)
-# cb5 = fig5.colorbar(im5, cax=cax)
-# cb5.ax.get_yaxis().labelpad = 15
-# cb5.set_label('log [counts / second]', rotation=270)
-# plt.tight_layout()
-# plt.show()
 
 # save plot ###################################################################
 # ax1.figure.savefig('spec.svg')
