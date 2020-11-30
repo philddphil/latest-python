@@ -467,26 +467,19 @@ def count_rate(d3):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-<<<<<<< Updated upstream
-d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200924\HH T3 175850")
+
+d0 = (r"C:\Data\SCM\SCM Data 20201126\HH T3 150007")
+
 # os.chdir(d0)
 
 # d0s = glob.glob(d0 + r'\*222*')
 # print(d0s)
 # d0 = d0s[0]
-=======
-d0 = (r"C:\Data\SCM\SCM Data 20200929")
 os.chdir(d0)
-
-d0s = glob.glob(d0 + r'\*410*')
-print(d0s)
-d0 = d0s[0]
->>>>>>> Stashed changes
 d1 = prep_dirs_chs(d0)
-# gen_dts_from_tts(d1, d0, 'HH')
+gen_dts_from_tts(d1, d0, 'HH')
 hist_1d(d1, 0.256, 100000)
-plot_1d_hist(d1, 1000)
+plot_1d_hist(d1, 100)
 
 
 ##############################################################################

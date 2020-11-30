@@ -158,16 +158,16 @@ def PPT_save_2d_im(fig, ax, cb, name):
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
             ax.figure.savefig(name + '_' + str(app_no))
             f_exist = False
-            print(' # = ' + str(app_no)) 
+            print(' # = ' + str(app_no))
         else:
-            app_no = app_no + 1     
+            app_no = app_no + 1
             print('Base + # exists')
 
 
 ##############################################################################
 # Def some functions
 ##############################################################################
-pX = (r"C:\Data\SCM\SCM Data 20200928\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20201126\Raster scans")
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20200908\Raster scans")
 
@@ -175,80 +175,85 @@ p0 = pX
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
-print(len(datafiles),'images found')
-size=5
-for i0, v0 in enumerate(datafiles[-2:]):
+print(len(datafiles), 'images found')
+size = 5
+for i0, v0 in enumerate(datafiles[0:]):
     print(os.path.split(v0)[1])
-    
+
     x, y, img = load_SCM_F5L10(v0)
-    img = img
+
     log_img = np.log(img)
     # FSM scaling: 12.5 microns = 1.56
-    x = x * 25 / (2.6 - 1.4)
-    y = y * 25 / (2.6 - 1.4)
+    # x = x * 25 / (2.6 - 1.4)
+    # y = y * 25 / (2.6 - 1.4)
     # Piezo scaling 10V = 25 microns
     # x = x * 2.5
     # y = y * 2.5
 
-    lb = os.path.basename(v0)
-    plotname1 = os.path.splitext(lb)[0]
-    plotname2 = os.path.splitext(lb)[0] + ' log'
-    print(plotname1)
-    print(plotname2)
-    ax1, fig1, cs = set_figure(name='figure lin',
-                               xaxis='x distance (μm)',
-                               yaxis='y distance (μm)',
-                               size=5)
-    im1 = plt.imshow(np.flipud(img), cmap='magma',
-                     extent=extents(y) +
-                     extents(x),
-                     label=lb,
-                     # vmin=np.min(img),
-                     vmax=1e-0 * np.max(img)
-                     )
-    divider = make_axes_locatable(ax1)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
-    cbar1 = fig1.colorbar(im1, cax=cax)
-    cbar1.ax.get_yaxis().labelpad = 15
-    cbar1.set_label('counts / second', rotation=270)
-    plt.tight_layout()
-    plt.show()
-    os.chdir(p0)
-    # ax1.figure.savefig(plotname1 + 'dark.svg')
-    # ax1.figure.savefig(plotname1 + 'dark.png')
-    PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
+    try:
 
-    # plt.axis('off')
-    # plt.cla()
-    # im1 = plt.imshow(np.flipud(img), cmap='magma',
-    #                  extent=prd_plots.extents(y) +
-    #                  prd_plots.extents(x),
-    #                  label=lb,
-    #                  vmin=np.min(img),
-    #                  vmax=0.6 * np.max(img),
-    #                  alpha=0.5)
-    # plt.savefig(plotname2)
+        lb = os.path.basename(v0)
+        plotname1 = os.path.splitext(lb)[0]
+        plotname2 = os.path.splitext(lb)[0] + ' log'
+        print(plotname1)
+        print(plotname2)
+        ax1, fig1, cs = set_figure(name='figure lin',
+                                   xaxis='x distance (μm)',
+                                   yaxis='y distance (μm)',
+                                   size=5)
+        im1 = plt.imshow(np.flipud(img), cmap='magma',
+                         extent=extents(y) +
+                         extents(x),
+                         label=lb,
+                         # vmin=np.min(img),
+                         vmax= 1e-1 * np.max(img)
+                         )
+        divider = make_axes_locatable(ax1)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cbar1 = fig1.colorbar(im1, cax=cax)
+        cbar1.ax.get_yaxis().labelpad = 15
+        cbar1.set_label('counts / second', rotation=270)
+        plt.tight_layout()
+        plt.show()
+        os.chdir(p0)
+        # ax1.figure.savefig(plotname1 + 'dark.svg')
+        # ax1.figure.savefig(plotname1 + 'dark.png')
+        PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
 
-    ax2, fig2, cs = set_figure(name='figure log',
-                               xaxis='x distance (μm)',
-                               yaxis='y distance (μm)',
-                               size=5)
-    # plt.title(lb)
-    im2 = plt.imshow(np.flipud(log_img), cmap='magma',
-                     extent=extents(y) +
-                     extents(x),
-                     label=lb,
-                     vmin=np.min(log_img),
-                     vmax=1 * np.max(log_img)
-                     )
-    divider = make_axes_locatable(ax2)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
-    fig2.colorbar(im2, cax=cax)
-    cbar2 = fig2.colorbar(im2, cax=cax)
-    cbar2.ax.get_yaxis().labelpad = 15
-    cbar2.set_label('log [counts / second]', rotation=270)
-    plt.tight_layout()
-    plt.show()
-    os.chdir(p0)
-    PPT_save_2d_im(fig2, ax2, cbar1, plotname2)
-##############################################################################
+        # plt.axis('off')
+        # plt.cla()
+        # im1 = plt.imshow(np.flipud(img), cmap='magma',
+        #                  extent=prd_plots.extents(y) +
+        #                  prd_plots.extents(x),
+        #                  label=lb,
+        #                  vmin=np.min(img),
+        #                  vmax=0.6 * np.max(img),
+        #                  alpha=0.5)
+        # plt.savefig(plotname2)
+
+        ax2, fig2, cs = set_figure(name='figure log',
+                                   xaxis='x distance (μm)',
+                                   yaxis='y distance (μm)',
+                                   size=5)
+        # plt.title(lb)
+        im2 = plt.imshow(np.flipud(log_img), cmap='magma',
+                         extent=extents(y) +
+                         extents(x),
+                         # label=lb,
+                         # vmin= np.min(log_img),
+                         # vmax= 10 * np.max(log_img)
+                         )
+        divider = make_axes_locatable(ax2)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        fig2.colorbar(im2, cax=cax)
+        cbar2 = fig2.colorbar(im2, cax=cax)
+        cbar2.ax.get_yaxis().labelpad = 15
+        cbar2.set_label('log [counts / second]', rotation=270)
+        plt.tight_layout()
+        plt.show()
+        os.chdir(p0)
+        PPT_save_2d_im(fig2, ax2, cbar1, plotname2)
+    except:
+        print(np.shape(img))
+        pass
+    ##############################################################################
