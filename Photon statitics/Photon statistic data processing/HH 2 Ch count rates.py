@@ -65,6 +65,12 @@ def palette():
     return colours
 
 
+# For use with extents in imshow ##############################################
+def extents(f):
+    delta = f[1] - f[0]
+    return [f[0] - delta / 2, f[-1] + delta / 2]
+
+
 # set rcParams for nice plots ################################################
 def ggplot():
     colours = palette()
@@ -127,12 +133,17 @@ def prep_dirs(d0):
 
 
 # Calculate the running average count rate in chA for last N photons
-def count_rate(d3, chA, N, TCSPC):
+def count_hist(d3, bins, chA, TCSPC):
     print(d3)
     datafiles0 = glob.glob(d3 + r'\*' + chA + r'*')
-    dts_avg = []
-    crs_avg = []
-    for i0, v0 in enumerate(datafiles0[0:2]):
+
+    all_t = 0
+    all_ph = 0
+    all_hists = np.zeros(len(bins) - 1)
+    rate = []
+    ts = []
+
+    for i0, v0 in enumerate(datafiles0[0:]):
         print(v0)
 
         if TCSPC == 'HH':
@@ -144,7 +155,7 @@ def count_rate(d3, chA, N, TCSPC):
             data_loop = enumerate(TTs[0])
 
         for i1, v1 in data_loop:
-                 # convert to ns
+            # convert to ns
             # note the conversion factor is 1e2 for HH & 1e-1 for FCT
             if TCSPC == 'HH':
                 tt = [j0 * 1e2 for j0 in TT]
@@ -156,13 +167,47 @@ def count_rate(d3, chA, N, TCSPC):
                 print('Choose hardware, HH or FCT')
                 break
 
-            dt = np.diff(tt) * 1e-9
-            cr = dt
-            cr_avg = np.convolve(cr, np.ones((N,)) / N, mode='valid')
-            cr_avg0  = uniform_filter1d(cr, N)
-            crs_avg.append(cr_avg)
+            exp_t = tt[-1] - tt[0]
+            exp_ph = len(tt)
+            dts = np.diff(tt)
+            hist, bins_alt = np.histogram(dts, bins)
+            rate.append(exp_ph / (exp_t * 1e-9))
+            ts.append(exp_t * 1e-9)
 
-    return crs_avg
+        all_hists += hist
+        all_t += exp_t
+        all_ph += exp_ph
+
+    return all_hists, all_t, all_ph, rate, ts
+
+
+# Save plot for powerpoint ###################################################
+def PPT_save_2d(fig, ax, name):
+
+    # Set plot colours
+    plt.rcParams['text.color'] = 'xkcd:black'
+    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
+    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
+    ax.xaxis.label.set_color('xkcd:black')
+    ax.yaxis.label.set_color('xkcd:black')
+    ax.tick_params(axis='x', colors='xkcd:black')
+    ax.tick_params(axis='y', colors='xkcd:black')
+
+    # Loop to check for file - appends filename with _# if name already exists
+    f_exist = True
+    app_no = 0
+    while f_exist is True:
+        if os.path.exists(name + '.png') is False:
+            ax.figure.savefig(name)
+            f_exist = False
+            print('Base exists')
+        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+            ax.figure.savefig(name + '_' + str(app_no))
+            f_exist = False
+            print(' # = ' + str(app_no))
+        else:
+            app_no = app_no + 1
+            print('Base + # exists')
 
 
 ##############################################################################
@@ -171,24 +216,101 @@ def count_rate(d3, chA, N, TCSPC):
 d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20200928\HH T3 175222")
 d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200924\HH T3 163443")
-cr_avg = count_rate(d0, 'ch0', 1800, 'HH')
+      r"\SCM Data 20201126\HH T3 150007")
+d1 = d0 + r"\Py data"
+try:
+    os.mkdir(d1)
+except:
+    pass
 
-print(len(cr_avg[0]))
+os.chdir(d0)
 
+ch = 'ch1'
+bins = np.linspace(0, 2e2, 401)
+
+bin_width = bins[1] - bins[0]
+
+bin_axis = np.linspace((bin_width) / 2, bins[-1] - (bin_width / 2),
+                       len(bins) - 1)
+
+# # Calculate dts for 1 channel, histogram & save
+hist, exp_time, exp_arrivals, rate, ts = count_hist(d0, bins, ch,  'HH')
+rate_ts = np.cumsum(ts)
+os.chdir(d1)
+np.savetxt(ch + ' photon number, time', [exp_arrivals, exp_time])
+np.savetxt(ch + ' histogram', hist)
+np.savetxt(ch + ' bin_axis', bin_axis)
+np.savetxt(ch + ' avg', [rate, rate_ts])
+
+# Load previous datasets
+arrivals_time = np.loadtxt(ch + ' photon number, time')
+
+exp_time = arrivals_time[0]
+exp_arrivals = arrivals_time[1]
+
+hist = np.loadtxt(ch + ' histogram')
+bin_axis = np.loadtxt(ch + ' bin_axis')
+rate, rate_ts = np.loadtxt(ch + ' avg')
+
+cpns = exp_arrivals / exp_time
+
+exp_decay = [np.max(hist) * np.exp(-i0 / cpns) for i0 in bin_axis]
+# rate = [1e9 / i0 for i0 in dts]
+# avg0 = rate[::100]
+# avg1 = rate[::1000]
+# avg2 = rate[::10000]
+# avg3 = rate[::100000]
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
-
-ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='x',
-                           yaxis='cps',
+xlabel = 'Δt (ns) - bin width ' + str(bin_width) + 'ns'
+ax0, fig0, cs = set_figure(name='figure0',
+                           xaxis= xlabel,
+                           yaxis='#',
                            size=4)
-ax1.plot(cr_avg[0])
-ax1.set_ylim(0, np.max(cr_avg[0]))
+plt.bar(bin_axis, hist, bin_width)
+plt.plot(bin_axis, exp_decay, c=cs['ggblue'])
+fig0.tight_layout()
+
+ax1, fig1, cs = set_figure(name='figure1',
+                           xaxis= xlabel,
+                           yaxis='log(#)',
+                           size=4)
+plt.bar(bin_axis, hist, bin_width)
+plt.plot(bin_axis, exp_decay, c=cs['ggblue'])
+ax1.set_yscale('log')
 fig1.tight_layout()
+
+ax2, fig2, cs = set_figure(name='figure2',
+                           xaxis='t',
+                           yaxis='average cps (over 5 s)',
+                           size=4)
+plt.plot(rate_ts, rate,
+         '.--',
+         markersize=7,
+         alpha=1)
+# plt.plot(np.linspace(0, len(dts), len(avg0)), avg0,
+#   '.-',
+#   markersize=3,
+#   alpha = 0.3)
+# plt.plot(np.linspace(0, len(dts), len(avg1)), avg1,
+#   '.-',
+#   markersize=5,
+#   alpha = 0.5)
+# plt.plot(np.linspace(0, len(dts), len(avg2)), avg2,
+#   '.-',
+#   markersize=5,
+#   alpha = 0.5)
+# plt.plot(np.linspace(0, len(dts), len(avg3)), avg3,
+#   '.-',
+#   markersize=5,
+#   alpha = 0.5)
+
+
+ax2.set_ylim(0, 1.1 * np.max(rate))
+fig2.tight_layout()
 plt.show()
 
 # size = 4
@@ -262,4 +384,6 @@ plt.show()
 # ax1.figure.savefig('spec.svg')
 # plot_file_name = plot_path + 'plot2.png'
 # ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'spec')
+PPT_save_2d(fig0, ax0, 'hist')
+PPT_save_2d(fig1, ax1, 'log hist')
+PPT_save_2d(fig2, ax2, 'avg')

@@ -232,7 +232,7 @@ def g3_2d_alt(coords, a):
 ts = np.linspace(-201, 201, 201)
 coords = np.meshgrid(ts, ts)
 
-z = 0
+z = 1
 x = 1 - z
 
 perm_sum = z * z * z  + \
@@ -300,10 +300,10 @@ fig3.patch.set_facecolor(cs['mnk_dgrey'])
 ax3.set_xlabel('x axis')
 ax3.set_ylabel('y axis')
 # ax3.contour(*coords, g3_1, 50, cmap='magma')
-scattter = ax3.plot(ts, -ts, np.diagonal(np.fliplr(g3_plot)),
-                    color=cs['ggred'], label='')
-scattter = ax3.plot(ts, ts[50] * np.ones(len(ts)), g3_plot[50],
-                    color=cs['ggblue'], label='')
+# scattter = ax3.plot(ts, -ts, np.diagonal(np.fliplr(g3_plot)),
+#                     color=cs['ggred'], label='')
+# scattter = ax3.plot(ts, ts[50] * np.ones(len(ts)), g3_plot[50],
+#                     color=cs['ggblue'], label='')
 ax3.plot_surface(*coords, g3_plot, cmap='magma', alpha=0.8)
 norm = plt.Normalize(g3_plot.min(), g3_plot.max())
 # colors = cm.magma(norm(g3_1_a))

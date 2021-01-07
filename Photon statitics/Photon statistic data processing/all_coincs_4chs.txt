@@ -12,9 +12,6 @@ from itertools import permutations
 from itertools import combinations
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-##############################################################################
-# Some defs
-##############################################################################
 
 # Prepare the directories and channel names ##################################
 def prep_dirs(d0):
@@ -196,7 +193,6 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
             tot_t = np.max([np.max(tt0), np.max(tt1)]) * 1e-9
             global_t += tot_t
-            
             c0 = len(tt0)
             c1 = len(tt1)
 
@@ -229,7 +225,6 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
 # Function which calculates closest time differences #########################
 def closest_val(a, b, dts):
-    
     c = np.searchsorted(a, b)
 
     for i0, v0 in enumerate(c):
@@ -569,7 +564,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 
 
 ##############################################################################
-# Code to do stuff
+# Import data (saved by python code filter data.py)
 ##############################################################################
 # begin timing
 start_time = time.time()

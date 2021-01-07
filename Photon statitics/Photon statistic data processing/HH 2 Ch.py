@@ -5,6 +5,7 @@ import os
 import re
 import glob
 import numpy as np
+from scipy.optimize import curve_fit
 
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
@@ -241,7 +242,6 @@ def plot_int_profile(directory):
     plt.close(fig1)
 
 
-# Run start-stop to get dt list & save #######################################
 # Generate histogram vals and bins from dt list & save #######################
 def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
@@ -370,124 +370,275 @@ def hist_1d(d2, res=0.4, t_range=25100, chA='ch0', chB='ch1'):
 
 
 # Plot g2 from histogram of counts ###########################################
-def plot_1d_hist(d2, xlim=1000, chA='ch0', chB='ch1'):
-    d3 = d2 + r"\dts " + chA + " & " + chB
-    f0 = d3 + r"\g2_hist.csv"
-    f1 = d3 + r"\g2_bins.csv"
-    f2 = d3 + r"\other_global.csv"
-
-    hist = np.genfromtxt(f0)
-    bin_edges = np.genfromtxt(f1)
-
+def plot_1d_hist(d1, hist, bin_edges, xlim=1000, chA='ch0', chB='ch1'):
     bin_w = (bin_edges[1] - bin_edges[0]) / 2
     print('max hist value:', np.max(hist))
 
     ts = np.linspace(bin_edges[1], bin_edges[-1] -
                      bin_w, len(bin_edges) - 1)
 
-    total_t, ctsps_0, ctsps_1 = np.genfromtxt(f2)
-    g2s = hist / (ctsps_0 * ctsps_1 * 1e-9 * total_t * 2 * bin_w)
+    ##########################################################################
+    # Plot data
+    ##########################################################################
 
+    os.chdir(d1)
+
+    # xy plot ################################################################
+    ax1, fig1, cs = set_figure(
+        name='figure', xaxis='τ, ns', yaxis='cts', size=4)
+    # plt.title(chA + ' & ' + chB)
+    ax1.set_xlim(-1 * xlim, xlim)
+    ax1.set_ylim(-0.1 * np.max(hist), 1.1 * np.max(hist))
+
+    ax1.plot(ts, hist,
+             '.-', markersize=3,
+             lw=0.1,
+             alpha=0.2, label='')
+    ax1.set_ylim(0, 1.1 * np.max(hist))
+    # plt.show()
+    # plotname = 'hist'
+    # PPT_save_2d(fig1, ax1, plotname)
+    # plt.close(fig1)
+
+
+def gen_dts_from_tts_windowed(d2, d3, TCSPC,  win, chA='ch0', chB='ch1'):
+    os.chdir(d3)
+    file_str = r"\dts " + chA + " & " + chB
+    d_dt = d2 + file_str
+
+    try:
+        os.mkdir(d_dt)
+    except:
+        pass
+
+    dts = []
+    global_cps0 = []
+    global_cps1 = []
+    global_t = 0
+
+    datafiles0 = glob.glob(d3 + r'\*' + chA + r'*')
+    datafiles1 = glob.glob(d3 + r'\*' + chB + r'*')
+
+    dt_file_number = 0
+    for i0, v0 in enumerate(datafiles0[0:]):
+        print(datafiles0[i0])
+        os.chdir(d_dt)
+        if TCSPC == 'HH':
+            TT0 = np.loadtxt(datafiles0[i0])
+            TT1 = np.loadtxt(datafiles1[i0])
+            data_loop = enumerate([0])
+
+        if TCSPC == 'FCT':
+            TT0 = np.load(datafiles0[i0], allow_pickle=True)
+            TT1 = np.load(datafiles1[i0], allow_pickle=True)
+            TTs = [TT0, TT1]
+            TTs.sort(key=len)
+            data_loop = enumerate(TTs[0])
+
+        for i1, v1 in data_loop:
+
+            # convert to ns
+            # note the conversion factor is 1e2 for HH & 1e-1 for FCT
+            if TCSPC == 'HH':
+                tt0 = [j0 * 1e2 for j0 in TT0]
+                tt1 = [j0 * 1e2 for j0 in TT1]
+            elif TCSPC == 'FCT':
+                tt0 = [j0 * 1e-1 for j0 in TT0[i1]]
+                tt1 = [j0 * 1e-1 for j0 in TT1[i1]]
+            else:
+                print('Choose hardware, HH or FCT')
+                break
+
+            tot_t = np.max([np.max(tt0), np.max(tt1)]) * 1e-9
+            global_t += tot_t
+            c0 = len(tt0)
+            c1 = len(tt1)
+
+            cps0 = c0 / tot_t
+            cps1 = c1 / tot_t
+
+            global_cps0.append(cps0)
+            global_cps1.append(cps1)
+
+            # calculate closest values
+            dts = closest_vals(tt1, tt0, dts, win)
+
+            if i1 % 10000 == 0:
+                dt_file_number += 1
+                print('saving dts', dt_file_number)
+                dt_file = 'dts ' + chA + ' ' + chB + ' ' + str(dt_file_number)
+                np.save(dt_file, np.asarray(dts))
+                dts = []
+
+    os.chdir(d_dt)
+    dt_file = dt_file = 'dts ' + chA + ' ' + chB + ' ' + 'f'
+    np.save(dt_file, np.asarray(dts))
+    dts = []
+    global_cps0 = np.mean(global_cps0)
+    global_cps1 = np.mean(global_cps1)
+
+    np.savetxt("other_global.csv", [global_t, global_cps0, global_cps1],
+               delimiter=',')
+
+
+# Function which calculates closest time differences #########################
+def closest_vals(a, b, dts, win):
+    c = np.searchsorted(a, b)
+    # print('b', len(a))
+    # print('a', len(b))
+    # print('c', len(c))
+
+    for i0, v0 in enumerate(c):
+        N = 0
+        start = b[i0]
+        while (v0 - N) >= 0 and (v0 + N) < len(a):
+            dt = start - a[v0 - (N + 1)]
+            if dt <= win:
+                dts.append(dt)
+                N += 1
+                # print('bwd N', N, dt)
+            else:
+                N = 0
+                break
+
+        while (v0 - N) >= 0 and (v0 + N) < len(a):
+            dt = start - a[v0 + N]
+            if dt >= -1 * win:
+                dts.append(dt)
+                N += 1
+                # print('fwd N', N, dt)
+            else:
+                break
+    return dts
+
+
+def load_hist_bins(d1, chA='ch0', chB='ch1'):
+    d2 = d1 + r"\dts " + chA + " & " + chB
+    f0 = d2 + r"\g2_hist.csv"
+    f1 = d2 + r"\g2_bins.csv"
+    hist = np.genfromtxt(f0)
+    bin_edges = np.genfromtxt(f1)
+    return hist, bin_edges
+
+
+def g2_from_cts(d1, hist, bin_edges, chA='ch0', chB='ch1'):
+    d2 = d1 + r"\dts " + chA + " & " + chB
+    f2 = d2 + r"\other_global.csv"
+    total_t, ctsps_0, ctsps_1 = np.genfromtxt(f2)
     print('total cps:', np.round(ctsps_0 + ctsps_1))
+
+    bin_w = bin_edges[1] - bin_edges[0]
+    g2s = hist / (ctsps_0 * ctsps_1 * 1e-9 * total_t * bin_w)
+    return g2s
+
+
+# g2 function taken from "Berthel et al 2015" for 3 level system with #########
+# experimental count rate envelope and multiple emitters ######################
+def g2_fit_ss(t, dt, a, b, c, d, z):
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    g3 = (g1 + g2)
+    g4 = g3 * (1 - 2 * z * (1 - z)) + 2 * z * (1 - z)
+    g5 = g4 * np.exp(-d * np.abs(t - dt))
+    return g5
+
+
+# g2 function taken from "Berthel et al 2015" for 3 level system with #########
+# experimental count rate envelope and multiple emitters ######################
+def g2_fit_win(t, dt, a, b, c, d, z):
+    g1 = 1 - c * np.exp(- a * np.abs(t - dt))
+    g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
+    g3 = (g1 + g2)
+    g4 = g3 * (1 - 2 * z * (1 - z)) + 2 * z * (1 - z)
+    g5 = g4 * np.exp(-d * np.abs(t - dt))
+    return g4
+
+
+def plot_g2_fit(d1, g2s, bin_edges, xlim):
+    a = 0.5
+    b = 0.002
+    c = 1.5
+    d = 0.00001
+    dt = 0
+    z = 0.1
+
+    # generate time axis
+    bin_w = bin_edges[1] - bin_edges[0]
+    ts = np.linspace(bin_edges[1] +
+                 bin_w, bin_edges[-1] -
+                 bin_w, len(bin_edges) - 1)    
+    ts_fit = np.linspace(ts[0], ts[-1], 1000000)
+
+    init_g = [dt, a, b, c, d, z]
+
+    popt_g1, pcov_g1 = curve_fit(g2_fit_ss,
+                                 ts, g2s, p0=[*init_g],
+                                 bounds=([-np.inf, 0, 0, 0, 0, 0],
+                                         [np.inf, np.inf, np.inf,
+                                          np.inf, np.inf, 1]))
+    rnd = 7
+    print('Fitted params for g2(t)')
+    print('dt =', np.round(popt_g1[0], rnd),
+          'a =', np.round(popt_g1[1], rnd),
+          'b =', np.round(popt_g1[2], rnd),
+          'c =', np.round(popt_g1[3], rnd),
+          'd =', np.round(popt_g1[4], rnd),
+          'z =', np.round(popt_g1[5], rnd))
 
     ##########################################################################
     # Plot data
     ##########################################################################
 
-    os.chdir(d3)
+    os.chdir(d1)
 
     # xy plot ################################################################
     ax1, fig1, cs = set_figure(
         name='figure', xaxis='τ, ns', yaxis='cts', size=4)
-    plt.title(chA + ' & ' + chB)
+    # plt.title()
     ax1.set_xlim(-1 * xlim, xlim)
-    ax1.set_ylim(-0.1 * np.max(hist), 1.1 * np.max(hist))
+    ax1.set_ylim(0, 1.1 * np.max(g2s))
 
-    ax1.plot(ts, hist,
-             '.-', markersize=5,
-             lw=0.5,
-             alpha=1, label='')
+    ax1.plot(ts, g2s,
+             '.-', markersize=3,
+             lw=0.1,
+             alpha=0.2, label='')
+    ax1.plot(ts_fit, g2_fit_ss(
+        ts_fit, *popt_g1), '-',
+        color=cs['ggblue'],
+        label='fit',
+        alpha=1,
+        lw=1.0)
     # plt.show()
-    os.chdir(d2)
-    a = re.findall('\d+', chA)[0]
-    b = re.findall('\d+', chB)[0]
-    plotname = 'hist ' + a + b
+    plotname = 'hist'
     PPT_save_2d(fig1, ax1, plotname)
     plt.close(fig1)
 
 
-# Set up figure for plotting #################################################
-def start_stop(starts, stops, dydx1, t_range, i0, d3, glob_dts, dt_chs):
-    loc = 1000
-    # pad stop channel for region searching
-    tt_pad = np.pad(stops, loc + 1)
-    # loop through tt0_ns as our start channel
-    for i1, v1 in enumerate(starts[0:]):
-
-        # trunkate full tt1_ns list to a region of 2 * locale values around
-        # the same time as the value v1 is (need to use dydx1 to convert)
-
-        # 1. find the corresponding index in tt1_ns
-        i_tt1 = int(v1 / dydx1)
-
-        # 2.  specify locale around idx to check - get both times & idx vals
-        tt_local = stops[i_tt1:i_tt1 + 2 * loc]
-        x_local = np.arange(i_tt1, i_tt1 + 2 * loc) - loc + 1
-
-        # substract ith value of tt0_ns (v1) from tt1_ns & use abs operator
-        tt_temp = np.abs(tt_local - v1)
-
-        # find idx of min
-        try:
-            dt_idx = np.argmin(tt_temp)
-        except:
-            break
-
-        # find time difference of min value
-        dt = tt_local[dt_idx] - v1
-
-        # check if value is of interest
-        if -t_range < dt < t_range:
-            glob_dts.append(dt)
-
-    (q, r) = divmod(i0, 10)
-    if r == 0 and q != 0:
-        os.chdir(d3)
-        # print('saving dts')
-        dt_file = dt_chs + ' ' + str(q - 1) + '.csv'
-        np.savetxt(dt_file, glob_dts, delimiter=",")
-        print('length = ', len(glob_dts))
-        glob_dts = []
-    return q, glob_dts
-
-
-def count_rate(d3):
-    datafiles0 = glob.glob(d3 + r'\*' + chA + r'*')
-
 ##############################################################################
 # Do some stuff
 ##############################################################################
-<<<<<<< Updated upstream
-d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200924\HH T3 175850")
-# os.chdir(d0)
+d0s = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Projects\2019"
+      r"\Nu quantum\Samples\NQ2\Example NV\HH T3 150007 ss")
 
-# d0s = glob.glob(d0 + r'\*222*')
-# print(d0s)
-# d0 = d0s[0]
-=======
-d0 = (r"C:\Data\SCM\SCM Data 20200929")
-os.chdir(d0)
+d0w = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Projects\2019"
+      r"\Nu quantum\Samples\NQ2\Example NV\HH T3 150007 win")
 
-d0s = glob.glob(d0 + r'\*410*')
-print(d0s)
-d0 = d0s[0]
->>>>>>> Stashed changes
-d1 = prep_dirs_chs(d0)
-# gen_dts_from_tts(d1, d0, 'HH')
-hist_1d(d1, 0.256, 100000)
-plot_1d_hist(d1, 1000)
+os.chdir(d0s)
 
+d1s = prep_dirs_chs(d0s)
+d1w = prep_dirs_chs(d0w)
+# gen_dts_from_tts_windowed(d1, d0, 'HH', 1e5)
+# hist_1d(d1, 0.256, 1e4)
+
+hist_s, bin_edges_s = load_hist_bins(d1s)
+hist_w, bin_edges_w = load_hist_bins(d1w)
+g2s = g2_from_cts(d1s, hist_s, bin_edges_s)
+g2w = g2_from_cts(d1w, hist_w, bin_edges_w)
+
+# plot_1d_hist(d1s, hist_s, bin_edges_s, 1e4)
+# plot_1d_hist(d1w, hist_w, bin_edges_w, 1e4)
+
+plot_g2_fit(d1w, g2w, bin_edges_w, 1e4)
 
 ##############################################################################
 # Plot some figures

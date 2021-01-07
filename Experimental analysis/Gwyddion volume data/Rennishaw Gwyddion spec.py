@@ -297,56 +297,37 @@ def PPT_save_2d(fig, ax, name):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201027")
+d0 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020")
 
-f0 = (d0 + r"\One z per line.txt")
-f1 = (d0 + r"\wavelengths.txt")
-f2 = (d0 + r"\mean image.txt")
-
-step_size = 0.3
-clim = [0, 20]
-u_lim = 45
-
-d1 = d0 + r"\Thresh" + str(u_lim)
-try:
-  os.mkdir(d1)
-except:
-  pass
-
+f0 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020\One z per line.txt")
+f1 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020\wavelengths.txt")
+f2 = (r"C:\local files\Experimental Data\G4 L12 Rennishaw\20201020\mean image.txt")
 
 mean_image_data = np.genfromtxt(f2)
 img = mean_image_data
+
 log_img = np.log(mean_image_data)
 
-# plot mean image
-ax1, fig1, cs = set_figure('fig1', size=7)
-im1 = plt.imshow(img, cmap='magma',
-                 vmin=clim[0],
-                 vmax=clim[1])
-
-
-divider = make_axes_locatable(ax1)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-cbar1 = plt.colorbar(im1, cax=cax)
-cbar1.ax.get_yaxis().labelpad = 15
-cbar1.set_label('log counts / second', rotation=270)
-plt.show()
-
-# get image scales
 y_px, x_px = np.shape(mean_image_data)
-x_img = np.linspace(0, x_px*step_size, x_px)
-y_img = np.linspace(0, y_px*step_size, y_px)
+x_range = 56.2
+y_range = 54.2
+x_img = np.linspace(0, x_range, x_px)
+y_img = np.linspace(0, y_range, y_px)
 y_m = y_img[1] - y_img[0]
 x_m = x_img[1] - x_img[0]
 y_c = np.min(y_img)
 x_c = np.min(x_img)
 
-# find centro-symmetric objects
+u_lim = 15
+
+d1_name = str(u_lim) + ' thresh'
+d1 = os.path.join(d0, d1_name) 
+
+clim = [0, 10]
 centroids_px, peak_slices = image_object_find(
     x_img, y_img, mean_image_data, u_lim)
 print('Objects found (#) = ', len(centroids_px))
 
-# get wavelength data
 wavelengths_data = np.genfromtxt(f1, skip_header=3)
 wavelengths_micron = [1e9 * pair[1] for pair in wavelengths_data]
 
@@ -363,7 +344,7 @@ for i0, v0 in enumerate(peak_slices[0:]):
     for i2, v2 in enumerate(y_range):
       index = x_px * v2 + v1
       indices.append(index)
-  print('Object #', i0, 'elements', len(indices)) 
+  print(i0, len(indices)) 
   with open(f0, 'r') as input_file:
     for position, line in enumerate(input_file):
       if position in indices:
@@ -373,12 +354,24 @@ for i0, v0 in enumerate(peak_slices[0:]):
         specs_object.append(data_floats)
   specs_all.append(specs_object)
 
+print(np.shape(specs_all[0]))
+print(np.shape(specs_all[1]))
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
 
+ax1, fig1, cs = set_figure('fig1', size=7)
+im1 = plt.imshow(np.log(img), cmap='magma',
+                 vmin=np.min(np.log(img)),
+                 vmax=0.9 * np.max(np.log(img)))
+
+divider = make_axes_locatable(ax1)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar1 = plt.colorbar(im1, cax=cax)
+cbar1.ax.get_yaxis().labelpad = 15
+cbar1.set_label('log counts / second', rotation=270)
 
 
 for i0, v0 in enumerate(centroids_px):
@@ -392,7 +385,7 @@ for i0, v0 in enumerate(centroids_px):
 
 ax2, fig2, cs = set_figure('fig2',  size=7)
 im2 = plt.imshow(img, cmap='magma',
-                 vmin=clim[0], vmax=0.5 * clim[1]
+                 vmin=clim[0] + 1, vmax=0.5 * clim[1]
                  )
 divider = make_axes_locatable(ax2)
 cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -418,8 +411,11 @@ for i0, v0 in enumerate(centroids_px[0:]):
     for i1, v1 in enumerate(specs_object):
       plt.plot(wavelengths_micron, v1)
 
+
     plt.tight_layout()
     name = 'obj' + str(i0) + ' x' + str(int(x)) + ' y' + str(int(y))
+    np.savetxt(name, specs_object)
+    np.savetxt('wavelengths', wavelengths_micron)
     PPT_save_2d(fig3, ax3, name)
     plt.close()
 

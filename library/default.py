@@ -219,7 +219,6 @@ def load_AgilentDCA_ascii(filepath):
     return (XY_scope_data, YOffset)
 
 
-def tdms()
 # Save 2d plot with a colourscheme suitable for ppt, as a png #################
 def PPT_save_2d(fig, ax, name):
 
@@ -253,21 +252,9 @@ def PPT_save_2d(fig, ax, name):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Users\pd10\OneDrive - National Physical Laboratory"
-      r"\Projects\2018\3QN\HWU Transmitter\Data\Keysight N7747A")
-f0 = (r"\Main.vi 18.11.2020 12.42.40 - IM output.tdms")
-f1 = (r"\Main.vi 18.11.2020 12.53.53 - IM output.tdms")
-f1 = (r"\Main.vi 18.11.2020 13.15.45 - MBC output.tdms")
-
-
-tdms_file = TdmsFile.read(d0 + f1)
-time_g = tdms_file['Time']
-time_ch = time_g['Time (UTC 1904) / s']
-times1 = time_ch[:]
-times1 = times1 - np.min(times1)
-power_g = tdms_file['Power']
-power_ch = power_g['S1 Power / W']
-powers1 = power_ch[:]
+a = 10
+t = np.linspace(-200, 200, 2000)
+p = 1 - np.exp(-np.abs((1 / a) * t))
 
 ##############################################################################
 # Plot some figures
@@ -276,18 +263,18 @@ powers1 = power_ch[:]
 # xy plot ####################################################################
 ax1, fig1, cs = set_figure(name='figure',
                            xaxis='time (ns)',
-                           yaxis='mV',
+                           yaxis='probability / $ (p_1)^2 $',
                            size=4)
-ax1.plot(times0, powers0, '.', ms=1)
-ax1.plot(times0, powers0, '-', alpha=0.5, lw=0.1, c=cs['gglred'])
-ax1.plot(times1, powers1, '.', ms=1)
-ax1.plot(times1, powers1, '-', alpha=0.5, lw=0.1, c=cs['gglblue'])
-ax1.set_yscale('log')
+ax1.plot(t, p)
+# ax1.plot(times0, powers0, '-', alpha=0.5, lw=0.1, c=cs['gglred'])
+# ax1.plot(times1, powers1, '.', ms=1)
+# ax1.plot(times1, powers1, '-', alpha=0.5, lw=0.1, c=cs['gglblue'])
+# ax1.set_yscale('log')
 fig1.tight_layout()
 plt.show()
-os.chdir(d0)
-ax1.figure.savefig('IM output.png')
-PPT_save_2d(fig1, ax1, 'IM output.png')
+# os.chdir(d0)
+# ax1.figure.savefig('IM output.png')
+# PPT_save_2d(fig1, ax1, 'IM output.png')
 
 # hist/bar plot ##############################################################
 # hists, bins = np.hist(δt0,100)
