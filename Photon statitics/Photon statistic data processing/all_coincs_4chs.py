@@ -597,7 +597,6 @@ Chs = ['ch0', 'ch1', 'ch2', 'ch3']
 # generate list of possible pairings from channels defined above
 Chs_perms2 = list(set(permutations(Chs, 2)))
 
-# for each possible permutation of pairs, calculate dts & hist results
 for i0, v0 in enumerate(Chs_perms2):
     chA, chB = v0[0:2]
     print('channels:', chA, ' & ', chB)

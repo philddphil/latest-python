@@ -617,6 +617,7 @@ def plot_g2_fit(d1, g2s, bin_edges, xlim):
 ##############################################################################
 # Do some stuff
 ##############################################################################
+
 d0s = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Projects\2019"
       r"\Nu quantum\Samples\NQ2\Example NV\HH T3 150007 ss")
 
@@ -637,6 +638,20 @@ g2w = g2_from_cts(d1w, hist_w, bin_edges_w)
 
 # plot_1d_hist(d1s, hist_s, bin_edges_s, 1e4)
 # plot_1d_hist(d1w, hist_w, bin_edges_w, 1e4)
+
+d0 = (r"C:\Data\SCM\SCM Data 20201203\HH T3 154120")
+d0 = (r"C:\Data\SCM\SCM Data 20201207\Sequences\07Dec20-002\1\SCM Data 20201207\HH T3 185411")
+
+# os.chdir(d0)
+
+# d0s = glob.glob(d0 + r'\*222*')
+# print(d0s)
+# d0 = d0s[0]
+os.chdir(d0)
+d1 = prep_dirs_chs(d0)
+gen_dts_from_tts(d1, d0, 'HH')
+hist_1d(d1, 0.256, 100000)
+plot_1d_hist(d1, 100)
 
 plot_g2_fit(d1w, g2w, bin_edges_w, 1e4)
 
