@@ -113,17 +113,17 @@ def load_SCM_F5L10(filepath):
     data = a.readlines()
     a.close()
     for i0, j0 in enumerate(data):
-        if 'X initial / V' in j0:
+        if 'X initial' in j0:
             x_init = float(data[i0].split("\t")[-1])
-        if 'X final / V' in j0:
+        if 'X final' in j0:
             x_fin = float(data[i0].split("\t")[-1])
-        if 'X increment / V' in j0:
+        if 'X inc' in j0:
             x_res = float(data[i0].split("\t")[-1])
-        if 'Y initial / V' in j0:
+        if 'Y initial' in j0:
             y_init = float(data[i0].split("\t")[-1])
-        if 'Y final / V' in j0:
+        if 'Y final' in j0:
             y_fin = float(data[i0].split("\t")[-1])
-        if 'Y increment / V' in j0:
+        if 'Y inc' in j0:
             y_res = float(data[i0].split("\t")[-1])
         if 'Y wait period / ms' in j0:
             data_start_line = i0 + 2
@@ -167,15 +167,18 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 # Def some functions
 ##############################################################################
-pX = (r"C:\Data\SCM\SCM Data 20201126\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20201214\Raster scans")
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200908\Raster scans")
+      r"\SCM Data 2020014\Raster scans")
 
 p0 = pX
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
 print(len(datafiles), 'images found')
+for i0, v0 in enumerate(datafiles):
+    print(i0, v0)
+
 size = 5
 for i0, v0 in enumerate(datafiles[0:]):
     print(os.path.split(v0)[1])
@@ -206,7 +209,7 @@ for i0, v0 in enumerate(datafiles[0:]):
                          extents(x),
                          label=lb,
                          # vmin=np.min(img),
-                         vmax= 1e-1 * np.max(img)
+                         vmax= 4e4
                          )
         divider = make_axes_locatable(ax1)
         cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -239,9 +242,9 @@ for i0, v0 in enumerate(datafiles[0:]):
         im2 = plt.imshow(np.flipud(log_img), cmap='magma',
                          extent=extents(y) +
                          extents(x),
-                         # label=lb,
-                         # vmin= np.min(log_img),
-                         # vmax= 10 * np.max(log_img)
+                         label=lb,
+                         vmin= np.log(1500),
+                         vmax= np.log(5000)
                          )
         divider = make_axes_locatable(ax2)
         cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -256,4 +259,4 @@ for i0, v0 in enumerate(datafiles[0:]):
     except:
         print(np.shape(img))
         pass
-    ##############################################################################
+##############################################################################

@@ -567,26 +567,25 @@ def PPT_save_2d_im(fig, ax, cb, name):
 # Import data (saved by python code filter data.py)
 ##############################################################################
 start_time = time.time()
-d0 = (r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech"
-r"\20200807\10 Hrs")
+d0 = (r"C:\Data\FCT\20210104\4")
 d1, d2, d3 = prep_dirs(d0)
-# proc_lst(d0)
-# lst_end = time.time()
-# print("lst proc", lst_end - start_time)
-# unwrap_4ch_data(d0)
-# uw_end = time.time()
-# print("uw chs", uw_end - lst_end)
+proc_lst(d0)
+lst_end = time.time()
+print("lst proc", lst_end - start_time)
+unwrap_4ch_data(d0)
+uw_end = time.time()
+print("uw chs", uw_end - lst_end)
 
 Chs = ['ch0', 'ch1', 'ch2', 'ch3']
 
-# Chs_perms2 = list(set(permutations(Chs, 2)))
+Chs_perms2 = list(set(permutations(Chs, 2)))
 
-# for i0, v0 in enumerate(Chs_perms2):
-#     chA, chB = v0[0:2]
-#     print('channels:', chA, ' & ', chB)
-#     gen_dts_from_tts(d2, d3, 'FCT', chA, chB)
-#     hist_1d(d2, 0.1, 100000, chA, chB)
-#     plot_1d_hist(d2, 200, chA, chB)
+for i0, v0 in enumerate(Chs_perms2):
+    chA, chB = v0[0:2]
+    print('channels:', chA, ' & ', chB)
+    gen_dts_from_tts(d2, d3, 'FCT', chA, chB)
+    hist_1d(d2, 0.1, 100000, chA, chB)
+    plot_1d_hist(d2, 200, chA, chB)
 
 Chs_perms3 = list(set(permutations(Chs, 3)))
 Chs_combs3 = list(set(combinations(Chs, 3)))

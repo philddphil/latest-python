@@ -241,7 +241,6 @@ def plot_int_profile(directory):
     plt.close(fig1)
 
 
-# Run start-stop to get dt list & save #######################################
 # Generate histogram vals and bins from dt list & save #######################
 def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
@@ -468,7 +467,8 @@ def count_rate(d3):
 # Do some stuff
 ##############################################################################
 
-d0 = (r"C:\Data\SCM\SCM Data 20201126\HH T3 150007")
+d0 = (r"C:\Data\SCM\SCM Data 20201203\HH T3 154120")
+d0 = (r"C:\Data\SCM\SCM Data 20201207\Sequences\07Dec20-002\1\SCM Data 20201207\HH T3 185411")
 
 # os.chdir(d0)
 
