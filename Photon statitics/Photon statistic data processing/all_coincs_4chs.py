@@ -169,15 +169,17 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
     datafiles0 = glob.glob(d3 + r'\*' + chA + r'*')
     datafiles1 = glob.glob(d3 + r'\*' + chB + r'*')
 
-    file_number = min([len(datafiles0), len(datafiles1)])
+    print(chA, len(datafiles0), chB, len(datafiles1))
     dt_file_number = 0
-    for i0 in np.arange(file_number):
+    for i0 in np.arange(len(datafiles0)):
 
         os.chdir(d_dt)
         TT0 = np.load(datafiles0[i0], allow_pickle=True)
         TT1 = np.load(datafiles1[i0], allow_pickle=True)
 
         TTs = [TT0, TT1]
+        print('resets per file a', np.shape(TT0))
+        print('resets per file b', np.shape(TT1))
         TTs.sort(key=len)
 
         for i1, v1 in enumerate(TTs[0]):
@@ -575,19 +577,18 @@ def PPT_save_2d_im(fig, ax, cb, name):
 start_time = time.time()
 
 # specify data directory
-d0 = (r"C:\local files\Experimental Data\F5L10 SPADs Fastcom tech"
-r"\20200807\10 Hrs")
+d0 = (r"C:\Data\FCT\20210104\3")
 
 # prepare additional directories for processed data
 d1, d2, d3 = prep_dirs(d0)
 
 # call proc_lst & log time
-proc_lst(d0)
+# proc_lst(d0)
 lst_end = time.time()
 print("lst proc", lst_end - start_time)
 
 # unwrap ascii arrival times into npy ragged arrays & log time
-unwrap_4ch_data(d0)
+# unwrap_4ch_data(d0)
 uw_end = time.time()
 print("uw chs", uw_end - lst_end)
 
