@@ -583,12 +583,14 @@ d0 = (r"C:\Data\FCT\20210104\3")
 d1, d2, d3 = prep_dirs(d0)
 
 # call proc_lst & log time
-# proc_lst(d0)
+print('processing lst file into channel arrival time asciis')
+proc_lst(d0)
 lst_end = time.time()
 print("lst proc", lst_end - start_time)
 
 # unwrap ascii arrival times into npy ragged arrays & log time
-# unwrap_4ch_data(d0)
+print('unwrapping the 4 ascii files into npy arrays')
+unwrap_4ch_data(d0)
 uw_end = time.time()
 print("uw chs", uw_end - lst_end)
 
