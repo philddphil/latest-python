@@ -270,7 +270,7 @@ def hist_1d(d2, res=0.4, t_range=25100, chA='ch0', chB='ch1'):
     hists = np.zeros(nbins)
 
     for i0, v0 in enumerate(datafiles[0:]):
-        print('saving hist & bins csv - ', i0, 'of', len(datafiles))
+        print('saving 1D hist & bins csv - ', i0, 'of', len(datafiles))
         dts = np.load(v0, allow_pickle=True)
         hist, bin_edges = np.histogram(dts, edges)
         hists += hist
@@ -301,7 +301,7 @@ def hist_2d(d2, res=50, t_range=25100, chA='ch0', chB='ch1', chC='ch2'):
     hists = np.zeros([nbins, nbins])
 
     for i0, v0 in enumerate(datafiles_a):
-        print('saving hist & bins csv - ', i0, 'of', len(datafiles_a))
+        print('saving 2D" hist & bins csv - ', i0, 'of', len(datafiles_a))
         dtsAB = np.load(datafiles_a[i0], allow_pickle=True)
         dtsAC = np.load(datafiles_b[i0], allow_pickle=True)
         data_array = np.transpose(np.array([dtsAB, dtsAC]))
@@ -587,8 +587,6 @@ os.chdir(d0)
 with open('log.txt', 'w+') as log:
     # log start
     start_time = time.time()
-    write_str = ('start = ' + str(start_time))
-    log.write(write_str)
 
     # prepare additional directories for processed data
     d1, d2, d3 = prep_dirs(d0)
@@ -599,7 +597,8 @@ with open('log.txt', 'w+') as log:
 
     # log lst end
     lst_end = time.time()
-    write_str = ('lst processing end = ' + str(lst_end))
+    write_str = ('lst processing end = ' +
+                 str(np.round(lst_end - start_time, 3)) + '\n')
     log.write(write_str)
     print("lst proc", lst_end - start_time)
 
@@ -609,7 +608,8 @@ with open('log.txt', 'w+') as log:
 
     # log unwrap end
     uw_end = time.time()
-    write_str = ('unwrapping end = ' + str(uw_end))
+    write_str = ('unwrapping end = ' +
+                 str(np.round(uw_end - lst_end, 3)) + '\n')
     log.write(write_str)
     print("uw chs", uw_end - lst_end)
 
@@ -618,39 +618,46 @@ with open('log.txt', 'w+') as log:
 
     # generate list of possible pairings from channels defined above
     Chs_perms2 = list(set(permutations(Chs, 2)))
-
+    last_ch_AB_hist = uw_end
     for i0, v0 in enumerate(Chs_perms2):
         chA, chB = v0[0:2]
         print('channels:', chA, ' & ', chB)
         gen_dts_from_tts(d2, d3, 'FCT', chA, chB)
         ch_AB_end = time.time()
         write_str = ('channels:' + chA + ' & ' + chB +
-                     ' dt calc finished = ' + str(ch_AB_end))
+                     ' dt calc finished = ' +
+                     str(np.round(ch_AB_end - last_ch_AB_hist, 3)) +
+                     '\n')
         log.write(write_str)
         hist_1d(d2, 0.1, 100000, chA, chB)
         plot_1d_hist(d2, 200, chA, chB)
         ch_AB_hist = time.time()
         write_str = ('channels:' + chA + ' & ' + chB +
-                     ' hist finished = ' + str(ch_AB_hist))
+                     ' hist finished = ' +
+                     str(np.round(ch_AB_hist - ch_AB_end, 3)) +
+                     '\n')
         log.write(write_str)
+        last_ch_AB_hist = ch_AB_hist
         # pairwise dt list calculation time
-     
 
     # generate list of possible combinations of channels defined above
     Chs_combs3 = list(set(combinations(Chs, 3)))
 
     # for each triplet combination histogram the dt pair
     # (needs pairwaise dt calcs to be done)
+    last_ch_AB_AC = last_ch_AB_hist
     for i0, v0 in enumerate(Chs_combs3):
         chA, chB, chC = v0[0:3]
         print('channels:', chA, chB, ' & ', chA, chC)
         hist_2d(d2, 1, 1000, chA, chB, chC)
         plot_2d_hist(d2, 200, 1, 1000, chA, chB, chC)
         ch_AB_AC_end = time.time()
-        write_str = ('channels:' + chA + chB + 
-            ' & ' + chA + chC +
-                     ' hist time  =' + str(ch_AB_AC_end))
+        write_str = ('channels:' + chA + chB +
+                     ' & ' + chA + chC +
+                     ' hist time  =' +
+                     str(np.round(ch_AB_AC_end - last_ch_AB_AC, 3)) + '\n')
         log.write(write_str)
+        last_ch_AB_AC = ch_AB_AC_end
 
     # recond time for hsitogramming part of code
     dt_hist_end = time.time()
