@@ -17,6 +17,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 ##############################################################################
 
 # Prepare the directories and channel names ##################################
+
+
 def prep_dirs(d0):
     d1 = d0 + r'\py data'
     d2 = d1 + r'\time difference files'
@@ -78,7 +80,10 @@ def proc_lst(d0):
                 except:
                     missed_counts += 1
                     pass
-            if current_line % 1000000 == 0:
+
+            if current_line % 10000000 == 0:
+                print('Processed', current_line, 'lines')
+                print('Missed', missed_counts, 'counts')
                 f1.close()
                 f2.close()
                 f3.close()
@@ -198,7 +203,7 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
             tot_t = np.max([np.max(tt0), np.max(tt1)]) * 1e-9
             global_t += tot_t
-            
+
             c0 = len(tt0)
             c1 = len(tt1)
 
@@ -231,7 +236,7 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
 
 # Function which calculates closest time differences #########################
 def closest_val(a, b, dts):
-    
+
     c = np.searchsorted(a, b)
 
     for i0, v0 in enumerate(c):
@@ -311,11 +316,11 @@ def hist_2d(d2, res=50, t_range=25100, chA='ch0', chB='ch1', chC='ch2'):
     except:
         pass
     os.chdir(d4)
-    hist_csv_name = ("g3_hist_res_" + str(1000*res) + 'ps' +
+    hist_csv_name = ("g3_hist_res_" + str(1000 * res) + 'ps' +
                      "_range_" + str(t_range) + ".csv")
-    xbins_csv_name = ("g3_xbins_res_" + str(1000*res) + 'ps' +
+    xbins_csv_name = ("g3_xbins_res_" + str(1000 * res) + 'ps' +
                       "_range_" + str(t_range) + ".csv")
-    ybins_csv_name = ("g3_ybins_res_" + str(1000*res) + 'ps' +
+    ybins_csv_name = ("g3_ybins_res_" + str(1000 * res) + 'ps' +
                       "_range_" + str(t_range) + ".csv")
     np.savetxt(hist_csv_name, hists, delimiter=",")
     np.savetxt(xbins_csv_name, bin_edges[0], delimiter=",")
@@ -371,11 +376,11 @@ def plot_1d_hist(d2, xlim=1000, chA='ch0', chB='ch1'):
 
 # Plot a 2d histogram from data in d2 ########################################
 def plot_2d_hist(d2, x_lim, res, t_range, chA='ch0', chB='ch1', chC='ch2'):
-    hist_csv_name = ("g3_hist_res_" + str(1000*res) + 'ps' +
+    hist_csv_name = ("g3_hist_res_" + str(1000 * res) + 'ps' +
                      "_range_" + str(t_range) + ".csv")
-    xbins_csv_name = ("g3_xbins_res_" + str(1000*res) + 'ps' +
+    xbins_csv_name = ("g3_xbins_res_" + str(1000 * res) + 'ps' +
                       "_range_" + str(t_range) + ".csv")
-    ybins_csv_name = ("g3_ybins_res_" + str(1000*res) + 'ps' +
+    ybins_csv_name = ("g3_ybins_res_" + str(1000 * res) + 'ps' +
                       "_range_" + str(t_range) + ".csv")
 
     d4 = d2 + r"\dts " + chA + chB + " & " + chA + chC
@@ -573,51 +578,80 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 # Code to do stuff
 ##############################################################################
-# begin timing
-start_time = time.time()
-
 # specify data directory
 d0 = (r"C:\Data\FCT\20210104\3")
+os.chdir(d0)
 
-# prepare additional directories for processed data
-d1, d2, d3 = prep_dirs(d0)
+# create log file to write to
 
-# call proc_lst & log time
-print('processing lst file into channel arrival time asciis')
-proc_lst(d0)
-lst_end = time.time()
-print("lst proc", lst_end - start_time)
+with open('log.txt', 'w+') as log:
+    # log start
+    start_time = time.time()
+    write_str = ('start = ' + str(start_time))
+    log.write(write_str)
 
-# unwrap ascii arrival times into npy ragged arrays & log time
-print('unwrapping the 4 ascii files into npy arrays')
-unwrap_4ch_data(d0)
-uw_end = time.time()
-print("uw chs", uw_end - lst_end)
+    # prepare additional directories for processed data
+    d1, d2, d3 = prep_dirs(d0)
 
-# define channel labels
-Chs = ['ch0', 'ch1', 'ch2', 'ch3']
+    # call proc_lst
+    print('processing lst file into channel arrival time asciis')
+    proc_lst(d0)
 
-# generate list of possible pairings from channels defined above
-Chs_perms2 = list(set(permutations(Chs, 2)))
+    # log lst end
+    lst_end = time.time()
+    write_str = ('lst processing end = ' + str(lst_end))
+    log.write(write_str)
+    print("lst proc", lst_end - start_time)
 
-for i0, v0 in enumerate(Chs_perms2):
-    chA, chB = v0[0:2]
-    print('channels:', chA, ' & ', chB)
-    gen_dts_from_tts(d2, d3, 'FCT', chA, chB)
-    hist_1d(d2, 0.1, 100000, chA, chB)
-    plot_1d_hist(d2, 200, chA, chB)
+    # unwrap ascii arrival times into npy ragged arrays & log time
+    print('unwrapping the 4 ascii files into npy arrays')
+    unwrap_4ch_data(d0)
 
-# generate list of possible combinations of channels defined above
-Chs_combs3 = list(set(combinations(Chs, 3)))
+    # log unwrap end
+    uw_end = time.time()
+    write_str = ('unwrapping end = ' + str(uw_end))
+    log.write(write_str)
+    print("uw chs", uw_end - lst_end)
 
-# for each triplet combination histogram the dt pair 
-# (needs pairwaise dt calcs to be done)
-for i0, v0 in enumerate(Chs_combs3):
-    chA, chB, chC = v0[0:3]
-    print('channels:', chA, chB, ' & ', chA, chC)
-    hist_2d(d2, 1, 1000, chA, chB, chC)
-    plot_2d_hist(d2, 200, 1, 1000, chA, chB, chC)
+    # define channel labels
+    Chs = ['ch0', 'ch1', 'ch2', 'ch3']
 
-# recond time for hsitogramming part of code
-dt_hist_end = time.time()
-print('dt_hist', dt_hist_end - uw_end)
+    # generate list of possible pairings from channels defined above
+    Chs_perms2 = list(set(permutations(Chs, 2)))
+
+    for i0, v0 in enumerate(Chs_perms2):
+        chA, chB = v0[0:2]
+        print('channels:', chA, ' & ', chB)
+        gen_dts_from_tts(d2, d3, 'FCT', chA, chB)
+        ch_AB_end = time.time()
+        write_str = ('channels:' + chA + ' & ' + chB +
+                     ' dt calc finished = ' + str(ch_AB_end))
+        log.write(write_str)
+        hist_1d(d2, 0.1, 100000, chA, chB)
+        plot_1d_hist(d2, 200, chA, chB)
+        ch_AB_hist = time.time()
+        write_str = ('channels:' + chA + ' & ' + chB +
+                     ' hist finished = ' + str(ch_AB_hist))
+        log.write(write_str)
+        # pairwise dt list calculation time
+     
+
+    # generate list of possible combinations of channels defined above
+    Chs_combs3 = list(set(combinations(Chs, 3)))
+
+    # for each triplet combination histogram the dt pair
+    # (needs pairwaise dt calcs to be done)
+    for i0, v0 in enumerate(Chs_combs3):
+        chA, chB, chC = v0[0:3]
+        print('channels:', chA, chB, ' & ', chA, chC)
+        hist_2d(d2, 1, 1000, chA, chB, chC)
+        plot_2d_hist(d2, 200, 1, 1000, chA, chB, chC)
+        ch_AB_AC_end = time.time()
+        write_str = ('channels:' + chA + chB + 
+            ' & ' + chA + chC +
+                     ' hist time  =' + str(ch_AB_AC_end))
+        log.write(write_str)
+
+    # recond time for hsitogramming part of code
+    dt_hist_end = time.time()
+    print('dt_hist', dt_hist_end - uw_end)
