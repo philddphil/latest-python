@@ -249,27 +249,37 @@ def PPT_save_2d(fig, ax, name):
             print('Base + # exists')
 
 
+# Generic 1D Lorentzian function ##############################################
+def Lorentzian_1D(x, A, x_c, γ, bkg=0):
+    L = (A * γ ** 2) / ((x - x_c)**2 + γ ** 2) + bkg
+    return L
 ##############################################################################
 # Do some stuff
 ##############################################################################
-a = 10
-t = np.linspace(-200, 200, 2000)
-p = 1 - np.exp(-np.abs((1 / a) * t))
+c = 3e8
+h = 6.626e-34
+e = 1.602e-19
+λs = 1e-9 * np.linspace(400, 900, 1000)
+Δλ = 5e-9
+λc = 550e-9
+Es = (h * c) / (λs * e)
+ΔE = Δλ * ((h * c) / (e * λc**2))
 
+L1=Lorentzian_1D(Es, 1, 2.25426, ΔE)
+L2=Lorentzian_1D(λs, 1, 550e-9, Δλ)
 ##############################################################################
 # Plot some figures
 ##############################################################################
 # os.chdir(r"C:\local files\Python\Plots")
 # xy plot ####################################################################
-ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='time (ns)',
-                           yaxis='probability / $ (p_1)^2 $',
+ax1, fig1, cs=set_figure(name='figure',
+                           xaxis='Wavelength (nm)',
+                           yaxis='Amplitude',
                            size=4)
-ax1.plot(t, p)
-# ax1.plot(times0, powers0, '-', alpha=0.5, lw=0.1, c=cs['gglred'])
-# ax1.plot(times1, powers1, '.', ms=1)
-# ax1.plot(times1, powers1, '-', alpha=0.5, lw=0.1, c=cs['gglblue'])
-# ax1.set_yscale('log')
+
+ax1.plot(λs, L1, label='Lor in E')
+ax1.plot(λs, L2, label='Lor in λ')
+
 fig1.tight_layout()
 plt.show()
 # os.chdir(d0)
@@ -349,7 +359,7 @@ plt.show()
 # plt.show()
 
 # save plot ###################################################################
-# ax1.figure.savefig('spec.svg')
-# plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'spec')
+ax1.figure.savefig('spec.svg')
+plot_file_name = 'plot2.png'
+ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
+PPT_save_2d(fig1, ax1, 'spec')

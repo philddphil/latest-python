@@ -117,13 +117,13 @@ def load_SCM_F5L10(filepath):
             x_init = float(data[i0].split("\t")[-1])
         if 'X final' in j0:
             x_fin = float(data[i0].split("\t")[-1])
-        if 'X inc' in j0:
+        if 'X res' in j0:
             x_res = float(data[i0].split("\t")[-1])
         if 'Y initial' in j0:
             y_init = float(data[i0].split("\t")[-1])
         if 'Y final' in j0:
             y_fin = float(data[i0].split("\t")[-1])
-        if 'Y inc' in j0:
+        if 'Y res' in j0:
             y_res = float(data[i0].split("\t")[-1])
         if 'Y wait period / ms' in j0:
             data_start_line = i0 + 2
@@ -169,9 +169,10 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 pX = (r"C:\Data\SCM\SCM Data 20201214\Raster scans")
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 2020014\Raster scans")
-
-p0 = pX
+      r"\SCM Data 20200728\Raster scans")
+pZ = (r"C:\local files\Compiled Data\Nu Quantum"
+      r"\Sample 2\B2 C1 data\Raster scans")
+p0 = pZ
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
@@ -180,7 +181,7 @@ for i0, v0 in enumerate(datafiles):
     print(i0, v0)
 
 size = 5
-for i0, v0 in enumerate(datafiles[0:]):
+for i0, v0 in enumerate(datafiles[-1:]):
     print(os.path.split(v0)[1])
 
     x, y, img = load_SCM_F5L10(v0)
@@ -203,13 +204,13 @@ for i0, v0 in enumerate(datafiles[0:]):
         ax1, fig1, cs = set_figure(name='figure lin',
                                    xaxis='x distance (μm)',
                                    yaxis='y distance (μm)',
-                                   size=5)
+                                   size=size)
         im1 = plt.imshow(np.flipud(img), cmap='magma',
                          extent=extents(y) +
                          extents(x),
                          label=lb,
-                         # vmin=np.min(img),
-                         vmax= 4e4
+                         vmin=np.min(img),
+                         vmax=0.1 * np.max(img),
                          )
         divider = make_axes_locatable(ax1)
         cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -237,14 +238,14 @@ for i0, v0 in enumerate(datafiles[0:]):
         ax2, fig2, cs = set_figure(name='figure log',
                                    xaxis='x distance (μm)',
                                    yaxis='y distance (μm)',
-                                   size=5)
+                                   size=size)
         # plt.title(lb)
         im2 = plt.imshow(np.flipud(log_img), cmap='magma',
                          extent=extents(y) +
                          extents(x),
                          label=lb,
-                         vmin= np.log(1500),
-                         vmax= np.log(5000)
+                         vmin=np.log(7000),
+                         vmax=np.log(45000)
                          )
         divider = make_axes_locatable(ax2)
         cax = divider.append_axes("right", size="5%", pad=0.05)

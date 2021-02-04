@@ -12,13 +12,11 @@ from itertools import permutations
 from itertools import combinations
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+
 ##############################################################################
 # Some defs
 ##############################################################################
-
 # Prepare the directories and channel names ##################################
-
-
 def prep_dirs(d0):
     d1 = d0 + r'\py data'
     d2 = d1 + r'\time difference files'
@@ -141,17 +139,31 @@ def unwrap_4ch_data(d0):
                 previous_data = data
 
                 # save array of arrival times to file
-                if array_size == 1000000:
+                # Set this to 10000 for laptop processing
+                # Or 1000000 for server processing
+                # Or 1000000 for server prov
+                if array_size == 10000:
                     fname = 'ch' + str(i0) + ' ' + str(array_number)
                     np.save(fname, data_array)
-                    data_array = []
+                    
                     array_number += 1
+                    print('saving', fname, 
+                        'phtons arrivals so far', curr_line,
+                        '               ',
+                        'resets so far', array_number * len(data_array))
+
+                    data_array = []
+                    array_size = 0
 
             # save final array of arrival times to file
             fname = 'ch' + str(i0) + ' f'
             np.save(fname, data_array)
             print('total times', curr_line)
             print('total resets', len(data_array))
+            write_str = ('ch arrivals' + str(i0) + '\n'
+                         'Total photons =' + str(curr_line) + '\n'
+                         'Total resets =' + str(len(data_array)) + '\n')
+            log.write(write_str)
 
 
 # Generate histogram vals and bins from dt list & save #######################
@@ -166,6 +178,7 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
     except:
         pass
 
+    dts_number = 0
     dts = []
     global_cps0 = []
     global_cps1 = []
@@ -179,8 +192,15 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
     for i0 in np.arange(len(datafiles0)):
 
         os.chdir(d_dt)
-        TT0 = np.load(datafiles0[i0], allow_pickle=True)
-        TT1 = np.load(datafiles1[i0], allow_pickle=True)
+        try:
+            TT0 = np.load(datafiles0[i0], allow_pickle=True)
+            TT1 = np.load(datafiles1[i0], allow_pickle=True)
+        except:
+            write_str = ("dts " + chA + " & " + chB + ' break at file' + str(i0))
+            log.write(write_str)
+            print('dt proc. stop at file', i0)
+            print(chA, len(TT0), chB, len(TT1))
+            break
 
         TTs = [TT0, TT1]
         print('resets per file a', np.shape(TT0))
@@ -221,6 +241,8 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
                 print('saving dts', dt_file_number)
                 dt_file = 'dts ' + chA + ' ' + chB + ' ' + str(dt_file_number)
                 np.save(dt_file, np.asarray(dts))
+                dts_number += len(dts)
+                print('dts so far', dts_number)
                 dts = []
 
     os.chdir(d_dt)
@@ -229,9 +251,11 @@ def gen_dts_from_tts(d2, d3, TCSPC, chA='ch0', chB='ch1'):
     dts = []
     global_cps0 = np.mean(global_cps0)
     global_cps1 = np.mean(global_cps1)
-
     np.savetxt("other_global.csv", [global_t, global_cps0, global_cps1],
                delimiter=',')
+    write_str = ("dts " + chA + " & " + chB + '\n' +
+                 'Total dts = ' + str(dts_number))
+    log.write(write_str)
 
 
 # Function which calculates closest time differences #########################
@@ -249,7 +273,7 @@ def closest_val(a, b, dts):
                 dt = dt1
             dts.append(dt)
         else:
-            dt0 = b[i0] - a[v0 - 1]
+            dt = b[i0] - a[v0 - 1]
             dts.append(dt)
     return dts
 
@@ -290,14 +314,14 @@ def hist_2d(d2, res=50, t_range=25100, chA='ch0', chB='ch1', chC='ch2'):
 
     file_str_a = (r'\dts ' + chA + ' ' + chB)
     file_str_b = (r'\dts ' + chA + ' ' + chC)
-
+    print(d3a + file_str_a)
     datafiles_a = glob.glob(d3a + file_str_a + r'*')
     datafiles_b = glob.glob(d3b + file_str_b + r'*')
 
     nbins = int(2 * t_range / res + 1)
     edges = np.linspace(-t_range, t_range, nbins + 1)
     edges_2d = np.transpose(np.meshgrid(edges, edges))
-    print(np.shape(edges_2d))
+    print(np.shape(edges_2d), 'data file #', len(datafiles_a))
     hists = np.zeros([nbins, nbins])
 
     for i0, v0 in enumerate(datafiles_a):
@@ -307,7 +331,7 @@ def hist_2d(d2, res=50, t_range=25100, chA='ch0', chB='ch1', chC='ch2'):
         data_array = np.transpose(np.array([dtsAB, dtsAC]))
         hist, bin_edges = np.histogramdd(data_array, [edges, edges])
         hists += hist
-        print(np.max(np.max(hists)))
+        print('max counts', np.max(np.max(hists)))
 
     d4 = d2 + r"\dts " + chA + chB + " & " + chA + chC
 
@@ -436,11 +460,15 @@ def plot_2d_hist(d2, x_lim, res, t_range, chA='ch0', chB='ch1', chC='ch2'):
     ax4.set_xlim(-1 * x_lim, x_lim)
     ax4.set_ylim(-1 * x_lim, x_lim)
     # plt.show()
+    a = re.findall('\d+', chA)[0]
+    b = re.findall('\d+', chB)[0]
+    c = re.findall('\d+', chC)[0]
+    plotname = 'hist ' + a + b + '_' + a + c
     print('max counts', np.max(hist))
-    os.chdir(d4)
-    PPT_save_2d(fig1, ax1, 'profiles')
-    PPT_save_2d_im(fig4, ax4, cb, 'image')
-    plt.close(fig1)
+    os.chdir(d2)
+    # PPT_save_2d(fig1, ax1, 'profiles')
+    PPT_save_2d_im(fig4, ax4, cb, plotname)
+    # plt.close(fig1)
     plt.close(fig4)
 
 
@@ -579,7 +607,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
 # Code to do stuff
 ##############################################################################
 # specify data directory
-d0 = (r"C:\Data\FCT\20210104\3")
+d0 = (r"D:\pd10\TEST8 8hr")
 os.chdir(d0)
 
 # create log file to write to
@@ -587,13 +615,12 @@ os.chdir(d0)
 with open('log.txt', 'w+') as log:
     # log start
     start_time = time.time()
-
     # prepare additional directories for processed data
     d1, d2, d3 = prep_dirs(d0)
 
     # call proc_lst
     print('processing lst file into channel arrival time asciis')
-    proc_lst(d0)
+    # proc_lst(d0)
 
     # log lst end
     lst_end = time.time()
@@ -604,7 +631,7 @@ with open('log.txt', 'w+') as log:
 
     # unwrap ascii arrival times into npy ragged arrays & log time
     print('unwrapping the 4 ascii files into npy arrays')
-    unwrap_4ch_data(d0)
+    # unwrap_4ch_data(d0)
 
     # log unwrap end
     uw_end = time.time()
@@ -619,6 +646,7 @@ with open('log.txt', 'w+') as log:
     # generate list of possible pairings from channels defined above
     Chs_perms2 = list(set(permutations(Chs, 2)))
     last_ch_AB_hist = uw_end
+
     for i0, v0 in enumerate(Chs_perms2):
         chA, chB = v0[0:2]
         print('channels:', chA, ' & ', chB)
@@ -638,7 +666,7 @@ with open('log.txt', 'w+') as log:
                      '\n')
         log.write(write_str)
         last_ch_AB_hist = ch_AB_hist
-        # pairwise dt list calculation time
+    #     # pairwise dt list calculation time
 
     # generate list of possible combinations of channels defined above
     Chs_combs3 = list(set(combinations(Chs, 3)))
