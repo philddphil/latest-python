@@ -6,9 +6,9 @@ import datetime
 ##############################################################################
 # Do some stuff
 ##############################################################################
-R = 30e3
-N = 500
-Res = 5e-9
+R = 7.52e3
+N = 1
+Res = 3e-9
 
 # Calulate times for various g(τ)s. Note factor of 4 for g3 because of the exp arrangement
 

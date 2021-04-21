@@ -318,11 +318,13 @@ def hist_2d(d2, res=50, t_range=25100, chA='ch0', chB='ch1', chC='ch2'):
     datafiles_a = glob.glob(d3a + file_str_a + r'*')
     datafiles_b = glob.glob(d3b + file_str_b + r'*')
 
-    nbins = int(2 * t_range / res + 1)
-    edges = np.linspace(-t_range, t_range, nbins + 1)
+    nbins = int(2 * (t_range / res))
+    centres = np.linspace(-t_range, t_range, nbins + 1)
+    edges = np.linspace(-(t_range + res / 2), (t_range + res / 2), nbins + 2)
+    hists = np.zeros(len(centres))
+
     edges_2d = np.transpose(np.meshgrid(edges, edges))
-    print(np.shape(edges_2d), 'data file #', len(datafiles_a))
-    hists = np.zeros([nbins, nbins])
+    hists = np.zeros([centres, centres])
 
     for i0, v0 in enumerate(datafiles_a):
         print('saving 2D" hist & bins csv - ', i0, 'of', len(datafiles_a))
@@ -340,12 +342,12 @@ def hist_2d(d2, res=50, t_range=25100, chA='ch0', chB='ch1', chC='ch2'):
     except:
         pass
     os.chdir(d4)
-    hist_csv_name = ("g3_hist_res_" + str(1000 * res) + 'ps' +
-                     "_range_" + str(t_range) + ".csv")
-    xbins_csv_name = ("g3_xbins_res_" + str(1000 * res) + 'ps' +
-                      "_range_" + str(t_range) + ".csv")
-    ybins_csv_name = ("g3_ybins_res_" + str(1000 * res) + 'ps' +
-                      "_range_" + str(t_range) + ".csv")
+    hist_csv_name = ("g3_hist_res_" + int(str(1000 * res)) + 'ps' +
+                     "_range_" + int(str(t_range)) + ".csv")
+    xbins_csv_name = ("g3_xbins_res_" + int(str(1000 * res)) + 'ps' +
+                      "_range_" + int(str(t_range) + ".csv"))
+    ybins_csv_name = ("g3_ybins_res_" + int(str(1000 * res)) + 'ps' +
+                      "_range_" + int(str(t_range)) + ".csv")
     np.savetxt(hist_csv_name, hists, delimiter=",")
     np.savetxt(xbins_csv_name, bin_edges[0], delimiter=",")
     np.savetxt(ybins_csv_name, bin_edges[1], delimiter=",")

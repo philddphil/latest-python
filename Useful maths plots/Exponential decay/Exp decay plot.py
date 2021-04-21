@@ -128,90 +128,28 @@ def PPT_save_2d(fig, ax, name, dpi=600):
             print('Base + # exists')
 
 
-# Poissonian distribution at values of k for mean value λ #####################
-def Poissonian_1D(k, λ):
-    P = []
-
-    for i0, j0 in enumerate(k):
-        P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
-
-    return P
-
-
 ##############################################################################
 # Do some stuff
 ##############################################################################
-n_max = 5
-res = n_max + 1
+tau0 = 30
+tau1 = 5
+tau2 = 1
+t = np.linspace(0, 100, 1000)
 
-n_bar1 = 0.5
-n_bar2 = 3
-
-n_ints = np.linspace(0, n_max, res)
-n_cont = np.linspace(0, n_max, 1024)
-
-P_ints1 = Poissonian_1D(n_ints, n_bar1)
-P_cont1 = Poissonian_1D(n_cont, n_bar1)
-
-P_ints2 = Poissonian_1D(n_ints, n_bar2)
-P_cont2 = Poissonian_1D(n_cont, n_bar2)
-
+y0 = np.exp(-t / tau0)
+y1 = np.exp(-t / tau1)
+y2 = np.exp(-t / tau2)
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
-plot_path = r"D:\Python\Plots\\"
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
-x_d = n_ints
-y_d1 = [i0*0.2 for i0 in P_ints1]
-y_d1 = P_ints1
-y_d2 = P_ints2
+ax1, fig1, cs = set_figure('figure', 'time ns', 'Normalised counts', 3)
 
-x_c = n_cont
-y_c1 = P_cont1
-y_c2 = P_cont2
+plt.plot(t, y0, label='$τ_1$ = 30 ns - NV')
+plt.plot(t, y1, label='$τ_2$ = 5 ns - hBN')
+plt.plot(t, y2, label='$τ_3$ = 1 ns - QD')
 
-ax2, fig2, cs = set_figure('figure', r'$\langle n \rangle$', 'Probability', 3)
-
-# plt.plot(x1, y1, '.', alpha=0.8, color=cs['gglred'], label=r'$\mathbb{N}$')
-
-# plt.bar(1, 0.8,
-#         alpha=1,
-#         color=cs['gglblue'],
-#         label=r'0.8|1$\rangle$')
-
-# plt.bar(2, 0.2,
-#         alpha=1,
-#         color=cs['gglpurple'],
-#         label=r'0.2|2$\rangle$')
-
-plt.bar(x_d, y_d1,
-        alpha=1,
-        color=cs['gglred'],
-        label=r'|α$_{0.5}\rangle$')
-
-# plt.bar(x_d, y_d2, alpha=0.5, color=cs['gglpurple'], label=r'|α$_3\rangle$')
-# plt.plot(x1, y1, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
-# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
-# plt.plot(x_c, y_c2, alpha=1, color=cs['ggblue'], lw=0.5)
-
-plt.plot(x_c, y_c1,
-         alpha=1,
-         color=cs['ggred'],
-         lw=1,
-         label=r'$\mathbb{R}$')
-
-ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# ax2.set_yscale('log')
-ax2.set_xlim(-0.5, 5.5)
-ax2.set_ylim(0, 1.1)
-# os.chdir(p0)
 plt.tight_layout()
 plt.show()
-ax2.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-PPT_save_2d(fig2, ax2, 'plot')
+ax1.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
+PPT_save_2d(fig1, ax1, 'plot')

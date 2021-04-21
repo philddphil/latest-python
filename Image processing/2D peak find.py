@@ -180,13 +180,14 @@ def PPT_save_2d_im(fig, ax, cb, name):
     # Loop to check for file - appends filename with _# if name already exists
     f_exist = True
     app_no = 0
+    dpi = 600
     while f_exist is True:
         if os.path.exists(name + '.png') is False:
             ax.figure.savefig(name)
             f_exist = False
             print('Base exists')
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
+            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
             f_exist = False
             print(' # = ' + str(app_no))
         else:
@@ -196,65 +197,65 @@ def PPT_save_2d_im(fig, ax, cb, name):
 
 def image_object_find(x_img, y_img, img, u_lim):
 
-  y_img = y_img[::-1]
-  krnl_size = 10
-  x_k = np.arange(krnl_size)
-  y_k = np.arange(krnl_size)
+    y_img = y_img[::-1]
+    krnl_size = 10
+    x_k = np.arange(krnl_size)
+    y_k = np.arange(krnl_size)
 
-  coords = np.meshgrid(x_k, y_k)
+    coords = np.meshgrid(x_k, y_k)
 
-  G = Gaussian_2D(coords, 1, int(krnl_size - 1) / 2,
-                  int(krnl_size - 1) / 2, 1, 1)
-  G = np.reshape(G, (krnl_size, krnl_size))
+    G = Gaussian_2D(coords, 1, int(krnl_size - 1) / 2,
+                    int(krnl_size - 1) / 2, 1, 1)
+    G = np.reshape(G, (krnl_size, krnl_size))
 
-  img_1 = ndi.convolve(img, G)
+    img_1 = ndi.convolve(img, G)
 
-  img_2 = img_1
-  super_threshold_indices = img_1 < Ulim
-  img_1[super_threshold_indices] = 0
+    img_2 = img_1
+    super_threshold_indices = img_1 < Ulim
+    img_1[super_threshold_indices] = 0
 
-  img_3, label_nmbr = ndi.label(img_2)
+    img_3, label_nmbr = ndi.label(img_2)
 
+    peak_slices = ndi.find_objects(img_3)
+    print('Objects found (#) = ', len(peak_slices))
+    centroids_px = []
+    for peak_slice in peak_slices:
+        dy, dx = peak_slice
+        x, y = dx.start, dy.start
+        cx, cy = centroid(img_3[peak_slice])
+        centroids_px.append((x + cx, y + cy))
 
-  peak_slices = ndi.find_objects(img_3)
-  print('Objects found (#) = ', len(peak_slices))
-  centroids_px = []
-  for peak_slice in peak_slices:
-      dy, dx = peak_slice
-      x, y = dx.start, dy.start
-      cx, cy = centroid(img_3[peak_slice])
-      centroids_px.append((x + cx, y + cy))
+    shape_img = np.shape(img)
+    x_px = np.arange(0, shape_img[0])
+    y_px = np.arange(0, shape_img[1])
 
+    x_px_m = (x_px[-1] - x_px[0]) / len(x_px)
+    y_px_m = (y_px[-1] - y_px[0]) / len(y_px)
 
-  shape_img = np.shape(img)
-  x_px = np.arange(0, shape_img[0])
-  y_px = np.arange(0, shape_img[1])
+    x_img_m = (x_img[-1] - x_img[0]) / len(x_img)
+    y_img_m = (y_img[-1] - y_img[0]) / len(y_img)
+    centroids_img = []
 
-  x_px_m = (x_px[-1] - x_px[0]) / len(x_px)
-  y_px_m = (y_px[-1] - y_px[0]) / len(y_px)
+    for x, y in centroids_px:
+        centroids_img.append(((x * (x_img_m / x_px_m) - (x_px[0] - x_img[0])),
+                              (y * (y_img_m / y_px_m) - (y_px[0] - y_img[0]))))
 
-  x_img_m = (x_img[-1] - x_img[0]) / len(x_img)
-  y_img_m = (y_img[-1] - y_img[0]) / len(y_img)
-  centroids_img = []
-
-  for x, y in centroids_px:
-      centroids_img.append(((x * (x_img_m / x_px_m) - (x_px[0] - x_img[0])),
-                            (y * (y_img_m / y_px_m) - (y_px[0] - y_img[0]))))
-
-  return centroids_img
+    return centroids_img
 
 
 ##############################################################################
 # File paths
 ##############################################################################
-p0 = (r"C:\Data\SCM\SCM Data 20201208\Raster scans\09Dec20 scan-001.txt")
+p0 = (r"C:\Data\SCM\SCM Data 20201208\Raster scans\0Dec20 scan-001.txt")
 d0 = (r"C:\Data\SCM\SCM Data 20201208\Raster scans")
 
+p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans\02Dec20 scan-001.txt")
+d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans")
 ##############################################################################
 # Image processing to retrieve peak locations
 ##############################################################################
-Ulim = 90000
-clim = [0, Ulim]
+Ulim = 110000
+clim = [2000, 20000]
 
 x_img, y_img, img = load_SCM_F5L10(p0)
 # img = np.flipud(img)
@@ -288,7 +289,8 @@ for x, y in centroids_img:
     ax1.text(x, y, '  ' + str(pk_number),
              c=cs['mnk_green'])
 
-ax2, fig2, cs = set_figure('fig2',  size=7)
+
+ax2, fig2, cs = set_figure('fig2',  size=5)
 im2 = plt.imshow(img, cmap='magma',
                  extent=extents(x_img) + extents(y_img),
                  vmin=clim[0], vmax=clim[1]
@@ -333,4 +335,5 @@ for x, y in centroids_img:
 plt.show()
 os.chdir(d0)
 np.savetxt("coords.csv", centroids_img, delimiter=",")
-PPT_save_2d_im(fig1, ax1, cbar1, 'Labelled image.png')
+PPT_save_2d_im(fig2, ax2, cbar2, 'Labelled image.png')
+ax2.figure.savefig('Labelled image.svg')

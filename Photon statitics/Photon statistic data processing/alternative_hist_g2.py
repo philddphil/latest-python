@@ -2,10 +2,10 @@
 # Import some libraries
 ##############################################################################
 import os
-import sys
+import glob
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
+from numpy import random
 
 
 ##############################################################################
@@ -21,28 +21,6 @@ def palette():
                'mnk_blue': [75 / 255, 179 / 255, 232 / 255],
                'mnk_orange': [224 / 255, 134 / 255, 31 / 255],
                'mnk_pink': [180 / 255, 38 / 255, 86 / 255],
-               ####
-               'rmp_dblue': [12 / 255, 35 / 255, 218 / 255],
-               'rmp_lblue': [46 / 255, 38 / 255, 86 / 255],
-               'rmp_pink': [210 / 255, 76 / 255, 197 / 255],
-               'rmp_green': [90 / 255, 166 / 255, 60 / 255],
-               ####
-               'fibre9l_1': [234 / 255, 170 / 255, 255 / 255],
-               'fibre9l_2': [255 / 255, 108 / 255, 134 / 255],
-               'fibre9l_3': [255 / 255, 182 / 255, 100 / 255],
-               'fibre9l_4': [180 / 255, 151 / 255, 255 / 255],
-               'fibre9l_6': [248 / 255, 255 / 255, 136 / 255],
-               'fibre9l_7': [136 / 255, 172 / 255, 255 / 255],
-               'fibre9l_8': [133 / 255, 255 / 255, 226 / 255],
-               'fibre9l_9': [135 / 255, 255 / 255, 132 / 255],
-               'fibre9d_1': [95 / 255, 0 / 255, 125 / 255],
-               'fibre9d_2': [157 / 255, 0 / 255, 28 / 255],
-               'fibre9d_3': [155 / 255, 82 / 255, 0 / 255],
-               'fibre9d_4': [40 / 255, 0 / 255, 147 / 255],
-               'fibre9d_6': [119 / 255, 125 / 255, 0 / 255],
-               'fibre9d_7': [0 / 255, 39 / 255, 139 / 255],
-               'fibre9d_8': [0 / 255, 106 / 255, 85 / 255],
-               'fibre9d_9': [53 / 255, 119 / 255, 0 / 255],
                ####
                'ggred': [217 / 255, 83 / 255, 25 / 255],
                'ggblue': [30 / 255, 144 / 255, 229 / 255],
@@ -88,7 +66,7 @@ def ggplot():
 
 
 # Set up figure for plotting #################################################
-def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=3):
+def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     ggplot()
     cs = palette()
     fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
@@ -128,90 +106,56 @@ def PPT_save_2d(fig, ax, name, dpi=600):
             print('Base + # exists')
 
 
-# Poissonian distribution at values of k for mean value λ #####################
-def Poissonian_1D(k, λ):
-    P = []
+# For use with extents in imshow ##############################################
+def extents(f):
+    delta = f[1] - f[0]
+    return [f[0] - delta / 2, f[-1] + delta / 2]
 
-    for i0, j0 in enumerate(k):
-        P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
 
-    return P
+# Generate histogram vals and bins from dt list & save #######################
+def hist_1d_fname(d2, res=0.4, t_range=25100):
+
+    hist_f = ("range" + str(int(t_range)) +
+              "ns res" + str(int(res * 1e3)) + "ps g2_hist.csv")
+    bins_f = ("range" + str(int(t_range)) +
+              "ns res" + str(int(res * 1e3)) + "ps g2_bins.csv")
+    return bins_f, hist_f
+
+
+# Generate histogram vals and bins from dt list & save #######################
+def hist_1d(d0, res=0.1, t_range=150000):
+    d1 = d0 + r"\dts"
+    file_str = (r'\dt_array_*')
+    datafiles = glob.glob(d1 + file_str)
+
+    nbins = int(2 * (t_range / res))
+    centres = np.linspace(-t_range, t_range, nbins + 1)
+    edges = np.linspace(-(t_range + res / 2), (t_range + res / 2), nbins + 2)
+    hists = np.zeros(len(centres))
+
+    for i0, v0 in enumerate(datafiles[0:]):
+        print('saving hist & bins csv - ', i0, 'of', len(datafiles))
+        dts = np.load(v0, allow_pickle=True)
+        for i1, v1 in enumerate(dts):
+            print(i1, len(v1))
+            hist, bin_edges = np.histogram(v1, edges)
+            hists += hist
+
+    hist_file = ("range" + str(int(t_range)) +
+                 "ns res" + str(int(res * 1e3)) + "ps g2_hist.csv")
+    bins_file = ("range" + str(int(t_range)) +
+                 "ns res" + str(int(res * 1e3)) + "ps g2_bins.csv")
+    os.chdir(d1)
+    print('saving histogram file')
+    np.savetxt(hist_file, hists, delimiter=",")
+    np.savetxt(bins_file, bin_edges, delimiter=",")
+    return bins_file, hist_file
 
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-n_max = 5
-res = n_max + 1
-
-n_bar1 = 0.5
-n_bar2 = 3
-
-n_ints = np.linspace(0, n_max, res)
-n_cont = np.linspace(0, n_max, 1024)
-
-P_ints1 = Poissonian_1D(n_ints, n_bar1)
-P_cont1 = Poissonian_1D(n_cont, n_bar1)
-
-P_ints2 = Poissonian_1D(n_ints, n_bar2)
-P_cont2 = Poissonian_1D(n_cont, n_bar2)
-
-
-##############################################################################
-# Plot some figures
-##############################################################################
-plot_path = r"D:\Python\Plots\\"
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
-x_d = n_ints
-y_d1 = [i0*0.2 for i0 in P_ints1]
-y_d1 = P_ints1
-y_d2 = P_ints2
-
-x_c = n_cont
-y_c1 = P_cont1
-y_c2 = P_cont2
-
-ax2, fig2, cs = set_figure('figure', r'$\langle n \rangle$', 'Probability', 3)
-
-# plt.plot(x1, y1, '.', alpha=0.8, color=cs['gglred'], label=r'$\mathbb{N}$')
-
-# plt.bar(1, 0.8,
-#         alpha=1,
-#         color=cs['gglblue'],
-#         label=r'0.8|1$\rangle$')
-
-# plt.bar(2, 0.2,
-#         alpha=1,
-#         color=cs['gglpurple'],
-#         label=r'0.2|2$\rangle$')
-
-plt.bar(x_d, y_d1,
-        alpha=1,
-        color=cs['gglred'],
-        label=r'|α$_{0.5}\rangle$')
-
-# plt.bar(x_d, y_d2, alpha=0.5, color=cs['gglpurple'], label=r'|α$_3\rangle$')
-# plt.plot(x1, y1, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
-# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
-# plt.plot(x_c, y_c2, alpha=1, color=cs['ggblue'], lw=0.5)
-
-plt.plot(x_c, y_c1,
-         alpha=1,
-         color=cs['ggred'],
-         lw=1,
-         label=r'$\mathbb{R}$')
-
-ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# ax2.set_yscale('log')
-ax2.set_xlim(-0.5, 5.5)
-ax2.set_ylim(0, 1.1)
-# os.chdir(p0)
-plt.tight_layout()
-plt.show()
-ax2.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-PPT_save_2d(fig2, ax2, 'plot')
+# specify data directory
+d0 = (r"D:\pd10\TEST4 2hr")
+os.chdir(d0)
+hist_1d(d0)

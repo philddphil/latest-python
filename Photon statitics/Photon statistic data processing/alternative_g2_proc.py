@@ -1,9 +1,16 @@
 ##############################################################################
 # Import some libraries
 ##############################################################################
+import os
+import re
+import glob
+import time
+import random
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy import random
+from itertools import permutations
+from itertools import combinations
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 ##############################################################################
@@ -75,70 +82,58 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     return ax1, fig1, cs
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png ################
-def PPT_save_2d(fig, ax, name, dpi=600):
+# Generate histogram vals and bins from dt list & save #######################
+def hist_1d_fname(d2, res=0.4, t_range=25100):
 
-    # Set plot colours
-    plt.rcParams['text.color'] = 'xkcd:black'
-    plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
-    ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
-    ax.xaxis.label.set_color('xkcd:black')
-    ax.yaxis.label.set_color('xkcd:black')
-    ax.tick_params(axis='x', colors='xkcd:black')
-    ax.tick_params(axis='y', colors='xkcd:black')
-
-    # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name, dpi=dpi)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
+    g2_f = ("range" + str(int(t_range)) +
+            "ns res" + str(int(res * 1e3)) + "ps g2.csv")
+    g2_hist_f = ("range" + str(int(t_range)) +
+                 "ns res" + str(int(res * 1e3)) + "ps g2_hist.csv")
+    bins_f = ("range" + str(int(t_range)) +
+              "ns res" + str(int(res * 1e3)) + "ps g2_bins.csv")
+    return g2_f, bins_f, g2_hist_f
 
 
-# For use with extents in imshow ##############################################
-def extents(f):
-    delta = f[1] - f[0]
-    return [f[0] - delta / 2, f[-1] + delta / 2]
+# Generate histogram vals and bins from dt list & save #######################
+def hist_2d_fname(d2, res=0.4, t_range=25100):
+
+    g3_f = ("range" + str(int(t_range)) +
+            "ns res" + str(int(res * 1e3)) + "ps g3.csv")
+    g3_hist_f = ("range" + str(int(t_range)) +
+                 "ns res" + str(int(res * 1e3)) + "ps g3_hist.csv")
+    xbins_f = ("range" + str(int(t_range)) +
+               "ns res" + str(int(res * 1e3)) + "ps g3_xbins.csv")
+    ybins_f = ("range" + str(int(t_range)) +
+               "ns res" + str(int(res * 1e3)) + "ps g3_ybins.csv")
+    return g3_f, xbins_f, ybins_f, g3_hist_f
+
+
 ##############################################################################
-# Do some stuff
+# Code to do stuff
 ##############################################################################
-t_range = 10
-res = 2.5
+# specify data directory
+d0 = (r"C:\local files\Compiled Data\G3s\Single")
+d1 = d0 + r"\alt results"
+d2 = d0 + r"\results"
+os.chdir(d1)
 
-data1 = random.rand(1000)
-data2 = random.rand(1000)
-data1 = t_range*(2 * data1 - 1)
-data2 = t_range*(2 * data2 - 1)
-data_array = np.transpose(np.array([data1, data2]))
+g2_res = 0.1
+g3_res = 30 * g2_res
+t_range = 1500
+t_lim = 1500
 
+g2_fa, bins_fa, g2_hist_fa = hist_1d_fname(d1, g2_res, t_range)
+g2_f, bins_f, g2_hist_f = hist_1d_fname(d2, g2_res, t_range)
 
-nbins = int(2 * (t_range / res))
-centres = np.linspace(-t_range, t_range, nbins + 1)
-edges = np.linspace(-(t_range + res / 2), (t_range + res / 2), nbins + 2)
+bins = np.genfromtxt(bins_f)
+g2_hista = np.genfromtxt(g2_hist_fa)
+os.chdir(d2)
+g2_hist = np.genfromtxt(g2_hist_f)
 
-edges_2d = np.transpose(np.meshgrid(edges, edges))
-hists = np.zeros([len(centres), len(centres)])
+x_w = bins[1] - bins[0]
+ts = np.arange(bins[0] + x_w / 2, bins[-1], x_w)
 
-hist, bin_edges = np.histogramdd(data_array, [edges, edges])
-
-data_lin = np.arange(np.min(edges), np.max(edges),1)
-
-print(edges)
-print(np.shape(bin_edges))
-print(bin_edges[0])
-print(bin_edges[1])
-ax1, fig1, cs = set_figure()
-plt.imshow(hist, extent=extents(centres) + extents(centres),)
-ax1.plot(centres, centres, '.')
-ax1.plot(edges, edges, '.', markersize=15)
-ax1.plot(data_lin, np.zeros(np.shape(data_lin)), '.')
+set_figure()
+plt.plot(ts, g2_hista / (2 * 7200))
+plt.plot(10 * ts[0:len(g2_hist)] + 100, g2_hist)
 plt.show()

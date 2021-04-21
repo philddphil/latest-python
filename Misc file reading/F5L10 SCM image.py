@@ -112,21 +112,39 @@ def load_SCM_F5L10(filepath):
     a = open(filepath, 'r', encoding='utf-8')
     data = a.readlines()
     a.close()
-    for i0, j0 in enumerate(data):
-        if 'X initial' in j0:
-            x_init = float(data[i0].split("\t")[-1])
-        if 'X final' in j0:
-            x_fin = float(data[i0].split("\t")[-1])
-        if 'X res' in j0:
-            x_res = float(data[i0].split("\t")[-1])
-        if 'Y initial' in j0:
-            y_init = float(data[i0].split("\t")[-1])
-        if 'Y final' in j0:
-            y_fin = float(data[i0].split("\t")[-1])
-        if 'Y res' in j0:
-            y_res = float(data[i0].split("\t")[-1])
-        if 'Y wait period / ms' in j0:
-            data_start_line = i0 + 2
+    try:
+      for i0, j0 in enumerate(data):
+          if 'X initial' in j0:
+              x_init = float(data[i0].split("\t")[-1])
+          if 'X final' in j0:
+              x_fin = float(data[i0].split("\t")[-1])
+          if 'X res' in j0:
+              x_res = float(data[i0].split("\t")[-1])
+          if 'Y initial' in j0:
+              y_init = float(data[i0].split("\t")[-1])
+          if 'Y final' in j0:
+              y_fin = float(data[i0].split("\t")[-1])
+          if 'Y res' in j0:
+              y_res = float(data[i0].split("\t")[-1])
+          if 'Y wait period / ms' in j0:
+              data_start_line = i0 + 2
+    except:
+       for i0, j0 in enumerate(data):
+          if 'X initial' in j0:
+              x_init = float(data[i0].split("\t")[-1])
+          if 'X final' in j0:
+              x_fin = float(data[i0].split("\t")[-1])
+          if 'X res' in j0:
+              print('data', data[i0])
+              x_res = float(data[i0].split("\t")[-1])
+          if 'Y initial' in j0:
+              y_init = float(data[i0].split("\t")[-1])
+          if 'Y final' in j0:
+              y_fin = float(data[i0].split("\t")[-1])
+          if 'Y res' in j0:
+              y_res = float(data[i0].split("\t")[-1])
+          if 'Y wait period / ms' in j0:
+              data_start_line = i0 + 2
 
     x = np.linspace(x_init, x_fin, int(x_res))
     y = np.linspace(y_fin, y_init, int(y_res))
@@ -135,7 +153,7 @@ def load_SCM_F5L10(filepath):
 
 
 # Save 2d image with a colourscheme suitable for ppt, as a png ###############
-def PPT_save_2d_im(fig, ax, cb, name):
+def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
     ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
@@ -144,7 +162,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
     ax.tick_params(axis='x', colors='xkcd:black')
     ax.tick_params(axis='y', colors='xkcd:black')
     cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
-    # cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
+    cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
     plt.setp(cbytick_obj, color='xkcd:black')
 
     # Loop to check for file - appends filename with _# if name already exists
@@ -152,11 +170,11 @@ def PPT_save_2d_im(fig, ax, cb, name):
     app_no = 0
     while f_exist is True:
         if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
+            ax.figure.savefig(name, dpi=dpi)
             f_exist = False
             print('Base exists')
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
+            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
             f_exist = False
             print(' # = ' + str(app_no))
         else:
@@ -169,10 +187,10 @@ def PPT_save_2d_im(fig, ax, cb, name):
 ##############################################################################
 pX = (r"C:\Data\SCM\SCM Data 20201214\Raster scans")
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20200728\Raster scans")
+      r"\SCM Data 20201201\Raster scans")
 pZ = (r"C:\local files\Compiled Data\Nu Quantum"
       r"\Sample 2\B2 C1 data\Raster scans")
-p0 = pZ
+p0 = pY
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
@@ -180,7 +198,7 @@ print(len(datafiles), 'images found')
 for i0, v0 in enumerate(datafiles):
     print(i0, v0)
 
-size = 5
+size = 3
 for i0, v0 in enumerate(datafiles[-1:]):
     print(os.path.split(v0)[1])
 
@@ -188,8 +206,8 @@ for i0, v0 in enumerate(datafiles[-1:]):
 
     log_img = np.log(img)
     # FSM scaling: 12.5 microns = 1.56
-    # x = x * 25 / (2.6 - 1.4)
-    # y = y * 25 / (2.6 - 1.4)
+    x = x * 25 / (2.6 - 1.4)
+    y = y * 25 / (2.6 - 1.4)
     # Piezo scaling 10V = 25 microns
     # x = x * 2.5
     # y = y * 2.5
@@ -210,13 +228,13 @@ for i0, v0 in enumerate(datafiles[-1:]):
                          extents(x),
                          label=lb,
                          vmin=np.min(img),
-                         vmax=0.1 * np.max(img),
+                         vmax=0.5 * np.max(img),
                          )
         divider = make_axes_locatable(ax1)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cbar1 = fig1.colorbar(im1, cax=cax)
         cbar1.ax.get_yaxis().labelpad = 15
-        cbar1.set_label('counts / second', rotation=270)
+        cbar1.set_label('counts / second', rotation=270, c='xkcd:black')
         plt.tight_layout()
         plt.show()
         os.chdir(p0)
@@ -244,19 +262,19 @@ for i0, v0 in enumerate(datafiles[-1:]):
                          extent=extents(y) +
                          extents(x),
                          label=lb,
-                         vmin=np.log(7000),
-                         vmax=np.log(45000)
+                         vmin=np.log(1500),
+                         vmax=np.log(145000)
                          )
         divider = make_axes_locatable(ax2)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         fig2.colorbar(im2, cax=cax)
         cbar2 = fig2.colorbar(im2, cax=cax)
         cbar2.ax.get_yaxis().labelpad = 15
-        cbar2.set_label('log [counts / second]', rotation=270)
+        cbar2.set_label('log [counts / second]', rotation=270, c='xkcd:black')
         plt.tight_layout()
         plt.show()
         os.chdir(p0)
-        PPT_save_2d_im(fig2, ax2, cbar1, plotname2)
+        PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
     except:
         print(np.shape(img))
         pass
