@@ -185,12 +185,14 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 ##############################################################################
 # Def some functions
 ##############################################################################
-pX = (r"C:\Data\SCM\SCM Data 20201214\Raster scans")
+##### PXI file path
+pX = (r"C:\Data\SCM\SCM Data 20210616\Raster scans")
+##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20201201\Raster scans")
+      r"\SCM Data 20210513\Raster scans")
 pZ = (r"C:\local files\Compiled Data\Nu Quantum"
       r"\Sample 2\B2 C1 data\Raster scans")
-p0 = pY
+p0 = pX
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
@@ -205,10 +207,12 @@ for i0, v0 in enumerate(datafiles[-1:]):
     x, y, img = load_SCM_F5L10(v0)
 
     log_img = np.log(img)
-    # FSM scaling: 12.5 microns = 1.56
-    x = x * 25 / (2.6 - 1.4)
-    y = y * 25 / (2.6 - 1.4)
-    # Piezo scaling 10V = 25 microns
+
+    #### Scaling for old files with voltages saved, not microns
+    #### FSM scaling: 12.5 microns = 1.56
+    # x = x * 25 / (2.6 - 1.4)
+    # y = y * 25 / (2.6 - 1.4)
+    #### Piezo scaling 10V = 25 microns
     # x = x * 2.5
     # y = y * 2.5
 

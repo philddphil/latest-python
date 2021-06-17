@@ -167,8 +167,8 @@ def I_sat_plot(file, title=''):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Data\SCM\SCM Data 20210105\PSats")
+d0 = (r"C:\Data\SCM\SCM Data 20210616\PSats")
 fs = glob.glob(d0 + r'\*.txt')
-f0 = fs[1]
+f0 = fs[-1]
 os.chdir(d0)
 I_sat_plot(f0)
