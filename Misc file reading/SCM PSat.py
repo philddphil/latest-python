@@ -39,13 +39,13 @@ def palette():
     return colours
 
 
-# set rcParams for nice plots #################################################
-def ggplot():
+# set rcParams for nice plots ################################################
+def ggplot_sansserif():
     colours = palette()
-    plt.style.use('ggplot')
+    # plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
-    plt.rcParams['font.family'] = 'monospace'
-    plt.rcParams['font.fantasy'] = 'Nimbus Mono'
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
     plt.rcParams['axes.labelsize'] = 8
     plt.rcParams['axes.labelweight'] = 'normal'
     plt.rcParams['xtick.labelsize'] = 8
@@ -68,7 +68,7 @@ def ggplot():
 
 # Set up figure for plotting #################################################
 def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
-    ggplot()
+    ggplot_sansserif()
     cs = palette()
     fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
     ax1 = fig1.add_subplot(111)
@@ -78,8 +78,8 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
     return ax1, fig1, cs
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png #################
-def PPT_save_2d(fig, ax, name):
+# Save 2d plot with a colourscheme suitable for ppt, as a png ################
+def PPT_save_2d(fig, ax, name, dpi=600):
 
     # Set plot colours
     plt.rcParams['text.color'] = 'xkcd:black'
@@ -95,16 +95,17 @@ def PPT_save_2d(fig, ax, name):
     app_no = 0
     while f_exist is True:
         if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
+            ax.figure.savefig(name, dpi=dpi)
             f_exist = False
             print('Base exists')
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no))
+            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
             f_exist = False
             print(' # = ' + str(app_no))
         else:
             app_no = app_no + 1
             print('Base + # exists')
+
 
 
 # Saturation curve ###########################################################
@@ -116,10 +117,10 @@ def I_sat(x, I_sat, P_sat, P_bkg, bkg):
 # Plot the I sat curve for data stored in file. Note plt.show() ##############
 def I_sat_plot(file, title=''):
     data = np.genfromtxt(file, delimiter=',', skip_header=0)
-    Ps = data[0]
+    Ps = 1000*data[0]
     kcps = data[1] / 1000
 
-    initial_guess = (1.5e2, 1e-1, 1e3, 1e0)
+    initial_guess = (1.5e2, 1, 0, 0)
     popt, _ = opt.curve_fit(I_sat, Ps, kcps, p0=initial_guess,
                             bounds=((0, 0, 0, 0),
                                     (np.inf, np.inf, np.inf, np.inf)))
@@ -160,15 +161,43 @@ def I_sat_plot(file, title=''):
     # plt.show()
     ax1.legend(loc='lower right', fancybox=True,
                facecolor=(1.0, 1.0, 1.0, 0.0))
-    PPT_save_2d(fig1, ax1, 'Psat1')
+    # PPT_save_2d(fig1, ax1, 'Psat1')
     plt.close(fig1)
-
+    return Ps, kcps, popt
 
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0 = (r"C:\Data\SCM\SCM Data 20210105\PSats")
+d0 = (r'C:\local files\Compiled Data\G3s\Other data\PSats')
 fs = glob.glob(d0 + r'\*.txt')
-f0 = fs[1]
+f0 = fs[0]
+f1 = fs[1]
 os.chdir(d0)
-I_sat_plot(f0)
+Ps_0, kcps_0, popt_0 = I_sat_plot(f0)
+Ps_1, kcps_1, popt_1 = I_sat_plot(f1)
+
+Ps_fit = np.linspace(np.min(Ps_0), np.max(Ps_0), 1000)
+
+Isat_fit_0 = I_sat(Ps_fit, *popt_0)
+Isat_fit_1 = I_sat(Ps_fit, *popt_1)
+
+ax1, fig1, cs = set_figure(name='figure',
+                           xaxis='Power (mW)',
+                           yaxis='$10^3$ counts per secound',
+                           size=2.5)
+
+plt.plot(Ps_0, kcps_0, '.', label='data',
+  color=cs['ggdblue'])
+plt.plot(Ps_fit, Isat_fit_0, '-',
+  color=cs['gglblue'])
+
+plt.plot(Ps_1, kcps_1, '.', 
+  label='data',
+  color=cs['ggdred']
+  )
+plt.plot(Ps_fit, Isat_fit_1, '-',
+  color=cs['gglred'])
+
+plt.tight_layout()
+plt.show()
+PPT_save_2d(fig1, ax1, 'Plot')

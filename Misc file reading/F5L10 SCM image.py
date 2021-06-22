@@ -7,6 +7,7 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colors import LogNorm
 
 
 ##############################################################################
@@ -63,12 +64,12 @@ def palette():
 
 
 # set rcParams for nice plots ################################################
-def ggplot():
+def ggplot_sansserif():
     colours = palette()
-    plt.style.use('ggplot')
+    # plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
-    plt.rcParams['font.family'] = 'monospace'
-    plt.rcParams['font.fantasy'] = 'Nimbus Mono'
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
     plt.rcParams['axes.labelsize'] = 8
     plt.rcParams['axes.labelweight'] = 'normal'
     plt.rcParams['xtick.labelsize'] = 8
@@ -91,7 +92,7 @@ def ggplot():
 
 # Set up figure for plotting #################################################
 def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
-    ggplot()
+    ggplot_sansserif()
     cs = palette()
     fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
     ax1 = fig1.add_subplot(111)
@@ -112,39 +113,40 @@ def load_SCM_F5L10(filepath):
     a = open(filepath, 'r', encoding='utf-8')
     data = a.readlines()
     a.close()
-    try:
-      for i0, j0 in enumerate(data):
-          if 'X initial' in j0:
-              x_init = float(data[i0].split("\t")[-1])
-          if 'X final' in j0:
-              x_fin = float(data[i0].split("\t")[-1])
-          if 'X res' in j0:
-              x_res = float(data[i0].split("\t")[-1])
-          if 'Y initial' in j0:
-              y_init = float(data[i0].split("\t")[-1])
-          if 'Y final' in j0:
-              y_fin = float(data[i0].split("\t")[-1])
-          if 'Y res' in j0:
-              y_res = float(data[i0].split("\t")[-1])
-          if 'Y wait period / ms' in j0:
-              data_start_line = i0 + 2
-    except:
-       for i0, j0 in enumerate(data):
-          if 'X initial' in j0:
-              x_init = float(data[i0].split("\t")[-1])
-          if 'X final' in j0:
-              x_fin = float(data[i0].split("\t")[-1])
-          if 'X res' in j0:
-              print('data', data[i0])
-              x_res = float(data[i0].split("\t")[-1])
-          if 'Y initial' in j0:
-              y_init = float(data[i0].split("\t")[-1])
-          if 'Y final' in j0:
-              y_fin = float(data[i0].split("\t")[-1])
-          if 'Y res' in j0:
-              y_res = float(data[i0].split("\t")[-1])
-          if 'Y wait period / ms' in j0:
-              data_start_line = i0 + 2
+
+  # for i0, j0 in enumerate(data):
+  #     if 'X initial' in j0:
+  #         x_init = float(data[i0].split("\t")[-1])
+  #     if 'X final' in j0:
+  #         x_fin = float(data[i0].split("\t")[-1])
+  #     if 'X res' in j0:
+  #         x_res = float(data[i0].split("\t")[-1])
+  #         print(x_res)
+  #     if 'Y initial' in j0:
+  #         y_init = float(data[i0].split("\t")[-1])
+  #     if 'Y final' in j0:
+  #         y_fin = float(data[i0].split("\t")[-1])
+  #     if 'Y res' in j0:
+  #         y_res = float(data[i0].split("\t")[-1])
+  #     if 'Y wait period / ms' in j0:
+  #         data_start_line = i0 + 2
+
+    for i0, j0 in enumerate(data):
+      if 'X initial' in j0:
+          x_init = float(data[i0].split("\t")[-1])
+      if 'X final' in j0:
+          x_fin = float(data[i0].split("\t")[-1])
+      if 'X increment' in j0:
+          x_res = float(data[i0].split("\t")[-1])
+          print(x_res)
+      if 'Y initial' in j0:
+          y_init = float(data[i0].split("\t")[-1])
+      if 'Y final' in j0:
+          y_fin = float(data[i0].split("\t")[-1])
+      if 'Y increment' in j0:
+          y_res = float(data[i0].split("\t")[-1])
+      if 'Y wait period / ms' in j0:
+          data_start_line = i0 + 2
 
     x = np.linspace(x_init, x_fin, int(x_res))
     y = np.linspace(y_fin, y_init, int(y_res))
@@ -186,8 +188,7 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 # Def some functions
 ##############################################################################
 pX = (r"C:\Data\SCM\SCM Data 20201214\Raster scans")
-pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20201201\Raster scans")
+pY = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Conferences\SPW 2019\Data\Scanning images\QDs")
 pZ = (r"C:\local files\Compiled Data\Nu Quantum"
       r"\Sample 2\B2 C1 data\Raster scans")
 p0 = pY
@@ -199,83 +200,70 @@ for i0, v0 in enumerate(datafiles):
     print(i0, v0)
 
 size = 3
-for i0, v0 in enumerate(datafiles[-1:]):
+for i0, v0 in enumerate(datafiles[:]):
     print(os.path.split(v0)[1])
 
     x, y, img = load_SCM_F5L10(v0)
 
-    log_img = np.log(img)
-    # FSM scaling: 12.5 microns = 1.56
-    x = x * 25 / (2.6 - 1.4)
-    y = y * 25 / (2.6 - 1.4)
-    # Piezo scaling 10V = 25 microns
-    # x = x * 2.5
-    # y = y * 2.5
+    #### Use scaling if reading older files (second set of ifs in 'load_SCM_F5L10') 
+    #### FSM scaling: 12.5 microns = 1.56
+    # x = x * 25 / (2.6 - 1.4)
+    # y = y * 25 / (2.6 - 1.4)
+    #### Piezo scaling 10V = 25 microns
+    x = x * 2.5
+    y = y * 2.5
 
-    try:
+    img = (1000/25)*img
+    # print(np.min(img))
+    lb = os.path.basename(v0)
+    plotname1 = os.path.splitext(lb)[0]
+    plotname2 = os.path.splitext(lb)[0] + ' log'
+    print(plotname1)
+    print(plotname2)
+    ax1, fig1, cs = set_figure(name='figure lin',
+                               xaxis='x distance (μm)',
+                               yaxis='y distance (μm)',
+                               size=size)
+    im1 = plt.imshow(img, cmap='magma',
+                     extent=extents(y) +  extents(x),
+                     label=lb,
+                     vmin=np.min(img),
+                     vmax=0.5 * np.max(img),
+                     origin='lower'
+                     )
+    divider = make_axes_locatable(ax1)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cbar1 = fig1.colorbar(im1, cax=cax)
+    cbar1.ax.get_yaxis().labelpad = 15
+    cbar1.set_label('counts / second', rotation=270, c='xkcd:black')
+    plt.tight_layout()
+    plt.show()
+    os.chdir(p0)
+    # ax1.figure.savefig(plotname1 + 'dark.svg')
+    # ax1.figure.savefig(plotname1 + 'dark.png')
+    PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
 
-        lb = os.path.basename(v0)
-        plotname1 = os.path.splitext(lb)[0]
-        plotname2 = os.path.splitext(lb)[0] + ' log'
-        print(plotname1)
-        print(plotname2)
-        ax1, fig1, cs = set_figure(name='figure lin',
-                                   xaxis='x distance (μm)',
-                                   yaxis='y distance (μm)',
-                                   size=size)
-        im1 = plt.imshow(np.flipud(img), cmap='magma',
-                         extent=extents(y) +
-                         extents(x),
-                         label=lb,
-                         vmin=np.min(img),
-                         vmax=0.5 * np.max(img),
-                         )
-        divider = make_axes_locatable(ax1)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        cbar1 = fig1.colorbar(im1, cax=cax)
-        cbar1.ax.get_yaxis().labelpad = 15
-        cbar1.set_label('counts / second', rotation=270, c='xkcd:black')
-        plt.tight_layout()
-        plt.show()
-        os.chdir(p0)
-        # ax1.figure.savefig(plotname1 + 'dark.svg')
-        # ax1.figure.savefig(plotname1 + 'dark.png')
-        PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
+    ax2, fig2, cs = set_figure(name='figure log',
+                               xaxis='x distance (μm)',
+                               yaxis='y distance (μm)',
+                               size=size
+                               )
 
-        # plt.axis('off')
-        # plt.cla()
-        # im1 = plt.imshow(np.flipud(img), cmap='magma',
-        #                  extent=prd_plots.extents(y) +
-        #                  prd_plots.extents(x),
-        #                  label=lb,
-        #                  vmin=np.min(img),
-        #                  vmax=0.6 * np.max(img),
-        #                  alpha=0.5)
-        # plt.savefig(plotname2)
+    im2 = plt.imshow(img, cmap='magma',
+                     extent=extents(y) + extents(x),
+                     norm=LogNorm(vmin=np.min(img)+1500, vmax=np.max(img)),
+                     label=lb,
+                     origin='lower'
+                     )
+    divider = make_axes_locatable(ax2)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
 
-        ax2, fig2, cs = set_figure(name='figure log',
-                                   xaxis='x distance (μm)',
-                                   yaxis='y distance (μm)',
-                                   size=size)
-        # plt.title(lb)
-        im2 = plt.imshow(np.flipud(log_img), cmap='magma',
-                         extent=extents(y) +
-                         extents(x),
-                         label=lb,
-                         vmin=np.log(1500),
-                         vmax=np.log(145000)
-                         )
-        divider = make_axes_locatable(ax2)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        fig2.colorbar(im2, cax=cax)
-        cbar2 = fig2.colorbar(im2, cax=cax)
-        cbar2.ax.get_yaxis().labelpad = 15
-        cbar2.set_label('log [counts / second]', rotation=270, c='xkcd:black')
-        plt.tight_layout()
-        plt.show()
-        os.chdir(p0)
-        PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
-    except:
-        print(np.shape(img))
-        pass
+    fig2.colorbar(im2, cax=cax)
+    cbar2 = fig2.colorbar(im2, cax=cax)
+    cbar2.ax.get_yaxis().labelpad = 15
+    cbar2.set_label('log [counts / second]', rotation=270, c='xkcd:black')
+    plt.tight_layout()
+    plt.show()
+    os.chdir(p0)
+    PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
 ##############################################################################
