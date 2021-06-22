@@ -114,39 +114,42 @@ def load_SCM_F5L10(filepath):
     data = a.readlines()
     a.close()
 
-  # for i0, j0 in enumerate(data):
-  #     if 'X initial' in j0:
-  #         x_init = float(data[i0].split("\t")[-1])
-  #     if 'X final' in j0:
-  #         x_fin = float(data[i0].split("\t")[-1])
-  #     if 'X res' in j0:
-  #         x_res = float(data[i0].split("\t")[-1])
-  #         print(x_res)
-  #     if 'Y initial' in j0:
-  #         y_init = float(data[i0].split("\t")[-1])
-  #     if 'Y final' in j0:
-  #         y_fin = float(data[i0].split("\t")[-1])
-  #     if 'Y res' in j0:
-  #         y_res = float(data[i0].split("\t")[-1])
-  #     if 'Y wait period / ms' in j0:
-  #         data_start_line = i0 + 2
-
+#### New file reading structure
     for i0, j0 in enumerate(data):
       if 'X initial' in j0:
           x_init = float(data[i0].split("\t")[-1])
       if 'X final' in j0:
           x_fin = float(data[i0].split("\t")[-1])
-      if 'X increment' in j0:
+      if 'X res' in j0:
           x_res = float(data[i0].split("\t")[-1])
           print(x_res)
       if 'Y initial' in j0:
           y_init = float(data[i0].split("\t")[-1])
       if 'Y final' in j0:
           y_fin = float(data[i0].split("\t")[-1])
-      if 'Y increment' in j0:
+      if 'Y res' in j0:
           y_res = float(data[i0].split("\t")[-1])
       if 'Y wait period / ms' in j0:
           data_start_line = i0 + 2
+
+#### Old file reading structure
+
+    # for i0, j0 in enumerate(data):
+    #   if 'X initial' in j0:
+    #       x_init = float(data[i0].split("\t")[-1])
+    #   if 'X final' in j0:
+    #       x_fin = float(data[i0].split("\t")[-1])
+    #   if 'X increment' in j0:
+    #       x_res = float(data[i0].split("\t")[-1])
+    #       print(x_res)
+    #   if 'Y initial' in j0:
+    #       y_init = float(data[i0].split("\t")[-1])
+    #   if 'Y final' in j0:
+    #       y_fin = float(data[i0].split("\t")[-1])
+    #   if 'Y increment' in j0:
+    #       y_res = float(data[i0].split("\t")[-1])
+    #   if 'Y wait period / ms' in j0:
+    #       data_start_line = i0 + 2
 
     x = np.linspace(x_init, x_fin, int(x_res))
     y = np.linspace(y_fin, y_init, int(y_res))
@@ -189,7 +192,7 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 ##############################################################################
 
 ##### PXI file path
-pX = (r"C:\Data\SCM\SCM Data 20210616\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20210621\Raster scans")
 ##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20210513\Raster scans")
@@ -208,22 +211,18 @@ for i0, v0 in enumerate(datafiles[:]):
     print(os.path.split(v0)[1])
 
     x, y, img = load_SCM_F5L10(v0)
-
+    im_min = np.min(np.min(img))
+    im_mean = np.mean(img)
+    print('image min value =', im_min)
     #### Use scaling if reading older files (second set of ifs in 'load_SCM_F5L10') 
     #### Scaling for old files with voltages saved, not microns
     #### FSM scaling: 12.5 microns = 1.56
     # x = x * 25 / (2.6 - 1.4)
     # y = y * 25 / (2.6 - 1.4)
     #### Piezo scaling 10V = 25 microns
-
-    x = x * 2.5
-    y = y * 2.5
-
     # x = x * 2.5
     # y = y * 2.5
 
-
-    img = (1000/25)*img
     # print(np.min(img))
     lb = os.path.basename(v0)
     plotname1 = os.path.splitext(lb)[0]
@@ -261,7 +260,7 @@ for i0, v0 in enumerate(datafiles[:]):
 
     im2 = plt.imshow(img, cmap='magma',
                      extent=extents(y) + extents(x),
-                     norm=LogNorm(vmin=np.min(img)+1500, vmax=np.max(img)),
+                     norm=LogNorm(vmin=im_mean/5, vmax=np.max(img)),
                      label=lb,
                      origin='lower'
                      )
