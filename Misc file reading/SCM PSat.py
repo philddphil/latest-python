@@ -168,10 +168,16 @@ def I_sat_plot(file, title=''):
 ##############################################################################
 # Do some stuff
 ##############################################################################
+#### Office laptop path
 d0 = (r'C:\local files\Compiled Data\G3s\Other data\PSats')
 fs = glob.glob(d0 + r'\*.txt')
 f0 = fs[0]
 f1 = fs[1]
+#### PXI Path
+d0 = (r"C:\Data\SCM\SCM Data 20210616\PSats")
+fs = glob.glob(d0 + r'\*.txt')
+f0 = fs[-1]
+
 os.chdir(d0)
 Ps_0, kcps_0, popt_0 = I_sat_plot(f0)
 Ps_1, kcps_1, popt_1 = I_sat_plot(f1)
