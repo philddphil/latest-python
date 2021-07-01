@@ -42,7 +42,7 @@ def palette():
 # set rcParams for nice plots ################################################
 def ggplot_sansserif():
     colours = palette()
-    # plt.style.use('ggplot')
+    plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
     plt.rcParams['font.family'] = 'sans-serif'
     plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
@@ -136,7 +136,7 @@ def I_sat_plot(file, title=''):
     lb1 = 'I$_{sat}$ = ' + str(Sat_cts) + 'kcps'
     lb2 = 'bkg = ' + str(Prop_bkg) + 'P + ' + str(bkg)
     lb3 = 'I$_{sat}$ = ' + str(Sat_cts) + 'kcps, ' + \
-        'P$_{sat}$ = ' + str(P_sat) + 'mW'
+        'P$_{sat}$ = ' + str(np.round(P_sat/1000, 2)) + 'mW'
 
     ##########################################################################
     # Plot some figures
@@ -160,7 +160,7 @@ def I_sat_plot(file, title=''):
     # plt.show()
     ax1.legend(loc='lower right', fancybox=True,
                facecolor=(1.0, 1.0, 1.0, 0.0))
-    # PPT_save_2d(fig1, ax1, 'Psat1')
+    PPT_save_2d(fig1, ax1, 'Psat1')
     plt.close(fig1)
     return Ps, kcps, popt
 
@@ -168,41 +168,42 @@ def I_sat_plot(file, title=''):
 # Do some stuff
 ##############################################################################
 #### Office laptop path
-d0 = (r'C:\local files\Compiled Data\G3s\Other data\PSats')
-fs = glob.glob(d0 + r'\*.txt')
-f0 = fs[0]
-f1 = fs[1]
+# d0 = (r'C:\local files\Compiled Data\G3s\Other data\PSats')
+# f0 = fs[0]
+# f1 = fs[1]
 #### PXI Path
-d0 = (r"C:\Data\SCM\SCM Data 20210616\PSats")
+d0 = (r"C:\Data\SCM\SCM Data 20210629\PSats")
 fs = glob.glob(d0 + r'\*.txt')
 f0 = fs[-1]
 
 os.chdir(d0)
 Ps_0, kcps_0, popt_0 = I_sat_plot(f0)
-Ps_1, kcps_1, popt_1 = I_sat_plot(f1)
+# Ps_1, kcps_1, popt_1 = I_sat_plot(f1)
 
-Ps_fit = np.linspace(np.min(Ps_0), np.max(Ps_0), 1000)
+#### Plot some ISats separately if needed
+# Ps_fit = np.linspace(np.min(Ps_0), np.max(Ps_0), 1000)
 
-Isat_fit_0 = I_sat(Ps_fit, *popt_0)
-Isat_fit_1 = I_sat(Ps_fit, *popt_1)
+# Isat_fit_0 = I_sat(Ps_fit, *popt_0)
+# Isat_fit_1 = I_sat(Ps_fit, *popt_1)
 
-ax1, fig1, cs = set_figure(name='figure',
-                           xaxis='Power (mW)',
-                           yaxis='$10^3$ counts per secound',
-                           size=2.5)
 
-plt.plot(Ps_0, kcps_0, '.', label='data',
-  color=cs['ggdblue'])
-plt.plot(Ps_fit, Isat_fit_0, '-',
-  color=cs['gglblue'])
+# ax1, fig1, cs = set_figure(name='figure',
+#                            xaxis='Power (mW)',
+#                            yaxis='$10^3$ counts per secound',
+#                            size=2.5)
 
-plt.plot(Ps_1, kcps_1, '.', 
-  label='data',
-  color=cs['ggdred']
-  )
-plt.plot(Ps_fit, Isat_fit_1, '-',
-  color=cs['gglred'])
+# plt.plot(Ps_0, kcps_0, '.', label='data',
+#   color=cs['ggdblue'])
 
-plt.tight_layout()
-plt.show()
-PPT_save_2d(fig1, ax1, 'Plot')
+# plt.plot(Ps_fit, Isat_fit_0, '-',
+#   color=cs['gglblue'])
+
+# plt.plot(Ps_1, kcps_1, '.', 
+#   label='data',
+#   color=cs['ggdred']
+#   )
+# plt.plot(Ps_fit, Isat_fit_1, '-',
+#   color=cs['gglred'])
+
+# plt.tight_layout()
+# plt.show()

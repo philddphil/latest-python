@@ -192,7 +192,7 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 ##############################################################################
 
 ##### PXI file path
-pX = (r"C:\Data\SCM\SCM Data 20210621\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20210629\Raster scans")
 ##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20210513\Raster scans")
@@ -207,7 +207,7 @@ for i0, v0 in enumerate(datafiles):
     print(i0, v0)
 
 size = 3
-for i0, v0 in enumerate(datafiles[:]):
+for i0, v0 in enumerate(datafiles[-1:]):
     print(os.path.split(v0)[1])
 
     x, y, img = load_SCM_F5L10(v0)
