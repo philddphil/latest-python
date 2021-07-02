@@ -172,7 +172,7 @@ ax3, fig3, cs = set_figure(name='figure3',
                            yaxis='number',
                            size=4)
 
-plt.hist(Ps[0:], bins=10,
+plt.hist(Ps[0:],
          facecolor=cs['ggblue'],
          edgecolor=cs['mnk_dgrey'],
          alpha=0.8)
