@@ -192,7 +192,7 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 ##############################################################################
 
 ##### PXI file path
-pX = (r"C:\Data\SCM\SCM Data 20210629\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20210705\Raster scans")
 ##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20210513\Raster scans")
@@ -207,7 +207,7 @@ for i0, v0 in enumerate(datafiles):
     print(i0, v0)
 
 size = 3
-for i0, v0 in enumerate(datafiles[-1:]):
+for i0, v0 in enumerate(datafiles[:]):
     print(os.path.split(v0)[1])
 
     x, y, img = load_SCM_F5L10(v0)
@@ -229,6 +229,8 @@ for i0, v0 in enumerate(datafiles[-1:]):
     plotname2 = os.path.splitext(lb)[0] + ' log'
     print(plotname1)
     print(plotname2)
+
+    #### Linear image plot
     ax1, fig1, cs = set_figure(name='figure lin',
                                xaxis='x distance (μm)',
                                yaxis='y distance (μm)',
@@ -250,8 +252,8 @@ for i0, v0 in enumerate(datafiles[-1:]):
     os.chdir(p0)
     # ax1.figure.savefig(plotname1 + 'dark.svg')
     # ax1.figure.savefig(plotname1 + 'dark.png')
-    PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
-
+ 
+    #### Logarithmic image plot
     ax2, fig2, cs = set_figure(name='figure log',
                                xaxis='x distance (μm)',
                                yaxis='y distance (μm)',
@@ -274,5 +276,9 @@ for i0, v0 in enumerate(datafiles[-1:]):
     plt.tight_layout()
     plt.show()
     os.chdir(p0)
-    PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
+
+
+    #### Save images
+    # PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
+    # PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
 ##############################################################################
