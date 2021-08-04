@@ -131,6 +131,8 @@ def load_SCM_F5L10(filepath):
           y_res = float(data[i0].split("\t")[-1])
       if 'Y wait period / ms' in j0:
           data_start_line = i0 + 2
+      if 'y V to um' in j0:
+          data_start_line = i0 + 2
 
 #### Old file reading structure
 
@@ -188,16 +190,19 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 
 
 ##############################################################################
-# Def some functions
+# Do some stuff
 ##############################################################################
 
 ##### PXI file path
-pX = (r"C:\Data\SCM\SCM Data 20210705\Raster scans")
+pX = (r"C:\Data\SCM\SCM Data 20210722\Raster scans")
+pX = (r"C:\Data\SCM\20210729 SCM Data\Raster scans")
 ##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20210513\Raster scans")
 pZ = (r"C:\local files\Compiled Data\Nu Quantum"
       r"\Sample 2\B2 C1 data\Raster scans")
+
+##### Specify pwd
 p0 = pX
 
 datafiles = glob.glob(p0 + r'\*.txt')
@@ -207,8 +212,8 @@ for i0, v0 in enumerate(datafiles):
     print(i0, v0)
 
 size = 3
-for i0, v0 in enumerate(datafiles[:]):
-    print(os.path.split(v0)[1])
+for i0, v0 in enumerate(datafiles[-1:]):
+
 
     x, y, img = load_SCM_F5L10(v0)
     im_min = np.min(np.min(img))
@@ -272,13 +277,13 @@ for i0, v0 in enumerate(datafiles[:]):
     fig2.colorbar(im2, cax=cax)
     cbar2 = fig2.colorbar(im2, cax=cax)
     cbar2.ax.get_yaxis().labelpad = 15
-    cbar2.set_label('log [counts / second]', rotation=270, c='xkcd:black')
+    cbar2.set_label('counts / second', rotation=270, c='xkcd:black')
     plt.tight_layout()
     plt.show()
     os.chdir(p0)
 
 
     #### Save images
-    # PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
-    # PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
+    PPT_save_2d_im(fig1, ax1, cbar1, plotname1)
+    PPT_save_2d_im(fig2, ax2, cbar2, plotname2)
 ##############################################################################

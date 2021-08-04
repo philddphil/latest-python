@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.filters import maximum_filter
 from scipy import ndimage as ndi
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colors import LogNorm
 
 
 ##############################################################################
@@ -65,12 +66,12 @@ def palette():
 
 
 # set rcParams for nice plots ################################################
-def ggplot():
+def ggplot_sansserif():
     colours = palette()
-    plt.style.use('ggplot')
+    # plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
-    plt.rcParams['font.family'] = 'monospace'
-    plt.rcParams['font.fantasy'] = 'Nimbus Mono'
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
     plt.rcParams['axes.labelsize'] = 8
     plt.rcParams['axes.labelweight'] = 'normal'
     plt.rcParams['xtick.labelsize'] = 8
@@ -93,7 +94,7 @@ def ggplot():
 
 # Set up figure for plotting #################################################
 def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
-    ggplot()
+    ggplot_sansserif()
     cs = palette()
     fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
     ax1 = fig1.add_subplot(111)
@@ -246,38 +247,47 @@ def image_object_find(x_img, y_img, img, u_lim):
 ##############################################################################
 # File paths
 ##############################################################################
-p0 = (r"C:\Data\SCM\SCM Data 20201208\Raster scans\0Dec20 scan-001.txt")
-d0 = (r"C:\Data\SCM\SCM Data 20201208\Raster scans")
 
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans\02Dec20 scan-001.txt")
-d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans")
+p0 = (r"C:\Data\SCM\SCM Data 20210721\Raster scans\21Jul21 scan-006.txt")
+d0 = (r"C:\Data\SCM\SCM Data 20210721\Raster scans")
+
+# p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans\02Dec20 scan-001.txt")
+# d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans")
 ##############################################################################
 # Image processing to retrieve peak locations
 ##############################################################################
-Ulim = 110000
-clim = [2000, 20000]
+Ulim = 260000
+clim = [2000, 80000]
 
-x_img, y_img, img = load_SCM_F5L10(p0)
-# img = np.flipud(img)
+x_img, y_img, img0 = load_SCM_F5L10(p0)
+img = np.flipud(img0)
+im_min = np.min(np.min(img))
+im_mean = np.mean(img)
 centroids_img = image_object_find(x_img, y_img, img, Ulim)
+coords_save = image_object_find(x_img, y_img, img0, Ulim)
 
 
 ##############################################################################
 # Plot some figures
 ##############################################################################
+size = 4
+ax1, fig1, cs = set_figure(name='figure log',
+                               xaxis='x distance (μm)',
+                               yaxis='y distance (μm)',
+                               size=size
+                               )
 
-ax1, fig1, cs = set_figure('fig1', size=7)
-im1 = plt.imshow(np.log(img), cmap='magma',
-                 extent=extents(x_img) + extents(y_img),
-                 vmin=np.min(np.log(img)),
-                 vmax=0.9 * np.max(np.log(img))
-                 )
+im1 = plt.imshow(img, cmap='magma',
+                     extent=extents(x_img) + extents(y_img),
+                     norm=LogNorm(vmin=im_mean/5, vmax=np.max(img)),
+                     origin='upper'
+                     )
 
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar1 = fig1.colorbar(im1, cax=cax)
 cbar1.ax.get_yaxis().labelpad = 15
-cbar1.set_label('log counts / second', rotation=270)
+cbar1.set_label('counts / second', rotation=270)
 
 pk_number = 0
 for x, y in centroids_img:
@@ -290,7 +300,11 @@ for x, y in centroids_img:
              c=cs['mnk_green'])
 
 
-ax2, fig2, cs = set_figure('fig2',  size=5)
+ax2, fig2, cs = set_figure(name='figure lin',
+                               xaxis='x distance (μm)',
+                               yaxis='y distance (μm)',
+                               size=size
+                               )
 im2 = plt.imshow(img, cmap='magma',
                  extent=extents(x_img) + extents(y_img),
                  vmin=clim[0], vmax=clim[1]
@@ -334,6 +348,7 @@ for x, y in centroids_img:
 
 plt.show()
 os.chdir(d0)
-np.savetxt("coords.csv", centroids_img, delimiter=",")
-PPT_save_2d_im(fig2, ax2, cbar2, 'Labelled image.png')
+np.savetxt("coords.csv", coords_save, delimiter=",")
+PPT_save_2d_im(fig2, ax2, cbar2, 'Labelled image lin.png')
+PPT_save_2d_im(fig1, ax1, cbar1, 'Labelled image log.png')
 ax2.figure.savefig('Labelled image.svg')

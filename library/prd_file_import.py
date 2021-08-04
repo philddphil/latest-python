@@ -175,6 +175,7 @@ def load_SCM_F5L10(filepath):
     img = np.loadtxt(data[data_start_line:])
     return (x, y, img)
 
+
 # Load Agilent Verbose XY ascii ###############################################
 def load_AgilentDCA_ascii(filepath):
     a = open(filepath, 'r', encoding='ascii')

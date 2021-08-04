@@ -45,7 +45,7 @@ def palette():
 # set rcParams for nice plots ################################################
 def ggplot_sansserif():
     colours = palette()
-    # plt.style.use('ggplot')
+    plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
     plt.rcParams['font.family'] = 'sans-serif'
     plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
@@ -113,16 +113,19 @@ def PPT_save_2d(fig, ax, name, dpi=600):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
-      r"\SCM Data 20210629\Lock and log data 130748")
+pX = (r"C:\Data\SCM\SCM Data 20210716\Lock and log data 173716")
+pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
+      r"\SCM Data 20210719\Lock and log data 130748")
+p0 = pX
 
 datafiles = glob.glob(p0 + r"\*.txt")
-
 Ps = []
 Is = []
 ts = []
+lines_total = 0
 
 for i0, v0 in enumerate(datafiles):
+    print('file name:', v0)
     with open(v0, 'r') as input_file:
         line_number = 0
         for line in input_file:
@@ -134,7 +137,8 @@ for i0, v0 in enumerate(datafiles):
             if r == 2:
                 Ps.append(1000 * float(line.rstrip()))
             line_number += 1
-
+        lines_total += line_number
+print('Total lines', lines_total)
 os.chdir(p0)
 ##############################################################################
 # Plot some figures
