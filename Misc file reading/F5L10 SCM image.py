@@ -195,7 +195,7 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 
 ##### PXI file path
 pX = (r"C:\Data\SCM\SCM Data 20210722\Raster scans")
-pX = (r"C:\Data\SCM\20210729 SCM Data\Raster scans")
+pX = (r"C:\Data\SCM\20210809 SCM Data\Raster scans")
 ##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20210513\Raster scans")
@@ -267,7 +267,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
 
     im2 = plt.imshow(img, cmap='magma',
                      extent=extents(y) + extents(x),
-                     norm=LogNorm(vmin=im_mean/5, vmax=np.max(img)),
+                     norm=LogNorm(vmin=im_mean/15, vmax=np.max(img)),
                      label=lb,
                      origin='lower'
                      )

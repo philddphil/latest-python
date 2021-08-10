@@ -120,7 +120,7 @@ def ggplot_sansserif():
 
 
 # Set up figure for plotting #################################################
-def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=4):
+def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=3):
     ggplot_sansserif()
     cs = palette()
     fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
@@ -171,7 +171,7 @@ def cos_ray_rem(data, λ, thres):
             print(v0)
             # if gradient of data[n] is above threshold, relace it with mean
             # of data[n-2] & data[n+2]
-            mean_before = np.mean(data[i0 - 14:i0 - 10])
+            mean_before = np.mean(data[i0 - 14:i0 - 4])
             mean_after = np.mean(data[i0 + 4:i0 + 14])
             data_proc[i0 - 5:i0]=np.mean([mean_before, mean_after])
             ray_data.append(data[i0 - 3:i0])
@@ -183,7 +183,7 @@ def cos_ray_rem(data, λ, thres):
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0=(r'C:\Data\SCM\20210729 Spec data')
+p0=(r'C:\Data\SCM\20210809 Spec Data')
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
@@ -193,7 +193,7 @@ datafiles.sort(key=os.path.getmtime)
 # Initialise lists of datasets
 for i0, v0 in enumerate(datafiles[-1:]):
     # load each spec file, generate λ array and cts array
-    λ, cts=load_spec(v0)
+    λ, cts = load_spec(v0)
 
     spec_name=(os.path.splitext(os.path.basename(v0))[0])
 
@@ -202,7 +202,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
     cts0=cts[idx1:idx0]
     λ0=λ[idx1:idx0]
 
-    cts1, ray_data, ray_λ=cos_ray_rem(cts, λ, 100)
+    cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 1500)
 
     ax0, fig0, cs=set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
     ax0.plot(λ, cts,
@@ -216,7 +216,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
              alpha=0.8,
              color=cs['mnk_yellow'],
              label='cosmic ray removed')
-    ax0.plot(λ, gaussian_filter(cts1, 12),
+    ax0.plot(λ, gaussian_filter(cts1, 21),
              '-',
              lw=0.5,
              color=cs['ggblue'],
@@ -234,6 +234,8 @@ for i0, v0 in enumerate(datafiles[-1:]):
              lw=0.5,
              color=cs['ggblue'],
              label='smoothed')
+    plt.tight_layout()
+    plt.show()
     PPT_save_2d(fig1, ax1, spec_name)
 
 

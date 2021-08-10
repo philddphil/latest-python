@@ -132,7 +132,7 @@ def load_T_log(filepath):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-p0 = (r"C:\Data\SCM\20210728 T Data")
+p0 = (r"C:\Data\SCM\20210809 T Data")
 T_files = glob.glob(p0 + r'\*.txt')
 print('number of files', len(T_files))
 
@@ -140,7 +140,7 @@ Hs = []
 Ts = []
 t_dates = []
 
-for i0, v0 in enumerate(T_files[-2:]):
+for i0, v0 in enumerate(T_files[:]):
     print(v0)
     t_date, T, H = load_T_log(v0)
     
