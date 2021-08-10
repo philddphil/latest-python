@@ -166,7 +166,7 @@ def centroid(data):
 
 
 # Save 2d image with a colourscheme suitable for ppt, as a png ###############
-def PPT_save_2d_im(fig, ax, cb, name):
+def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
     ax.patch.set_facecolor((1.0, 1.0, 1.0, 0.0))
@@ -175,16 +175,15 @@ def PPT_save_2d_im(fig, ax, cb, name):
     ax.tick_params(axis='x', colors='xkcd:black')
     ax.tick_params(axis='y', colors='xkcd:black')
     cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
-    # cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
+    cbylabel_obj = plt.getp(cb.ax.axes, 'yticklabels')
     plt.setp(cbytick_obj, color='xkcd:black')
 
     # Loop to check for file - appends filename with _# if name already exists
     f_exist = True
     app_no = 0
-    dpi = 600
     while f_exist is True:
         if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name)
+            ax.figure.savefig(name, dpi=dpi)
             f_exist = False
             print('Base exists')
         elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
@@ -196,6 +195,7 @@ def PPT_save_2d_im(fig, ax, cb, name):
             print('Base + # exists')
 
 
+# Find 'objects' (centro-symmetric features) in an image #####################
 def image_object_find(x_img, y_img, img, u_lim):
 
     y_img = y_img[::-1]
@@ -259,6 +259,19 @@ d0 = (r"C:\Data\SCM\SCM Data 20210721\Raster scans")
 Ulim = 260000
 clim = [2000, 80000]
 
+
+
+p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans\02Dec20 scan-001.txt")
+d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans")
+
+d0 = (r"C:\local files\Compiled Data\Nu Quantum\Sample 2\A2 C4 data\Raster scans")
+p0 = (r"C:\local files\Compiled Data\Nu Quantum\Sample 2\A2 C4 data\Raster scans\07Dec20 scan-001.txt")
+##############################################################################
+# Image processing to retrieve peak locations
+##############################################################################
+Ulim = 100000
+clim = [2000, 15000]
+
 x_img, y_img, img0 = load_SCM_F5L10(p0)
 img = np.flipud(img0)
 im_min = np.min(np.min(img))
@@ -270,6 +283,7 @@ coords_save = image_object_find(x_img, y_img, img0, Ulim)
 ##############################################################################
 # Plot some figures
 ##############################################################################
+
 size = 4
 ax1, fig1, cs = set_figure(name='figure log',
                                xaxis='x distance (μm)',
@@ -283,11 +297,24 @@ im1 = plt.imshow(img, cmap='magma',
                      origin='upper'
                      )
 
+
+ax1, fig1, cs = set_figure('fig1', size=4)
+im1 = plt.imshow(np.log(img), cmap='magma',
+                 extent=extents(x_img) + extents(y_img),
+                 vmin=np.min(np.log(img)),
+                 vmax=0.9 * np.max(np.log(img))
+                 )
+
+
 divider = make_axes_locatable(ax1)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar1 = fig1.colorbar(im1, cax=cax)
 cbar1.ax.get_yaxis().labelpad = 15
+
 cbar1.set_label('counts / second', rotation=270)
+
+cbar1.set_label('counts / second', rotation=270, c='xkcd:black')
+
 
 pk_number = 0
 for x, y in centroids_img:
@@ -296,8 +323,9 @@ for x, y in centroids_img:
              ms=15,
              mec=cs['mnk_green'],
              fillstyle='none')
-    ax1.text(x, y, '  ' + str(pk_number),
+    ax1.text(x, y, '    ' + str(pk_number),
              c=cs['mnk_green'])
+
 
 
 ax2, fig2, cs = set_figure(name='figure lin',
@@ -305,6 +333,9 @@ ax2, fig2, cs = set_figure(name='figure lin',
                                yaxis='y distance (μm)',
                                size=size
                                )
+
+ax2, fig2, cs = set_figure('fig2',  size=3)
+
 im2 = plt.imshow(img, cmap='magma',
                  extent=extents(x_img) + extents(y_img),
                  vmin=clim[0], vmax=clim[1]
@@ -313,8 +344,7 @@ divider = make_axes_locatable(ax2)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar2 = plt.colorbar(im2, cax=cax)
 cbar2.ax.get_yaxis().labelpad = 15
-cbar2.set_label('counts / second', rotation=270)
-
+cbar2.set_label('counts / second', rotation=270, c='xkcd:black')
 pk_number = 0
 for x, y in centroids_img:
     pk_number += 1
@@ -322,10 +352,10 @@ for x, y in centroids_img:
              ms=15,
              mec=cs['mnk_green'],
              fillstyle='none')
-    ax2.text(x, y, '  ' + str(pk_number),
+    ax2.text(x, y, '    ' + str(pk_number),
              c=cs['mnk_green'])
 
-
+plt.tight_layout()
 # ax3, fig3, cs = set_figure('fig3')
 # im3 = plt.imshow(img_2, cmap='magma',
 #                  extent=extents(y) +

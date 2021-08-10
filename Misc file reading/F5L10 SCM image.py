@@ -66,7 +66,7 @@ def palette():
 # set rcParams for nice plots ################################################
 def ggplot_sansserif():
     colours = palette()
-    # plt.style.use('ggplot')
+    plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
     plt.rcParams['font.family'] = 'sans-serif'
     plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
@@ -202,8 +202,11 @@ pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
 pZ = (r"C:\local files\Compiled Data\Nu Quantum"
       r"\Sample 2\B2 C1 data\Raster scans")
 
+
 ##### Specify pwd
 p0 = pX
+p0 = pZ
+
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)

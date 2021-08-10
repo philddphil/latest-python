@@ -173,7 +173,7 @@ def cos_ray_rem(data, λ, thres):
             # of data[n-2] & data[n+2]
             mean_before = np.mean(data[i0 - 14:i0 - 4])
             mean_after = np.mean(data[i0 + 4:i0 + 14])
-            data_proc[i0 - 5:i0]=np.mean([mean_before, mean_after])
+            data_proc[i0 - 5:i0] = np.mean([mean_before, mean_after])
             ray_data.append(data[i0 - 3:i0])
             ray_λ.append(λ[i0 - 3:i0])
     return data_proc, ray_data, ray_λ
@@ -184,10 +184,13 @@ def cos_ray_rem(data, λ, thres):
 ##############################################################################
 # Specify results directory and change working directory to this location
 p0=(r'C:\Data\SCM\20210809 Spec Data')
+
+p0 = (r'C:\Data\SCM\20210729 Spec data')
+
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
-datafiles=glob.glob(p0 + r'\*.txt')
+datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
 
 # Initialise lists of datasets
@@ -195,16 +198,16 @@ for i0, v0 in enumerate(datafiles[-1:]):
     # load each spec file, generate λ array and cts array
     λ, cts = load_spec(v0)
 
-    spec_name=(os.path.splitext(os.path.basename(v0))[0])
+    spec_name = (os.path.splitext(os.path.basename(v0))[0])
 
-    idx0=(np.abs(λ - 652.5)).argmin()
-    idx1=(np.abs(λ - 655)).argmin()
-    cts0=cts[idx1:idx0]
-    λ0=λ[idx1:idx0]
+    idx0 = (np.abs(λ - 652.5)).argmin()
+    idx1 = (np.abs(λ - 655)).argmin()
+    cts0 = cts[idx1:idx0]
+    λ0 = λ[idx1:idx0]
 
     cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 1500)
 
-    ax0, fig0, cs=set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
+    ax0, fig0, cs = set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
     ax0.plot(λ, cts,
              'o',
              alpha=0.5,
@@ -227,8 +230,8 @@ for i0, v0 in enumerate(datafiles[-1:]):
     ax0.legend(loc='upper left', fancybox=True, framealpha=0.5)
     plt.show()
     ax0.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-    PPT_save_2d(fig0, ax0, spec_name+'_proc')
-    ax1, fig1, cs=set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
+    PPT_save_2d(fig0, ax0, spec_name + '_proc')
+    ax1, fig1, cs = set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
     ax1.plot(λ, gaussian_filter(cts1, 12),
              '-',
              lw=0.5,
