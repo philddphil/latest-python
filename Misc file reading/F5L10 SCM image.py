@@ -195,18 +195,17 @@ def PPT_save_2d_im(fig, ax, cb, name, dpi=600):
 
 ##### PXI file path
 pX = (r"C:\Data\SCM\SCM Data 20210722\Raster scans")
-pX = (r"C:\Data\SCM\20210809 SCM Data\Raster scans")
+pX = (r"C:\Data\SCM\20210812 SCM Data\Raster scans")
+
 ##### Office laptop file paths
 pY = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements"
       r"\SCM Data 20210513\Raster scans")
 pZ = (r"C:\local files\Compiled Data\Nu Quantum"
       r"\Sample 2\B2 C1 data\Raster scans")
 
-
 ##### Specify pwd
 p0 = pX
-p0 = pZ
-
+# p0 = pZ
 
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)

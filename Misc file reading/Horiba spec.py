@@ -183,15 +183,17 @@ def cos_ray_rem(data, λ, thres):
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0=(r'C:\Data\SCM\20210809 Spec Data')
-
-p0 = (r'C:\Data\SCM\20210729 Spec data')
+p0=(r'C:\Data\SCM\20210813 Spec Data')
 
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
 # Generate list of relevant data files and sort them chronologically
 datafiles = glob.glob(p0 + r'\*.txt')
 datafiles.sort(key=os.path.getmtime)
+
+all_cts = []
+all_λs = []
+all_names = []
 
 # Initialise lists of datasets
 for i0, v0 in enumerate(datafiles[-1:]):
@@ -202,10 +204,18 @@ for i0, v0 in enumerate(datafiles[-1:]):
 
     idx0 = (np.abs(λ - 652.5)).argmin()
     idx1 = (np.abs(λ - 655)).argmin()
-    cts0 = cts[idx1:idx0]
-    λ0 = λ[idx1:idx0]
+    cts0 = cts[idx0:idx1]
+    λ0 = λ[idx0:idx1]
+    print(idx0,idx1)
 
-    cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 1500)
+    cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 1000)
+    background = (idx1 - idx0) * np.mean(cts)
+    print(spec_name, 'counts in region', np.sum(cts[idx0:idx1])-background)
+    print(spec_name, 'background in region', background)
+
+    all_cts.append(cts1)
+    all_names.append(spec_name)
+    all_λs.append(λ)
 
     ax0, fig0, cs = set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
     ax0.plot(λ, cts,
@@ -219,7 +229,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
              alpha=0.8,
              color=cs['mnk_yellow'],
              label='cosmic ray removed')
-    ax0.plot(λ, gaussian_filter(cts1, 21),
+    ax0.plot(λ, gaussian_filter(cts1, 1),
              '-',
              lw=0.5,
              color=cs['ggblue'],
@@ -228,18 +238,39 @@ for i0, v0 in enumerate(datafiles[-1:]):
     # ax0.set_xlim(640, 660)
     plt.tight_layout()
     ax0.legend(loc='upper left', fancybox=True, framealpha=0.5)
-    plt.show()
     ax0.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-    PPT_save_2d(fig0, ax0, spec_name + '_proc')
+
     ax1, fig1, cs = set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
     ax1.plot(λ, gaussian_filter(cts1, 12),
              '-',
              lw=0.5,
              color=cs['ggblue'],
              label='smoothed')
+    ax1.set_ylim(bottom=0)
+    # ax1.set_xlim(640, 660)
     plt.tight_layout()
+    
     plt.show()
-    PPT_save_2d(fig1, ax1, spec_name)
+    # PPT_save_2d(fig0, ax0, spec_name + '_proc')
+    # PPT_save_2d(fig1, ax1, spec_name)
+    plt.close()
 
 
-print(np.sum(cts[idx1:idx0]))
+ax2, fig2, cs = set_figure('Spectral comparison', 'wavelength / nm', 'arb. int.')
+i0 = -1
+ax2.plot(all_λs[i0], gaussian_filter(105*all_cts[i0], 21),
+         '-',
+         lw=0.5,
+         color=cs['ggblue'],
+         label=all_names[i0])
+i0  = -2
+ax2.plot(all_λs[i0], gaussian_filter(all_cts[i0], 21),
+         '-',
+         lw=0.5,
+         color=cs['ggred'],
+         label=all_names[i0])
+plt.tight_layout()
+ax2.legend(loc='upper left', fancybox=True, framealpha=0.5)
+plt.show()
+PPT_save_2d(fig2, ax2, spec_name + '_comparison')
+
