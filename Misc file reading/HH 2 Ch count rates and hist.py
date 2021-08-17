@@ -136,7 +136,7 @@ def prep_dirs(d0):
 # Calculate the running average count rate in chA for last N photons
 def count_hist(d3, bins, chA, TCSPC):
     print(d3)
-    datafiles0 = glob.glob(d3 + r'\*' + chA + r'*')
+    datafiles0 = glob.glob(d3 + r'\*tt ' + chA + r'*')
 
     all_t = 0
     all_ph = 0
@@ -229,39 +229,12 @@ def Bi_exp_fit(x, y, t1, t2, a1=0.5, a2=0.5):
 ##############################################################################
 # Do some stuff
 ##############################################################################
-d0_NV = (r"C:\local files\Compiled Data\Nu Quantum\Sample 2\Example NV\HH T3")
-
-d0_hBN = (r"C:\local files\Compiled Data\Nu Quantum\Sample 2\A2 C4 data\Peak 21\HH")
-
-# load up NV data
-d1NV = d0_NV + r"\Py data"
+d0 = (r"C:\Data\SCM\20210816 SCM Data\HH T3 103243")
+ch = 'ch0'
 ch = 'ch1'
-os.chdir(d1NV)
-rate_NV, rate_NVts = np.loadtxt(ch + ' avg')
-hist_NV = np.loadtxt(ch + ' histogram')
-bin_axis_NV = np.loadtxt(ch + ' bin_axis')
-arrivals_time_NV = np.loadtxt(ch + ' photon number, time')
-exp_arrivals_NV = arrivals_time_NV[0]
-exp_time_NV = arrivals_time_NV[1]
-cpns_NV = exp_arrivals_NV / exp_time_NV
-exp_decay_NV = [np.exp(-i0 * cpns_NV) for i0 in bin_axis_NV]
-norm_hist_NV = [i0 / np.max(hist_NV) for i0 in hist_NV]
-resids_1_NV = np.asarray(exp_decay_NV) - np.asarray(norm_hist_NV)
-popt_NV, pcov_NV = Bi_exp_fit(bin_axis_NV, norm_hist_NV, cpns_NV, cpns_NV)
-fit_NV = Bi_exp(bin_axis_NV, *popt_NV)
-resids_2_NV = fit_NV - np.asarray(norm_hist_NV)
-print(np.shape(rate_NV))
-print(np.shape(rate_NVts))
-d1 = d0_hBN + r"\Py data"
-try:
-    os.mkdir(d1)
-except:
-    pass
+os.chdir(d0)
 
-os.chdir(d0_hBN)
-
-
-bins = np.linspace(0, 2e5, 401)
+bins = np.linspace(0, 1e3, 401)
 
 bin_width = bins[1] - bins[0]
 
@@ -269,16 +242,16 @@ bin_axis = np.linspace((bin_width) / 2, bins[-1] - (bin_width / 2),
                        len(bins) - 1)
 
 # # Calculate dts for 1 channel, histogram & save
-hist, exp_time, exp_arrivals, rate, ts = count_hist(d0_hBN, bins, ch,  'HH')
+hist, exp_time, exp_arrivals, rate, ts = count_hist(d0, bins, ch, 'HH')
 rate_ts = np.cumsum(ts)
-os.chdir(d1)
-np.savetxt(ch + ' photon number, time', [exp_arrivals, exp_time])
+
+np.savetxt(ch + ' photon number time', [exp_arrivals, exp_time])
 np.savetxt(ch + ' histogram', hist)
 np.savetxt(ch + ' bin_axis', bin_axis)
 np.savetxt(ch + ' avg', [rate, rate_ts])
 
 # Load previous datasets
-arrivals_time = np.loadtxt(ch + ' photon number, time')
+arrivals_time = np.loadtxt(ch + ' photon number time')
 
 exp_arrivals = arrivals_time[0]
 exp_time = arrivals_time[1]
@@ -291,21 +264,21 @@ norm_hist = [i0 / np.max(hist) for i0 in hist]
 
 cpns = exp_arrivals / exp_time
 
-exp_decay = [np.exp(-i0 * cpns) for i0 in bin_axis]
+# exp_decay = [np.exp(-i0 * cpns) for i0 in bin_axis]
 
-popt, pcov = Bi_exp_fit(bin_axis, norm_hist, cpns, cpns)
-print(exp_arrivals)
-print(exp_time)
-print('rate = ', cpns * 1e9)
-print('t1 = ', np.round(popt[0] * 1e9))
-print('t2 = ', np.round(popt[1] * 1e9))
-print('a1 = ', np.round(popt[2], 2))
-print('a2 = ', np.round(popt[3], 2))
+# popt, pcov = Bi_exp_fit(bin_axis, norm_hist, cpns, cpns)
+# print(exp_arrivals)
+# print(exp_time)
+# print('rate = ', cpns * 1e9)
+# print('t1 = ', np.round(popt[0] * 1e9))
+# print('t2 = ', np.round(popt[1] * 1e9))
+# print('a1 = ', np.round(popt[2], 2))
+# print('a2 = ', np.round(popt[3], 2))
 
-fit = Bi_exp(bin_axis, *popt)
+# fit = Bi_exp(bin_axis, *popt)
 
-resids_1 = np.asarray(exp_decay) - np.asarray(norm_hist)
-resids_2 = fit - np.asarray(norm_hist)
+# resids_1 = np.asarray(exp_decay) - np.asarray(norm_hist)
+# resids_2 = fit - np.asarray(norm_hist)
 
 # rate = [1e9 / i0 for i0 in dts]
 # avg0 = rate[::100]
@@ -322,14 +295,10 @@ ax0, fig0, cs = set_figure(name='figure0',
                            xaxis=xlabel,
                            yaxis='#',
                            size=4)
-plt.plot(bin_axis, hist / np.max(hist), '.',
+plt.plot(bin_axis, hist, '.',
          label='hBN data')
-plt.plot(bin_axis, exp_decay, c=cs['ggdred'],
-         label='y = e^{-t/a}')
-plt.plot(bin_axis_NV, hist_NV / np.max(hist_NV), '.', c=cs['ggblue'],
-         label='NV data')
-plt.plot(bin_axis_NV, exp_decay_NV, c=cs['ggdblue'],
-         label='y = e^{-t/a}')
+# plt.plot(bin_axis, exp_decay, c=cs['ggdred'],
+#          label='y = e^{-t/a}')
 
 # plt.plot(bin_axis, Bi_exp(bin_axis, *popt))
 fig0.tight_layout()
@@ -340,7 +309,7 @@ fig0.tight_layout()
 #                            size=4)
 # plt.bar(bin_axis, hist, bin_width)
 # plt.plot(bin_axis, exp_decay, c=cs['ggblue'])
-ax0.set_yscale('log')
+# ax0.set_yscale('log')
 fig0.tight_layout()
 
 ax2, fig2, cs = set_figure(name='figure2',
@@ -353,30 +322,8 @@ plt.plot(rate_ts, rate,'.-',
          markersize=7,
          alpha=1)
 
-plt.plot(rate_NVts, rate_NV,'.-',
-         label='NV',
-         lw=0.5,
-         markersize=7,
-         alpha=1)
-
-ax2.set_ylim(0, np.max([1.1 * np.max(rate), 1.1 * np.max(rate_NV)]))
 fig2.tight_layout()
 
-ax3, fig3, cs = set_figure(name='figure3',
-                           xaxis=xlabel,
-                           yaxis='#',
-                           size=4)
-plt.plot(bin_axis, resids_1,
-         label='$y = e^{-t/a}$')
-plt.plot(bin_axis, resids_2,
-         label='$y = e^{-t/a}+e^{-t/b}$',
-         c=cs['ggdred'])
-plt.plot(bin_axis_NV, resids_1_NV,
-         label='$y = e^{-t/a}$')
-plt.plot(bin_axis_NV, resids_2_NV,
-         c=cs['ggdblue'],
-         label='$y = e^{-t/a}+e^{-t/b}$',)
-fig3.tight_layout()
 plt.show()
 # hist/bar plot ##############################################################
 # hists, bins = np.hist(δt0,100)

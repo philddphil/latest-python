@@ -168,7 +168,6 @@ def cos_ray_rem(data, λ, thres):
     ray_λ = []
     for i0, v0 in enumerate(cts_diff):
         if v0 > thres:
-            print(v0)
             # if gradient of data[n] is above threshold, relace it with mean
             # of data[n-2] & data[n+2]
             mean_before = np.mean(data[i0 - 14:i0 - 4])
@@ -183,7 +182,7 @@ def cos_ray_rem(data, λ, thres):
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0=(r'C:\Data\SCM\20210813 Spec Data')
+p0=(r'C:\Data\SCM\20210817 Spec Data')
 
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
@@ -196,7 +195,7 @@ all_λs = []
 all_names = []
 
 # Initialise lists of datasets
-for i0, v0 in enumerate(datafiles[-1:]):
+for i0, v0 in enumerate(datafiles[:]):
     # load each spec file, generate λ array and cts array
     λ, cts = load_spec(v0)
 
@@ -229,7 +228,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
              alpha=0.8,
              color=cs['mnk_yellow'],
              label='cosmic ray removed')
-    ax0.plot(λ, gaussian_filter(cts1, 1),
+    ax0.plot(λ, gaussian_filter(cts1, 50000),
              '-',
              lw=0.5,
              color=cs['ggblue'],
@@ -239,9 +238,9 @@ for i0, v0 in enumerate(datafiles[-1:]):
     plt.tight_layout()
     ax0.legend(loc='upper left', fancybox=True, framealpha=0.5)
     ax0.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-
+    # plt.close()
     ax1, fig1, cs = set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
-    ax1.plot(λ, gaussian_filter(cts1, 12),
+    ax1.plot(λ, gaussian_filter(cts1, 1),
              '-',
              lw=0.5,
              color=cs['ggblue'],
@@ -251,26 +250,45 @@ for i0, v0 in enumerate(datafiles[-1:]):
     plt.tight_layout()
     
     plt.show()
-    # PPT_save_2d(fig0, ax0, spec_name + '_proc')
-    # PPT_save_2d(fig1, ax1, spec_name)
-    plt.close()
+    PPT_save_2d(fig0, ax0, spec_name + '_proc')
+    PPT_save_2d(fig1, ax1, spec_name)
+    # plt.close()
 
-
+print(all_names)
 ax2, fig2, cs = set_figure('Spectral comparison', 'wavelength / nm', 'arb. int.')
-i0 = -1
-ax2.plot(all_λs[i0], gaussian_filter(105*all_cts[i0], 21),
+i0 = 0
+ax2.plot(all_λs[i0], gaussian_filter(all_cts[i0], 21),
          '-',
          lw=0.5,
          color=cs['ggblue'],
          label=all_names[i0])
-i0  = -2
+i0  = 1
+ax2.plot(all_λs[i0], gaussian_filter(all_cts[i0], 21),
+         '-',
+         lw=0.5,
+         color=cs['ggpurple'],
+         label=all_names[i0])
+i0  = 2
 ax2.plot(all_λs[i0], gaussian_filter(all_cts[i0], 21),
          '-',
          lw=0.5,
          color=cs['ggred'],
          label=all_names[i0])
+i0  = 3
+ax2.plot(all_λs[i0], gaussian_filter(all_cts[i0], 21),
+         '-',
+         lw=0.5,
+         color=cs['mnk_green'],
+         label=all_names[i0])
+i0  = 4
+ax2.plot(all_λs[i0], gaussian_filter(all_cts[i0], 21),
+         '-',
+         lw=0.5,
+         color=cs['ggyellow'],
+         label=all_names[i0])
 plt.tight_layout()
 ax2.legend(loc='upper left', fancybox=True, framealpha=0.5)
 plt.show()
+ax2.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
 PPT_save_2d(fig2, ax2, spec_name + '_comparison')
 
