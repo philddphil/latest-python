@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, r"C:\local files\Python\Local Repo\library")
 # Surface Pro 4 library path
 sys.path.insert(0, r"C:\Users\Phil\Documents\GitHub\latest-python\library")
+# PXI path
+sys.path.insert(0, r"C:\Users\ormphotons\Documents\GitHub\latest-python\library")
 np.set_printoptions(suppress=True)
 import prd_plots
 import prd_file_import
@@ -21,8 +23,7 @@ cs = prd_plots.palette()
 ##############################################################################
 # Import data (saved by labVIEW code controlling HH400)
 ##############################################################################
-d0 = r"C:\local files\Experimental Data\F5 L10 Confocal measurements" + \
-    r"\SCM Data 20200102\HH T3 162729"
+d0 = r"C:\Data\SCM\20210819 SCM Data\HH T3 141102"
 p0 = d0 + r"\tt ch0.txt"
 p1 = d0 + r"\tt ch1.txt"
 

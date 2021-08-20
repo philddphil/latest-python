@@ -182,7 +182,7 @@ def cos_ray_rem(data, λ, thres):
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0=(r'C:\Data\SCM\20210817 Spec Data')
+p0=(r'C:\Data\SCM\20210819 Spec Data')
 
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
@@ -195,7 +195,7 @@ all_λs = []
 all_names = []
 
 # Initialise lists of datasets
-for i0, v0 in enumerate(datafiles[:]):
+for i0, v0 in enumerate(datafiles[-1:]):
     # load each spec file, generate λ array and cts array
     λ, cts = load_spec(v0)
 
@@ -205,11 +205,12 @@ for i0, v0 in enumerate(datafiles[:]):
     idx1 = (np.abs(λ - 655)).argmin()
     cts0 = cts[idx0:idx1]
     λ0 = λ[idx0:idx1]
-    print(idx0,idx1)
 
     cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 1000)
+    # cts1 = cts
     background = (idx1 - idx0) * np.mean(cts)
     print(spec_name, 'counts in region', np.sum(cts[idx0:idx1])-background)
+    print('mean counts (taken as background)', np.mean(cts))
     print(spec_name, 'background in region', background)
 
     all_cts.append(cts1)
