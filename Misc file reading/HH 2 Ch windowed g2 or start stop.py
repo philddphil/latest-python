@@ -777,67 +777,45 @@ def plot_g2_fits_ss(d1, g2s, bin_edges, xlim, mks=1):
 # Do some stuff
 ##############################################################################
 # Data directories
-d0_NV = (
-    r"C:\local files\Compiled Data\Nu Quantum\Sample 2\Example NV\HH T3")
 
-d0_hBN = (
-    r"C:\local files\Compiled Data\Nu Quantum\Sample 2\A2 A1 data\Peak 1\HH")
+d0 = (r"C:\Data\SCM\20210819 SCM Data\HH T3 183038")
 
 
 # Prep more directories to organise data
-d1s_NV = prep_dirs_chs(d0_NV, ' win')
-d1w_NV = prep_dirs_chs(d0_NV, ' ss')
-d1s_hBN = prep_dirs_chs(d0_hBN, ' ss')
-d1w_hBN = prep_dirs_chs(d0_hBN, ' win')
+d1s = prep_dirs_chs(d0, ' ss')
+d1w = prep_dirs_chs(d0, ' win')
 
 t_res = 1
 t_range = 1e5
 
-# Gen dt lists if needed (takes time!) and histogram results
-# gen_dts_from_tts_windowed(d1w_hBN, d0_hBN, 'HH', 1e5)
-# gen_dts_from_tts(d1s_hBN, d0_hBN, 'HH')
+# Gen dt lists if needed (takes time!)
+gen_dts_from_tts_windowed(d1w, d0, 'HH', t_range)
+# gen_dts_from_tts(d1s, d0, 'HH')
 
 
 
-####### Load windowed/ss hBN datasets
-# try:
-#     bins_file_w, hist_file_w = hist_1d_fname(d1w_hBN, t_res, t_range)
-#     hist_w, bin_edges_w = load_hist_bins(d1w_hBN, bins_file_w, hist_file_w)
-# except:
-#     bins_file_w, hist_file_w = hist_1d(d1w_hBN, t_res, t_range)
-#     hist_w, bin_edges_w = load_hist_bins(d1w_hBN, bins_file_w, hist_file_w)
-
-# try:
-#     bins_file_s, hist_file_s = hist_1d_fname(d1s_hBN, t_res, t_range)
-#     hist_s, bin_edges_s = load_hist_bins(d1s_hBN, bins_file_s, hist_file_s)
-# except:
-#     bins_file_s, hist_file_s = hist_1d(d1s_hBN, t_res, t_range)
-#     hist_s, bin_edges_s = load_hist_bins(d1s_hBN, bins_file_s, hist_file_s)
-
-
-####### Load windowed/ss NV datasets
+####### Load windowed/ss datasets
 try:
-    bins_file_w, hist_file_w = hist_1d_fname(d1w_NV, t_res, t_range)
-    hist_w, bin_edges_w = load_hist_bins(d1w_NV, bins_file_w, hist_file_w)
+    bins_file_w, hist_file_w = hist_1d_fname(d1w, t_res, t_range)
+    hist_w, bin_edges_w = load_hist_bins(d1w, bins_file_w, hist_file_w)
 except:
-    bins_file_w, hist_file_w = hist_1d(d1w_NV, t_res, t_range)
-    hist_w, bin_edges_w = load_hist_bins(d1w_NV, bins_file_w, hist_file_w)
+    bins_file_w, hist_file_w = hist_1d(d1w, t_res, t_range)
+    hist_w, bin_edges_w = load_hist_bins(d1w, bins_file_w, hist_file_w)
 
 try:
-    bins_file_s, hist_file_s = hist_1d_fname(d1s_NV, t_res, t_range)
-    hist_s, bin_edges_s = load_hist_bins(d1s_NV, bins_file_s, hist_file_s)
+    bins_file_s, hist_file_s = hist_1d_fname(d1s, t_res, t_range)
+    hist_s, bin_edges_s = load_hist_bins(d1s, bins_file_s, hist_file_s)
 except:
-    bins_file_s, hist_file_s = hist_1d(d1s_NV, t_res, t_range)
-    hist_s, bin_edges_s = load_hist_bins(d1s_NV, bins_file_s, hist_file_s)
+    bins_file_s, hist_file_s = hist_1d(d1s, t_res, t_range)
+    hist_s, bin_edges_s = load_hist_bins(d1s, bins_file_s, hist_file_s)
 
+#### Convert count hists to g2s
+g2w = g2_from_cts(d1w, hist_w, bin_edges_w)
+g2s = g2_from_cts(d1s, hist_s, bin_edges_s)
 
-# Convert count hists to g2s
-# g2w_hBN = g2_from_cts(d1w_hBN, hist_w, bin_edges_w)
-# g2s_hBN = g2_from_cts(d1s_hBN, hist_s, bin_edges_s)
-
-# Plot datasets
-# plot_g2_fits_win(d1w_hBN, g2w_hBN, bin_edges_w, t_range)
-# plot_g2_fits_ss(d1s_hBN, g2s_hBN, bin_edges_s, t_range)
+#### Plot datasets
+# plot_g2_fits_win(d1w, g2w, bin_edges_w, t_range)
+# plot_g2_fits_ss(d1s, g2s, bin_edges_s, t_range)
 
 bin_w = (bin_edges_s[1] - bin_edges_s[0]) / 2
 
@@ -850,23 +828,23 @@ ts = np.linspace(bin_edges_s[1], bin_edges_s[-1] -
 # xy plot ####################################################################
 
 
-os.chdir(d0_NV)
+os.chdir(d0)
 
 # xy plot ################################################################
 ax1, fig1, cs = set_figure(
     name='figure', xaxis='τ, ns', yaxis='cts', size=4)
 
-ax1.plot(ts, hist_w,
+ax1.plot(ts, g2w,
          '.-', markersize=3,
          lw=0.1,
          alpha=0.2, label='')
 
-ax1.plot(ts, hist_s,
+ax1.plot(ts, g2s,
          '.-', markersize=3,
          lw=0.1,
          alpha=0.2, label='')
 
-ax1.set_ylim(0, 1.1 * np.max(hist_w))
+# ax1.set_ylim(0, 1.1 * np.max(hist_w))
 plt.show()
 plotname = 'hist'
 PPT_save_2d(fig1, ax1, plotname)

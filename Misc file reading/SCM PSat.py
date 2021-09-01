@@ -172,7 +172,7 @@ def I_sat_plot(file, title=''):
 # f0 = fs[0]
 # f1 = fs[1]
 #### PXI Path
-d0 = (r"C:\Data\SCM\20210818 SCM Data\PSats")
+d0 = (r"C:\Data\SCM\20210824 SCM Data\PSats")
 fs = glob.glob(d0 + r'\*.txt')
 f0 = fs[-1]
 

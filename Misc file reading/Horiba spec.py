@@ -182,7 +182,7 @@ def cos_ray_rem(data, λ, thres):
 # Do some stuff
 ##############################################################################
 # Specify results directory and change working directory to this location
-p0=(r'C:\Data\SCM\20210819 Spec Data')
+p0=(r'C:\Data\SCM\20210827\Spec Data')
 
 # p0 = (r"D:\Experimental Data\Internet Thorlabs optics data"))
 os.chdir(p0)
@@ -206,7 +206,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
     cts0 = cts[idx0:idx1]
     λ0 = λ[idx0:idx1]
 
-    cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 1000)
+    cts1, ray_data, ray_λ = cos_ray_rem(cts, λ, 100)
     # cts1 = cts
     background = (idx1 - idx0) * np.mean(cts)
     print(spec_name, 'counts in region', np.sum(cts[idx0:idx1])-background)
@@ -229,7 +229,7 @@ for i0, v0 in enumerate(datafiles[-1:]):
              alpha=0.8,
              color=cs['mnk_yellow'],
              label='cosmic ray removed')
-    ax0.plot(λ, gaussian_filter(cts1, 50000),
+    ax0.plot(λ, gaussian_filter(cts1, 50),
              '-',
              lw=0.5,
              color=cs['ggblue'],
@@ -240,13 +240,20 @@ for i0, v0 in enumerate(datafiles[-1:]):
     ax0.legend(loc='upper left', fancybox=True, framealpha=0.5)
     ax0.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
     # plt.close()
-    ax1, fig1, cs = set_figure('Spectrum', 'wavelength / nm', 'arb. int.')
-    ax1.plot(λ, gaussian_filter(cts1, 1),
+    ax1, fig1, cs = set_figure('Spectrum processed', 'wavelength / nm', 'arb. int.')
+    ax1.plot(λ, gaussian_filter(cts1, 3),
+             '.',
+             markersize=1,
+             alpha=0.2,
+             color=cs['ggred'],
+             label='data')
+    ax1.plot(λ, gaussian_filter(cts1, 50),
              '-',
-             lw=0.5,
-             color=cs['ggblue'],
+             lw=0.8,
+             color=cs['gglblue'],
              label='smoothed')
-    ax1.set_ylim(bottom=0)
+
+    ax1.set_ylim(top=1.01*np.max(gaussian_filter(cts1,50)))
     # ax1.set_xlim(640, 660)
     plt.tight_layout()
     
