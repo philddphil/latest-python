@@ -781,158 +781,67 @@ def plot_g2_fits_ss(d1, g2s, bin_edges, xlim, mks=1):
 d0 = (r"C:\Data\SCM\20210819 SCM Data\HH T3 183038")
 
 
-# Prep more directories to organise data
-d1s = prep_dirs_chs(d0, ' ss')
-d1w = prep_dirs_chs(d0, ' win')
+# # Prep more directories to organise data
+# d1s = prep_dirs_chs(d0, ' ss')
+# d1w = prep_dirs_chs(d0, ' win')
 
-t_res = 1
-t_range = 1e5
+# t_res = 1
+# t_range = 1e5
 
-# Gen dt lists if needed (takes time!)
-gen_dts_from_tts_windowed(d1w, d0, 'HH', t_range)
-# gen_dts_from_tts(d1s, d0, 'HH')
-
-
-
-####### Load windowed/ss datasets
-try:
-    bins_file_w, hist_file_w = hist_1d_fname(d1w, t_res, t_range)
-    hist_w, bin_edges_w = load_hist_bins(d1w, bins_file_w, hist_file_w)
-except:
-    bins_file_w, hist_file_w = hist_1d(d1w, t_res, t_range)
-    hist_w, bin_edges_w = load_hist_bins(d1w, bins_file_w, hist_file_w)
-
-try:
-    bins_file_s, hist_file_s = hist_1d_fname(d1s, t_res, t_range)
-    hist_s, bin_edges_s = load_hist_bins(d1s, bins_file_s, hist_file_s)
-except:
-    bins_file_s, hist_file_s = hist_1d(d1s, t_res, t_range)
-    hist_s, bin_edges_s = load_hist_bins(d1s, bins_file_s, hist_file_s)
-
-#### Convert count hists to g2s
-g2w = g2_from_cts(d1w, hist_w, bin_edges_w)
-g2s = g2_from_cts(d1s, hist_s, bin_edges_s)
-
-#### Plot datasets
-# plot_g2_fits_win(d1w, g2w, bin_edges_w, t_range)
-# plot_g2_fits_ss(d1s, g2s, bin_edges_s, t_range)
-
-bin_w = (bin_edges_s[1] - bin_edges_s[0]) / 2
-
-ts = np.linspace(bin_edges_s[1], bin_edges_s[-1] -
-                 bin_w, len(bin_edges_s) - 1)
-
-##############################################################################
-# Plot some figures
-##############################################################################
-# xy plot ####################################################################
+# # Gen dt lists if needed (takes time!)
+# gen_dts_from_tts_windowed(d1w, d0, 'HH', t_range)
+# # gen_dts_from_tts(d1s, d0, 'HH')
 
 
-os.chdir(d0)
 
-# xy plot ################################################################
-ax1, fig1, cs = set_figure(
-    name='figure', xaxis='τ, ns', yaxis='cts', size=4)
+# ####### Load windowed/ss datasets
+# try:
+#     bins_file_w, hist_file_w = hist_1d_fname(d1w, t_res, t_range)
+#     hist_w, bin_edges_w = load_hist_bins(d1w, bins_file_w, hist_file_w)
+# except:
+#     bins_file_w, hist_file_w = hist_1d(d1w, t_res, t_range)
+#     hist_w, bin_edges_w = load_hist_bins(d1w, bins_file_w, hist_file_w)
 
-ax1.plot(ts, g2w,
-         '.-', markersize=3,
-         lw=0.1,
-         alpha=0.2, label='')
+# try:
+#     bins_file_s, hist_file_s = hist_1d_fname(d1s, t_res, t_range)
+#     hist_s, bin_edges_s = load_hist_bins(d1s, bins_file_s, hist_file_s)
+# except:
+#     bins_file_s, hist_file_s = hist_1d(d1s, t_res, t_range)
+#     hist_s, bin_edges_s = load_hist_bins(d1s, bins_file_s, hist_file_s)
 
-ax1.plot(ts, g2s,
-         '.-', markersize=3,
-         lw=0.1,
-         alpha=0.2, label='')
+# #### Convert count hists to g2s
+# g2w = g2_from_cts(d1w, hist_w, bin_edges_w)
+# g2s = g2_from_cts(d1s, hist_s, bin_edges_s)
 
-# ax1.set_ylim(0, 1.1 * np.max(hist_w))
-plt.show()
-plotname = 'hist'
-PPT_save_2d(fig1, ax1, plotname)
-plt.close(fig1)
+# #### Plot datasets
+# # plot_g2_fits_win(d1w, g2w, bin_edges_w, t_range)
+# # plot_g2_fits_ss(d1s, g2s, bin_edges_s, t_range)
 
-# ax1, fig1, cs = set_figure(name='figure',
-#                            xaxis='τ / ns',
-#                            yaxis='probability of detection',
-#                            size=4)
-# ax1.plot(x, y1, c=cs['ggdred'])
-# ax1.plot(x, y2, c=cs['ggdred'])
-# ax1.plot(t, SPS2)
-# ax1.plot(t, SPS3)
-# ax1.plot(t, SPS4)
-# ax1.set_ylim(-0.1, 1.1)
+# bin_w = (bin_edges_s[1] - bin_edges_s[0]) / 2
+
+# ts = np.linspace(bin_edges_s[1], bin_edges_s[-1] -
+#                  bin_w, len(bin_edges_s) - 1)
+
+# ##############################################################################
+# # Plot some figures
+# ##############################################################################
+# os.chdir(d0)
+# # xy plot ####################################################################
+# ax1, fig1, cs = set_figure(
+#     name='figure', xaxis='τ, ns', yaxis='cts', size=4)
+
+# ax1.plot(ts, g2w,
+#          '.-', markersize=3,
+#          lw=0.1,
+#          alpha=0.2, label='')
+
+# ax1.plot(ts, g2s,
+#          '.-', markersize=3,
+#          lw=0.1,
+#          alpha=0.2, label='')
+
+# # ax1.set_ylim(0, 1.1 * np.max(hist_w))
+# plt.show()
+# plotname = 'hist'
+# PPT_save_2d(fig1, ax1, plotname)
 # plt.close(fig1)
-# fig1.tight_layout()
-# plt.show()
-
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.plot(x + 50, a, '.')
-# plt.plot(x + 50, b, '.')
-# plt.plot(c, '.')
-# # plt.title()
-# fig1.tight_layout()
-# plt.show()
-
-
-# hist/bar plot ##############################################################
-# hists, bins = np.hist(δt0,100)
-# size = 9
-# fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-# ax2 = fig2.add_subplot(111)
-# fig2.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Country', fontsize=28, labelpad=80,)
-# ax2.set_ylabel('Money (M$)', fontsize=28)
-# plt.bar(1, 500, color=cs['ggred'])
-# plt.bar(2, 1000, color=cs['ggblue'])
-# plt.bar(3, 1275, color=cs['mnk_green'])
-# plt.bar(4, 10000, color=cs['ggpurple'])
-# ax2.set_xlim(0.5, 4.5)
-# ax2.set_ylim(0, 11000)
-# ax2.set_yticklabels([])
-# ax2.set_xticklabels([])
-# size = 4
-# fig1 = plt.figure('fig1', figsize=(size * np.sqrt(2), size))
-# ax1 = fig1.add_subplot(111)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax2.set_xlabel('Δt (ps)')
-# ax2.set_ylabel('freq #')
-# plt.hist(δt0, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.8)
-# plt.hist(δt1, bins=100, edgecolor=cs['mnk_dgrey'], alpha=0.5)
-
-# xyz plot ###################################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# scattter = ax3.scatter(*coords, z, '.', alpha=0.4,
-#                       color=cs['gglred'], label='')
-# contour = ax3.contour(*coords, z, 10, cmap=cm.jet)
-# surface = ax3.plot_surface(*coords, z, 10, cmap=cm.jet)
-# wirefrace = ax3.plot_wireframe(*coords, z, 10, cmap=cm.jet)
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-# plt.tight_layout()
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# set_zlim(min_value, max_value)
-
-# img plot ###################################################################
-# ax4, fig4, cs = set.figure('image', 'x axis', 'y axis')
-# im4 = plt.imshow(Z, cmap='magma', extent=extents(y) +
-#                  extents(x),vmin=0,vmax=100)
-# divider = make_axes_locatable(ax4)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# cb4 = fig4.colorbar(im4, cax=cax)
-
-# save plot ###################################################################
-# ax1.figure.savefig('g2s.svg')
-# plot_file_name = plot_path + 'plot2.png'
-# ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
-# PPT_save_2d(fig1, ax1, 'g2')
