@@ -558,8 +558,6 @@ def g2_fit_ss_0(t, dt, a, b, c, d, z):
 
 # g2 function taken from "Berthel et al 2015" for 3 level system with #########
 # experimental count rate envelope and background #############################
-
-
 def g2_fit_ss_1(t, dt, a, b, c, d, r):
     g1 = 1 - c * np.exp(- a * np.abs(t - dt))
     g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
@@ -570,8 +568,6 @@ def g2_fit_ss_1(t, dt, a, b, c, d, r):
 
 # g2 function taken from "Berthel et al 2015" for 3 level system with #########
 # experimental count rate envelope and multiple emitters ######################
-
-
 def g2_fit_win_0(t, dt, a, b, c, d, z):
     g1 = 1 - c * np.exp(- a * np.abs(t - dt))
     g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
@@ -582,8 +578,6 @@ def g2_fit_win_0(t, dt, a, b, c, d, z):
 
 # g2 function taken from "Berthel et al 2015" for 3 level system with #########
 # experimental count rate envelope and background #############################
-
-
 def g2_fit_win_1(t, dt, a, b, c, d, r):
     g1 = 1 - c * np.exp(- a * np.abs(t - dt))
     g2 = (c - 1) * np.exp(- b * np.abs(t - dt))
@@ -665,19 +659,19 @@ def plot_g2_fits_win(d1, g2s, bin_edges, xlim, mks=1):
              markersize=mks,
              lw=0.1,
              alpha=0.8)
-    # ax1.plot(ts_fit - popt_g0[0], g2_fit_win_0(
-    #     ts_fit, *popt_g0), '-',
-    #     color=cs['ggyellow'],
-    #     label='fit 0',
-    #     alpha=1,
-    #     lw=3.0)
-    # ax1.plot(ts_fit - popt_g0[0], g2_fit_win_1(
-    #     ts_fit, *popt_g1), '-',
-    #     color=cs['ggpurple'],
-    #     label='fit 1',
-    #     alpha=1,
-    #     lw=1)
-    # plt.show()
+    ax1.plot(ts_fit - popt_g0[0], g2_fit_win_0(
+        ts_fit, *popt_g0), '-',
+        color=cs['ggyellow'],
+        label='fit 0',
+        alpha=1,
+        lw=3.0)
+    ax1.plot(ts_fit - popt_g0[0], g2_fit_win_1(
+        ts_fit, *popt_g1), '-',
+        color=cs['ggpurple'],
+        label='fit 1',
+        alpha=1,
+        lw=1)
+    plt.show()
     fig1.tight_layout()
     plotname = 'hist'
     ax1.legend(loc='upper left', fancybox=True, framealpha=0.0)
@@ -778,7 +772,7 @@ def plot_g2_fits_ss(d1, g2s, bin_edges, xlim, mks=1):
 ##############################################################################
 # Data directories
 
-d0 = (r"C:\Data\SCM\20210819 SCM Data\HH T3 183038")
+d0 = (r"C:\Data\20211011\SCM Data\HH T3 200831")
 
 
 # Prep more directories to organise data
@@ -786,11 +780,11 @@ d1s = prep_dirs_chs(d0, ' ss')
 d1w = prep_dirs_chs(d0, ' win')
 
 t_res = 1
-t_range = 1e5
+t_range = 250
 
 # Gen dt lists if needed (takes time!)
 gen_dts_from_tts_windowed(d1w, d0, 'HH', t_range)
-# gen_dts_from_tts(d1s, d0, 'HH')
+gen_dts_from_tts(d1s, d0, 'HH')
 
 
 
@@ -814,8 +808,8 @@ g2w = g2_from_cts(d1w, hist_w, bin_edges_w)
 g2s = g2_from_cts(d1s, hist_s, bin_edges_s)
 
 #### Plot datasets
-# plot_g2_fits_win(d1w, g2w, bin_edges_w, t_range)
-# plot_g2_fits_ss(d1s, g2s, bin_edges_s, t_range)
+plot_g2_fits_win(d1w, g2w, bin_edges_w, t_range)
+plot_g2_fits_ss(d1s, g2s, bin_edges_s, t_range)
 
 bin_w = (bin_edges_s[1] - bin_edges_s[0]) / 2
 

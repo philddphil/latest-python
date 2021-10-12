@@ -778,7 +778,7 @@ def plot_g2_fits_ss(d1, g2s, bin_edges, xlim, mks=1):
 ##############################################################################
 # Data directories
 
-d0 = (r"C:\Data\SCM\20210826 SCM Data\Sequences\26Aug21-002")
+d0 = (r"C:\Data\SCM\20210826 SCM Data\Sequences\27Aug21-001")
 Peak_dirs = glob.glob(d0 + r"\*")
 
 for i0, v0 in enumerate(Peak_dirs):
@@ -793,11 +793,11 @@ for i0, v0 in enumerate(Peak_dirs):
         # d1w = prep_dirs_chs(d0, ' win')
 
         t_res = 1
-        t_range = 1e5
+        t_range = 1000
         # # Gen dt lists if needed (takes time!)
         # gen_dts_from_tts_windowed(d1w, d0, 'HH', t_range)
-        print('Calculating dts')
-        gen_dts_from_tts(d1s, HH_dir, 'HH')
+        # print('Calculating dts')
+        # gen_dts_from_tts(d1s, HH_dir, 'HH')
 
         # ####### Load windowed/ss datasets
         # try:
@@ -841,11 +841,12 @@ for i0, v0 in enumerate(Peak_dirs):
 
 
         ax1.plot(ts, g2s,
-                 '.-', markersize=3,
+                 '.-', markersize=5,
                  lw=0.1,
-                 alpha=0.2, label='')
+                 alpha=0.5, label='')
 
         # ax1.set_ylim(0, 1.1 * np.max(hist_w))
+        ax1.set_ylim(bottom=0)
         plotname = 'hist'
         PPT_save_2d(fig1, ax1, plotname)
         plt.close(fig1)

@@ -172,7 +172,7 @@ def I_sat_plot(file, title=''):
 # f0 = fs[0]
 # f1 = fs[1]
 #### PXI Path
-d0 = (r"C:\Data\SCM\20210824 SCM Data\PSats")
+d0 = (r"C:\Data\SCM\20210910 SCM Data\PSats")
 fs = glob.glob(d0 + r'\*.txt')
 f0 = fs[-1]
 
@@ -181,22 +181,22 @@ Ps_0, kcps_0, popt_0 = I_sat_plot(f0)
 # Ps_1, kcps_1, popt_1 = I_sat_plot(f1)
 
 #### Plot some ISats separately if needed
-# Ps_fit = np.linspace(np.min(Ps_0), np.max(Ps_0), 1000)
+Ps_fit = np.linspace(np.min(Ps_0), np.max(Ps_0), 1000)
 
-# Isat_fit_0 = I_sat(Ps_fit, *popt_0)
+Isat_fit_0 = I_sat(Ps_fit, *popt_0)
 # Isat_fit_1 = I_sat(Ps_fit, *popt_1)
 
 
-# ax1, fig1, cs = set_figure(name='figure',
-#                            xaxis='Power (mW)',
-#                            yaxis='$10^3$ counts per secound',
-#                            size=2.5)
+ax1, fig1, cs = set_figure(name='figure',
+                           xaxis='Power (mW)',
+                           yaxis='$10^3$ counts per secound',
+                           size=2.5)
 
-# plt.plot(Ps_0, kcps_0, '.', label='data',
-#   color=cs['ggdblue'])
+plt.plot(Ps_0, kcps_0, '.', label='data',
+  color=cs['ggdblue'])
 
-# plt.plot(Ps_fit, Isat_fit_0, '-',
-#   color=cs['gglblue'])
+plt.plot(Ps_fit, Isat_fit_0, '-',
+  color=cs['gglblue'])
 
 # plt.plot(Ps_1, kcps_1, '.', 
 #   label='data',
@@ -205,5 +205,5 @@ Ps_0, kcps_0, popt_0 = I_sat_plot(f0)
 # plt.plot(Ps_fit, Isat_fit_1, '-',
 #   color=cs['gglred'])
 
-# plt.tight_layout()
-# plt.show()
+plt.tight_layout()
+plt.show()
