@@ -128,7 +128,7 @@ def load_SCM_F5L10(filepath):
             y_fin = float(data[i0].split("\t")[-1])
         if 'Y res' in j0:
             y_res = float(data[i0].split("\t")[-1])
-        if 'Y wait period / ms' in j0:
+        if 'y V' in j0:
             data_start_line = i0 + 2
 
     x = np.linspace(x_init, x_fin, int(x_res))
@@ -251,26 +251,14 @@ def image_object_find(x_img, y_img, img, u_lim):
 p0 = (r"C:\Data\SCM\SCM Data 20210721\Raster scans\21Jul21 scan-006.txt")
 d0 = (r"C:\Data\SCM\SCM Data 20210721\Raster scans")
 
-# p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans\02Dec20 scan-001.txt")
-# d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans")
+p0 = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Examplar Data\Confoal images\WSe2 Bilayer\27Aug21 scan-001.txt")
+d0 = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Examplar Data\Confoal images\WSe2 Bilayer")
+
 ##############################################################################
 # Image processing to retrieve peak locations
 ##############################################################################
-Ulim = 260000
-clim = [2000, 80000]
-
-
-
-p0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans\02Dec20 scan-001.txt")
-d0 = (r"C:\local files\Experimental Data\F5 L10 Confocal measurements\SCM Data 20201201\Raster scans")
-
-d0 = (r"C:\local files\Compiled Data\Nu Quantum\Sample 2\A2 C4 data\Raster scans")
-p0 = (r"C:\local files\Compiled Data\Nu Quantum\Sample 2\A2 C4 data\Raster scans\07Dec20 scan-001.txt")
-##############################################################################
-# Image processing to retrieve peak locations
-##############################################################################
-Ulim = 100000
-clim = [2000, 15000]
+Ulim = 10000000
+clim = [20000, 1500000]
 
 x_img, y_img, img0 = load_SCM_F5L10(p0)
 img = np.flipud(img0)

@@ -199,6 +199,7 @@ pX = (r"C:\Data\Pre back up data\SCM\SCM Data 20210513\Raster scans")
 
 ##### Office laptop file paths
 pX = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Examplar Data\Confoal images\WSe2 Bilayer")
+p_coords = (r"C:\Users\pd10\OneDrive - National Physical Laboratory\Examplar Data\Confoal images\WSe2 Bilayer\peak coords1.txt")
 # pZ = (r"C:\local files\Compiled Data\Nu Quantum"
 #       r"\Sample 2\B2 C1 data\Raster scans")
 
@@ -228,6 +229,8 @@ for i0, v0 in enumerate(datafiles[:]):
     #### Piezo scaling 10V = 25 microns
     # x = x * 2.5
     # y = y * 2.5
+    coords = np.genfromtxt(p_coords)
+    print(coords)
 
     # print(np.min(img))
     lb = os.path.basename(v0)
@@ -248,6 +251,18 @@ for i0, v0 in enumerate(datafiles[:]):
                      vmax=0.01 * np.max(img),
                      origin='lower'
                      )
+    for i0, v0 in enumerate(coords):
+        x_coord = -1 * v0[0]
+        y_coord = v0[1]
+        pk_number = i0
+        ax1.plot(x_coord, y_coord, 'o',
+                 ms=2,
+                 mec=cs['mnk_green'],
+                 fillstyle='none')
+        # ax1.text(x_coord, y_coord, '    ' + str(pk_number),
+        #          c=cs['mnk_green'])
+
+
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar1 = fig1.colorbar(im1, cax=cax)
@@ -273,6 +288,18 @@ for i0, v0 in enumerate(datafiles[:]):
                      label=lb,
                      origin='lower'
                      )
+
+    for i0, v0 in enumerate(coords):
+        x_coord = -1 * v0[0]
+        y_coord = v0[1]
+        pk_number = i0
+        ax2.plot(x_coord, y_coord, 'o',
+                 ms=2,
+                 mec=cs['mnk_green'],
+                 fillstyle='none')
+        # ax2.text(x_coord, y_coord, '    ' + str(pk_number),
+        #          c=cs['mnk_green'])
+
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes("right", size="5%", pad=0.05)
 
