@@ -1,6 +1,7 @@
+# %%
 import numpy as np
-
-dB = -0.2
+# %%
+dB = -0.5
 lin_from_dB = 10**(dB / 10)
 
 Pin = 1
