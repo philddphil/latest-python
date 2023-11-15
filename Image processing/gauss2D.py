@@ -40,7 +40,7 @@ opt.curve_fit
 data_fitted = Gaussian_2D(coords, *popt)
 
 fig, ax = plt.subplots(1, 1)
-ax.imshow(data_noisy.reshape(201, 201), cmap=plt.cm.jet, origin='bottom',
+ax.imshow(data_noisy.reshape(201, 201), cmap=plt.cm.jet, origin='lower',
           extent=(x.min(), x.max(), y.min(), y.max()))
 ax.contour(x, y, data_fitted.reshape(201, 201), 8, colors='w')
 plt.show()

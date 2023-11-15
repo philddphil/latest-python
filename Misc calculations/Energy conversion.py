@@ -48,8 +48,8 @@ h = constants.h
 pi = np.pi
 
 photon_rate_cps = 3e6
-wavelength_nm = 1030
-dfreq_GHz = 10
+wavelength_nm = 1033
+dfreq_GHz = 0.02
 
 n1 = 1.45
 d1 = (c / n1) * 12.5e-9
@@ -64,6 +64,7 @@ dnrg_μeV = dnrg_meV * 1e3
 
 freq_Hz = c / wavelength_m
 freq_GHz = freq_Hz / 1e9
+freq_MHz = freq_Hz / 1e6
 
 dlambda_m = (c * dfreq_Hz) / (freq_Hz ** 2)
 dlambda_nm = dlambda_m * 1e9
@@ -82,10 +83,10 @@ photon_flux_W = photon_J * photon_rate_cps
 photon_flux_pW = 1e12 * photon_flux_W
 
 # Cavity metrics
-l = 7.5e-3
+l = 360e-6
 FSR = 10e9
 Q1 = wavelength_nm / dlambda_nm
 Q2 = freq_Hz/dfreq_Hz
 Q = 1e7
 F = FSR / dfreq_Hz
-Ringdown = Q/(freq_Hz * 2 * pi)
+Ringdown = Q2/(freq_Hz * 2 * pi)

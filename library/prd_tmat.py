@@ -17,12 +17,32 @@ import copy
 # takes the input vector (q_in) and multiplies it by the matrix corresponding
 # to a length of d (optical path length = n * d)
 def ABCD_MM(q_in, d, n=1):
+    """ Matrix multiplication step in propagating 'd' along optical axis
+
+    Args:
+        q_in (list): list of 2 floats parameterising ray/Gbeam
+        d (float): float, distance to propagate
+        n (int, optional): Refractive index of medium. Defaults to 1.
+    """
     M = np.array([[1, d * n], [0, 1]])
     q_out = np.matmul(M, q_in)
     return(q_out)
 
 # propagation from z_in to z_end with 1000 pts in between. ###################
 def ABCD_propagate(qs, z_end, zs_in=None, ns_in=None, res=1000):
+    """Propagate ray/Gbeam to z_end in medium with ref ind 
+        n calculating qs at res points along the way
+
+    Args:
+        qs (list): 2 element list of floats parameterising ray/Gbeam
+        z_end (float): end of region to propagate over
+        zs_in (list, optional): list of locations (floats) ray/Gbeam 
+                                evaluated at. Defaults to None.
+        ns_in (list, optional): list ref inds at locations (floats) 
+                                ray/beam evaluated at. Defaults to None.
+        res (int, optional): int number of points to evaluate ray/Gbeam at. 
+                                Defaults to 1000.
+    """
     if zs_in is None:
         zs_in = [0]
     if ns_in is None:
@@ -50,6 +70,15 @@ def ABCD_propagate(qs, z_end, zs_in=None, ns_in=None, res=1000):
 
 # refraction due to a thin lens ##############################################
 def ABCD_tlens(qs, f):
+    """ Passes ray/Gbeam through thin lens, focal length l 
+
+    Args:
+        qs (list): 2 element list of floats parameterising ray/Gbeam
+        f (float): focal length of lens
+
+    Returns:
+        _type_: _description_
+    """
     M = np.array([[1, 0], [-1 / f, 1]])
     q_out = np.matmul(M, qs[-1])
     if qs[-1][1] == 1:

@@ -1,14 +1,14 @@
 ##############################################################################
-# Import some libraries
+# %% Import some libraries
 ##############################################################################
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
 ##############################################################################
-# Import some extra special libraries from my own repo
+# %% Import some extra special libraries from my own repo
 ##############################################################################
-p_lib = (r"C:\local files\Python\Local Repo\library")
+p_lib = (r"C:\Users\Phil Dolan\Documents\GitHub\latest-python\library")
 # p_lib = (r"C:\GitHub\latest-python\library")
 sys.path.insert(0, p_lib)
 
@@ -17,7 +17,7 @@ import prd_tmat
 cs = prd_plots.palette()
 
 ##############################################################################
-# Do some stuff
+# %% Do some stuff
 ##############################################################################
 
 # Follows the wikipedia ray matrix formalism
@@ -151,7 +151,7 @@ _, ps2, _ = prd_tmat.ABCD_propagate(ps2, z4, zs3, ns3, fres)
 _, Gs, _ = prd_tmat.ABCD_propagate(Gs, z4, zs3, ns3, fres)
 
 ##############################################################################
-# Convert 1D arrays of qs, ps & ns into Rs, ws, xs and θs
+# %% Convert 1D arrays of qs, ps & ns into Rs, ws, xs and θs
 ##############################################################################
 # Invert q parameter
 gs_inv = 1 / np.array(Gs)[:, 0]
@@ -178,7 +178,7 @@ pθs1 = np.array(ps1)[:, 1]
 pθs2 = np.array(ps2)[:, 1]
 
 ##############################################################################
-# Plot the outputted waists
+# %% Plot the outputted waists
 ##############################################################################
 # Scale values for appropriate plotting
 prd_plots.ggplot()
@@ -212,13 +212,13 @@ plt.plot(zs_plot, pxs2, '-', c=cs['ggblue'], label='')
 plt.plot(zs_plot, ws, '--', c=cs['gglred'], label='Gaussian Beam')
 plt.plot(zs_plot, -ws, '--', c=cs['gglred'])
 
-ax1.legend(loc='upper right', fancybox=True, framealpha=1)
-ax1.set_xlim(2.0 * (f1 + f1) + 0.99 * f3, 2.0 * (f1 + f1) + 2 * f3 - 0.99 * f3)
-ax1.set_ylim(-250, 250)
+# ax1.legend(loc='upper right', fancybox=True, framealpha=1)
+# ax1.set_xlim(2.0 * (f1 + f1) + 0.99 * f3, 2.0 * (f1 + f1) + 2 * f3 - 0.99 * f3)
+# ax1.set_ylim(-250, 250)
 plt.tight_layout()
 plt.show()
 
 # Saving plots
 plot_file_name = plot_path + r'\Gauss and Ray tracing off axis.png'
 ax1.legend(loc='upper left', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-prd_plots.PPT_save_2d(fig1, ax1, plot_file_name)
+
