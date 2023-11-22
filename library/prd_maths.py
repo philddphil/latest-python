@@ -41,8 +41,19 @@ def straight_line(x, m, c=0):
     return y
 
 
-# Generic 1D Gaussian peak function ###########################################
 def Gaussian_1D(x, A, x_c, σ, bkg=0, N=1):
+    """_summary_
+
+    Args:
+        x (_type_): _description_
+        A (_type_): _description_
+        x_c (_type_): _description_
+        bkg (int, optional): _description_. Defaults to 0.
+        N (int, optional): _description_. Defaults to 1.
+
+    Returns:
+        _type_: _description_
+    """
     # Note the optional input N, used for super Gaussians (default = 1)
     x_c = float(x_c)
     G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
@@ -236,8 +247,19 @@ def find_nearest(array, value):
     return array[idx], idx
 
 
-# Get Gaussian fit of histogram of data set a ################################
 def Gauss_hist(a, bins=10, rng=3, res=1000):
+    """ Get Gaussian fit of histogram of data set a
+
+    Args:
+        a (array): set of data values
+        bins (int, optional): number of bins in histogram. Defaults to 10.
+        rng (int, optional): range of histogram. Defaults to 3.
+        res (int, optional): resolution of plotted histogram fit. Defaults to 1000.
+
+    Returns:
+        x (array): range of x values (correspoding to data values)
+        y (array): frequency of data values
+    """
     μ = np.mean(a)
     σ = np.sqrt(np.var(a))
     n, bins = np.histogram(a, bins)

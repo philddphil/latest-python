@@ -1,3 +1,8 @@
+# %% imports
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
 # %% defs
 def ggplot_sansserif():
     """
@@ -120,72 +125,35 @@ def Gauss_hist(a, bins=10, rng=3, res=1000):
     return x, y
 
 
+def Gaussian_1D(x, A, x_c, σ, bkg=0, N=1):
+    """_summary_
+
+    Args:
+        x (_type_): _description_
+        A (_type_): _description_
+        x_c (_type_): _description_
+        bkg (int, optional): _description_. Defaults to 0.
+        N (int, optional): _description_. Defaults to 1.
+
+    Returns:
+        _type_: _description_
+    """
+    # Note the optional input N, used for super Gaussians (default = 1)
+    x_c = float(x_c)
+    G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
+    return G
+
+
 # %% Do some stuff
-x = np.linspace(0.9, 1.1, 500)
-A = 50
-SNR = 1 / 20
-bins = 15
-value = 10
-noise = np.random.normal(0, A * SNR, x.shape) + value
-Gauss_x, Gauss_y = prd_maths.Gauss_hist(noise, bins)
-
-# %% Plot some figures
-plot_path = r"G:\My Drive"
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
-
-###### xy plot ###############################################################
-size = 4
-
-fig2 = plt.figure('fig2', figsize=(size * np.sqrt(2), size))
-ax2 = fig2.add_subplot(111)
-fig2.patch.set_facecolor(cs['mnk_dgrey'])
-ax2.set_xlabel('measurement number')
-ax2.set_ylabel('value')
-plt.plot(noise, '.', alpha=1, color=cs['gglred'], label='')
-plt.plot(noise, alpha=0.2, color=cs['gglred'], label='')
-[ymin, ymax] = ax2.get_ylim()
+x = np.linspace(-10, 10, 1000)
+y = Gaussian_1D(x,1,0,1)
+# %% plot figure
+ax2, fig2 = set_figure()
+ax2.plot(x,y,
+         color='xkcd:red',
+        )
 plt.tight_layout()
-
-size = 4
-fig3 = plt.figure('fig3', figsize=(size, size))
-ax3 = fig3.add_subplot(111)
-fig3.patch.set_facecolor(cs['mnk_dgrey'])
-ax3.set_xlabel('freq of occurances (#)')
-ax3.set_ylabel('value')
-plt.hist(noise, bins, edgecolor=cs['mnk_dgrey'], color=cs['ggred'], alpha=0.5,
-         orientation="horizontal")
-plt.plot(Gauss_y, Gauss_x, alpha=1, color=cs['gglblue'], label='')
-ax3.set_ylim(ymin, ymax)
-plt.tight_layout()
-# plt.hist(G_noise, 10, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
-# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
-# plt.plot(x2, y2, alpha=1, color=cs['ggblue'], lw=0.5, label='excite')
-
-###### xyz plot ##############################################################
-# size = 4
-# fig3 = plt.figure('fig3', figsize=(size * np.sqrt(2), size))
-# ax3 = fig3.add_subplot(111, projection='3d')
-# fig3.patch.set_facecolor(cs['mnk_dgrey'])
-# ax3.set_xlabel('x axis')
-# ax3.set_ylabel('y axis')
-# scatexp = ax3.scatter(*coords, z, '.', alpha=0.4, color=cs['gglred'], label='')
-# surffit = ax3.contour(*coords, z, 10, cmap=cm.jet)
-
-# ax3.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# # os.chdir(p0)
-
-# ax3.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# ax3.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-# set_zlim(min_value, max_value)
-
 plt.show()
-plot_file_name = plot_path + r'\hist.png'
-prd_plots.PPT_save_2d(fig3, ax3, plot_file_name)
-plot_file_name = plot_path + r'\tseries.png'
-prd_plots.PPT_save_2d(fig2, ax2, plot_file_name)
+# %% save figure
+os.chdir(r"G:\My Drive\Plots")
+PPT_save_plot(fig2, ax2, 'Gaussian.svg')
