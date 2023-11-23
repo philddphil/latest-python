@@ -125,19 +125,25 @@ def Gauss_hist(a, bins=10, rng=3, res=1000):
     return x, y
 
 
-def Gaussian_1D(x, A, x_c, σ, bkg=0, N=1):
-    """_summary_
+def Gaussian_1D(x, A, x_c, x_w, bkg=0, N=1):
+    """ See wikipedia
+    https://en.wikipedia.org/wiki/Normal_distribution
 
     Args:
-        x (_type_): _description_
-        A (_type_): _description_
-        x_c (_type_): _description_
-        bkg (int, optional): _description_. Defaults to 0.
-        N (int, optional): _description_. Defaults to 1.
+        x (array): x values
+        A (float): peak value
+        x_c (float): mean
+        x_w (float): standard deviation
+        bkg (int, optional): y offset. Defaults to 0.
+        N (int, optional): order. Defaults to 1.
 
     Returns:
-        _type_: _description_
+        array: y values
     """
+    # Note the optional input N, used for super Gaussians (default = 1)
+    x_c = float(x_c)
+    G = A * np.exp(- (((x - x_c) ** 2) / (2 * x_w ** 2))**N) + bkg
+    return G
     # Note the optional input N, used for super Gaussians (default = 1)
     x_c = float(x_c)
     G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
