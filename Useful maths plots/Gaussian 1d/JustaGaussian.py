@@ -156,7 +156,7 @@ y = Gaussian_1D(x,1,0,1)
 # %% plot figure
 ax2, fig2 = set_figure()
 ax2.plot(x,y,
-         color='xkcd:red',
+         color='#5454ff',
         )
 plt.tight_layout()
 plt.show()
