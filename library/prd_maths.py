@@ -41,7 +41,7 @@ def straight_line(x, m, c=0):
     return y
 
 
-
+def Gaussian_1D(x, A, x_c, x_w, bkg, N):
     """ See wikipedia
     https://en.wikipedia.org/wiki/Normal_distribution
 
