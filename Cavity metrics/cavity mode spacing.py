@@ -367,10 +367,10 @@ ax0.plot(1e6*Ls,res_both_GHz,
 
 for i0, v0 in enumerate(peaks):
     ax0.text(1e6*v0, 0.6, 
-            int(ns_both_1033[i0]),
+            str(int(ns_both_1033[i0])),
             size=6)
     ax0.text(1e6*v0, 0.5, 
-            int(ns_both_1377[i0]),
+            str(int(ns_both_1377[i0])),
             size=6,
             )
     
