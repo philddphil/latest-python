@@ -79,6 +79,15 @@ def set_figure(name: str = 'figure',
 
 
 def PPT_save_plot(fig, ax, name, dpi=600):
+    """ saves a plot as 'name'.png (unless .svg is specified in the name). 
+    Iterates name (name_0, name_1, ...) if file already exists with that name.
+
+    Args:
+        fig (plt.fig): figure pointer
+        ax (plt.ax): axis pointer
+        name (str): desired name of file. No extension produced .png with name. Add .svg as ext. if needed
+        dpi (int, optional): _description_. Defaults to 600.
+    """
     # Set plot colours
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
@@ -146,21 +155,6 @@ def extents(f):
     """
     delta = f[1] - f[0]
     return f[0] - delta / 2, f[-1] + delta / 2
-
-
-def rotation(xmesh, ymesh, rotrad=0.0):
-    """_summary_
-
-    Args:
-        xmesh (array): 2d array of x coords
-        ymesh (array): 2d array of y coords
-        rotrad (float, optional): rotation in rad. Defaults to 0.
-    """
-    R = np.array([[np.cos(rotrad),  -np.sin(rotrad)],
-                  [np.sin(rotrad), np.cos(rotrad)]])
-
-    xmeshR, ymeshR = np.einsum('ji, mni -> jmn', R, np.dstack([xmesh, ymesh]))
-    return xmeshR, ymeshR
 
 
 def Gaussian_2D(coords, A, xo, yo, σ_x, σ_y, θ, offset):

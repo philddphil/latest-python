@@ -73,6 +73,15 @@ def set_figure(name: str = 'figure',
 
 
 def PPT_save_plot(fig, ax, name, dpi=600):
+    """ saves a plot as 'name'.png (unless .svg is specified in the name). 
+    Iterates name (name_0, name_1, ...) if file already exists with that name.
+
+    Args:
+        fig (plt.fig): figure pointer
+        ax (plt.ax): axis pointer
+        name (str): desired name of file. No extension produced .png with name. Add .svg as ext. if needed
+        dpi (int, optional): _description_. Defaults to 600.
+    """
     # Set plot colours
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
