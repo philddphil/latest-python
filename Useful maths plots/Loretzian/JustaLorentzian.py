@@ -104,27 +104,6 @@ def PPT_save_plot(fig, ax, name, dpi=600):
             print('Base + # exists')
 
 
-def Gauss_hist(a, bins=10, rng=3, res=1000):
-    """ Get Gaussian fit of histogram of data set a
-
-    Args:
-        a (array): set of data values
-        bins (int, optional): number of bins in histogram. Defaults to 10.
-        rng (int, optional): range of histogram. Defaults to 3.
-        res (int, optional): resolution of plotted histogram fit. Defaults to 1000.
-
-    Returns:
-        x (array): range of x values (correspoding to data values)
-        y (array): frequency of data values
-    """
-    μ = np.mean(a)
-    σ = np.sqrt(np.var(a))
-    n, bins = np.histogram(a, bins)
-    x = np.linspace(μ - rng * σ, μ + rng * σ, res)
-    y = Gaussian_1D(x, np.max(n), μ, σ)
-    return x, y
-
-
 def Lorentzian_1D(x, A, x_c, γ, bkg=0.0):
     """ Just a Lorentzian
 

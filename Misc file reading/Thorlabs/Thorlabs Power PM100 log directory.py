@@ -122,22 +122,6 @@ def PPT_save_plot(fig, ax, name, dpi=600):
             print('Base + # exists')
 
 
-
-    """_summary_
-
-    Args:
-        x (array): x coords
-        y (array): y coords
-        theta (float): angular rotation (theta = 0 is positive y direction, positive = c.w.)
-
-    Returns:
-        (Rx, Ry) (tuple(array,array)): rotated x and y coords 
-    """
-    rho, phi = cart2pol(x, y)
-    Rx, Ry = pol2cart(rho, phi + theta)
-    return (Rx, Ry)
-
-
 def PM100Dcsv(file):
     """Read in a csv saved from a Thorlabs PM100D
 
@@ -149,7 +133,7 @@ def PM100Dcsv(file):
         dts (list of floats): list of relative time of acquired data (s)
         Ps (list of floats): list of optical powers (W)
     """
-    
+
     d0 = open(file, 'r', encoding='utf-8')
     x0 = d0.readlines()
     d0.close()
@@ -159,9 +143,9 @@ def PM100Dcsv(file):
     Ps = []
 
     for i0, v0 in enumerate(x0[15:]):
-        t = str(v0.split(",")[1].strip()+ v0.split(",")[2])
+        t = str(v0.split(",")[1].strip() + v0.split(",")[2])
         t2 = v0.split(",")[2]
-        t2s= datetime.strptime(t2.strip(),"%H:%M:%S.%f")
+        t2s = datetime.strptime(t2.strip(), "%H:%M:%S.%f")
         ts0 = datetime.strptime(t, '%d/%m/%Y %H:%M:%S.%f')
         ts.append(ts0)
         dts.append(ts0.timestamp())
@@ -184,7 +168,8 @@ def slugify(value, allow_unicode=False):
     if allow_unicode:
         value = unicodedata.normalize('NFKC', value)
     else:
-        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+        value = unicodedata.normalize('NFKD', value).encode(
+            'ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value.lower())
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
@@ -205,6 +190,6 @@ ax0.plot(dts, 1e6*np.asarray(Ps),
 plt.tight_layout()
 plt.show()
 
-# %% save figure    
+# %% save figure
 os.chdir(path.parent)
 PPT_save_plot(fig0, ax0, slugify(path.stem))
