@@ -3,3 +3,4 @@ scipy
 jupyterlab
 matplotlib
 os
+datatime

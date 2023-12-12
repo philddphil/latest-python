@@ -157,7 +157,7 @@ def Gaussian_1D(x, A, x_c, x_w, bkg=0, N=1):
 π = np.pi
 phi = 0.1
 ts = np.linspace(-6 * π, 6 * π, 1000)
-Es0 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2)
+Es0 = Gaussian_1D(ts, 1, 0, 2 * π, 0, 4) * np.cos(ts*2)
 Es1 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π/4)
 Es2 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π/3)
 Es3 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π/2)
@@ -172,7 +172,7 @@ Es6 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π)
 
 
 ax1, fig1 = set_figure('wavepacket', 'x', 'y')
-ax1.plot(ts, Es0, 
+ax1.plot(ts, Es0**2, 
          '-',
          color='#ff652a',
          alpha=1,
@@ -211,4 +211,4 @@ fig1.tight_layout()
 ax1.axis('off')
 # Save plot
 os.chdir(r"G:\My Drive\Plots")
-PPT_save_plot(fig1, ax1, 'wavepacket')
+PPT_save_plot(fig1, ax1, 'wavepacket.svg')

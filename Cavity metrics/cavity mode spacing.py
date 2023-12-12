@@ -154,8 +154,8 @@ def cav_g(L, R):
     Returns:
         g (float): 'cavity parameter' unitless
     """
-
-    return 1-np.sqrt(L/R)
+    g = float(1-np.sqrt(L/R))
+    return g
 
 
 def linear(x, m, c):
@@ -207,6 +207,9 @@ ns_1033_GHz, ns_1377_GHz, ns_both_1033, ns_both_1377 = [], [], [], []
 nus_1033_GHz, nus_1377_GHz, nus_both_GHz = [], [], []
 Ls_1033_GHz, Ls_1377_GHz, Ls_both_GHz = [], [], []
 mode_map = []
+# supress weird unbound variable issue
+g1 = None
+g2 = None
 
 for i0, v0 in enumerate(Ls[:]):
     ## For loop over lengths (coarse)
@@ -277,7 +280,7 @@ for i0, v0 in enumerate(peaks[0:]):
     
     for i1, v1 in enumerate(Ls_hi_res):
         
-        if curved == True:             
+        if curved == True:               
             # curved cavity formula
             nus_1033_L.append(mode_nu(ns_both_1033[i0],v1, g1, g2)-nu_1033)
             nus_1377_L.append(mode_nu(ns_both_1377[i0],v1+L_offset, g1, g2)-nu_1377)

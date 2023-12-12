@@ -1,7 +1,16 @@
-# %% imports
+# %% import
+import os
+import sys
+import glob
+import time
+import unicodedata
+import re
+from datetime import datetime
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-import os
+from datetime import datetime
+
 
 # %% defs
 def ggplot_sansserif():
@@ -70,6 +79,15 @@ def set_figure(name: str = 'figure',
 
 
 def PPT_save_plot(fig, ax, name, dpi=600):
+    """ saves a plot as 'name'.png (unless .svg is specified in the name). 
+    Iterates name (name_0, name_1, ...) if file already exists with that name.
+
+    Args:
+        fig (plt.fig): figure pointer
+        ax (plt.ax): axis pointer
+        name (str): desired name of file. No extension produced .png with name. Add .svg as ext. if needed
+        dpi (int, optional): _description_. Defaults to 600.
+    """
     # Set plot colours
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
@@ -104,62 +122,89 @@ def PPT_save_plot(fig, ax, name, dpi=600):
             print('Base + # exists')
 
 
-def Gauss_hist(a, bins=10, rng=3, res=1000):
-    """ Get Gaussian fit of histogram of data set a
+
+    """_summary_
 
     Args:
-        a (array): set of data values
-        bins (int, optional): number of bins in histogram. Defaults to 10.
-        rng (int, optional): range of histogram. Defaults to 3.
-        res (int, optional): resolution of plotted histogram fit. Defaults to 1000.
+        x (array): x coords
+        y (array): y coords
+        theta (float): angular rotation (theta = 0 is positive y direction, positive = c.w.)
 
     Returns:
-        x (array): range of x values (correspoding to data values)
-        y (array): frequency of data values
+        (Rx, Ry) (tuple(array,array)): rotated x and y coords 
     """
-    μ = np.mean(a)
-    σ = np.sqrt(np.var(a))
-    n, bins = np.histogram(a, bins)
-    x = np.linspace(μ - rng * σ, μ + rng * σ, res)
-    y = Gaussian_1D(x, np.max(n), μ, σ)
-    return x, y
+    rho, phi = cart2pol(x, y)
+    Rx, Ry = pol2cart(rho, phi + theta)
+    return (Rx, Ry)
 
 
-def Gaussian_1D(x, A, x_c, x_w, bkg=0, N=1):
-    """ See wikipedia
-    https://en.wikipedia.org/wiki/Normal_distribution
+def PM100Dcsv(file):
+    """Read in a csv saved from a Thorlabs PM100D
 
     Args:
-        x (array): x values
-        A (float): peak value
-        x_c (float): mean
-        x_w (float): standard deviation
-        bkg (int, optional): y offset. Defaults to 0.
-        N (int, optional): order. Defaults to 1.
+        file (path): path to .csv (including the filename itself)
 
     Returns:
-        array: y values
+        ts (list of datetimes): list of times of acquired data
+        dts (list of floats): list of relative time of acquired data (s)
+        Ps (list of floats): list of optical powers (W)
     """
-    # Note the optional input N, used for super Gaussians (default = 1)
-    x_c = float(x_c)
-    G = A * np.exp(- (((x - x_c) ** 2) / (2 * x_w ** 2))**N) + bkg
-    return G
-    # Note the optional input N, used for super Gaussians (default = 1)
-    x_c = float(x_c)
-    G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
-    return G
+    
+    d0 = open(file, 'r', encoding='utf-8')
+    x0 = d0.readlines()
+    d0.close()
+
+    ts = []
+    dts = []
+    Ps = []
+
+    for i0, v0 in enumerate(x0[15:]):
+        t = str(v0.split(",")[1].strip()+ v0.split(",")[2])
+        t2 = v0.split(",")[2]
+        t2s= datetime.strptime(t2.strip(),"%H:%M:%S.%f")
+        ts0 = datetime.strptime(t, '%d/%m/%Y %H:%M:%S.%f')
+        ts.append(ts0)
+        dts.append(ts0.timestamp())
+        Ps.append(float(v0.split(',')[3]))
+
+    dts = np.asarray(dts) - np.array(dts[0])
+
+    return ts, dts, Ps
 
 
-# %% Do some stuff
-x = np.linspace(-10, 10, 1000)
-y = Gaussian_1D(x,1,0,3,0,4)
-# %% plot figure
-ax2, fig2 = set_figure()
-ax2.plot(x,y,
-         color='#5454ff',
-        )
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
+
+
+# %% stuff
+p0 = (r"G:\Shared drives\Projects\Innovate\LYRA\WP2 Test Harness Development"
+      r"\Data\QPhotonics Laser\Constant_LD_Current_Mode"
+      r"\ILD=10mA_t=10min_dt=0.1s_PM100D_monitoring.csv")
+
+ts, dts, Ps = PM100Dcsv(p0)
+path = Path(p0)
+
+# %% plot figs
+ax0, fig0 = set_figure('time vs power', 'time / s', 'power / μW')
+ax0.plot(dts, 1e6*np.asarray(Ps),
+         '.',
+         color='xkcd:red')
 plt.tight_layout()
 plt.show()
-# %% save figure
-os.chdir(r"G:\My Drive\Plots")
-PPT_save_plot(fig2, ax2, 'Gaussian 4th order.svg')
+
+# %% save figure    
+os.chdir(path.parent)
+PPT_save_plot(fig0, ax0, slugify(path.stem))

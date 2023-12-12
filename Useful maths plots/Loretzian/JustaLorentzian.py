@@ -125,41 +125,32 @@ def Gauss_hist(a, bins=10, rng=3, res=1000):
     return x, y
 
 
-def Gaussian_1D(x, A, x_c, x_w, bkg=0, N=1):
-    """ See wikipedia
-    https://en.wikipedia.org/wiki/Normal_distribution
+def Lorentzian_1D(x, A, x_c, γ, bkg=0.0):
+    """ Just a Lorentzian
 
     Args:
         x (array): x values
         A (float): peak value
         x_c (float): mean
-        x_w (float): standard deviation
-        bkg (int, optional): y offset. Defaults to 0.
-        N (int, optional): order. Defaults to 1.
+        bkg (float, optional): y offset. Defaults to 0.
 
     Returns:
-        array: y values
+        y (array): y values of Lorentzian curve
     """
-    # Note the optional input N, used for super Gaussians (default = 1)
-    x_c = float(x_c)
-    G = A * np.exp(- (((x - x_c) ** 2) / (2 * x_w ** 2))**N) + bkg
-    return G
-    # Note the optional input N, used for super Gaussians (default = 1)
-    x_c = float(x_c)
-    G = A * np.exp(- (((x - x_c) ** 2) / (2 * σ ** 2))**N) + bkg
-    return G
+    L = (A * γ ** 2) / ((x - x_c)**2 + γ ** 2) + bkg
+    return L
 
 
 # %% Do some stuff
 x = np.linspace(-10, 10, 1000)
-y = Gaussian_1D(x,1,0,3,0,4)
+y = Lorentzian_1D(x,1,0,1)
 # %% plot figure
 ax2, fig2 = set_figure()
 ax2.plot(x,y,
-         color='#5454ff',
+         color='xkcd:red',
         )
 plt.tight_layout()
 plt.show()
 # %% save figure
 os.chdir(r"G:\My Drive\Plots")
-PPT_save_plot(fig2, ax2, 'Gaussian 4th order.svg')
+PPT_save_plot(fig2, ax2, 'Lorentzian.svg')
