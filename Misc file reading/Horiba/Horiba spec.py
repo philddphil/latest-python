@@ -1,6 +1,4 @@
-##############################################################################
-# Import some libraries
-##############################################################################
+# %% Import some libraries
 import os
 import sys
 import glob
@@ -10,11 +8,8 @@ import matplotlib.pyplot as plt
 
 from scipy.ndimage import gaussian_filter
 
-
-##############################################################################
-# Some defs
-##############################################################################
-# Load spec file (.txt) ######################################################
+# %% Some defs
+# Load spec file (.txt)
 def load_spec(filepath):
     with open(filepath, 'r', encoding='utf-8') as file:
         data = file.readlines()
@@ -42,7 +37,7 @@ def load_spec(filepath):
     return λ, cts
 
 
-# Custom palette for plotting ################################################
+# Custom palette for plotting
 def palette():
     colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
                'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
@@ -92,7 +87,7 @@ def palette():
     return colours
 
 
-# set rcParams for nice plots ################################################
+# set rcParams for nice plots
 def ggplot_sansserif():
     colours = palette()
     plt.style.use('ggplot')
@@ -119,7 +114,7 @@ def ggplot_sansserif():
     plt.rcParams['axes.titlepad'] = 6
 
 
-# Set up figure for plotting #################################################
+# Set up figure for plotting 
 def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=3):
     ggplot_sansserif()
     cs = palette()
@@ -131,7 +126,7 @@ def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=3):
     return ax1, fig1, cs
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png ################
+# Save 2d plot with a colourscheme suitable for ppt, as a png
 def PPT_save_2d(fig, ax, name, dpi=600):
 
     # Set plot colours
@@ -160,7 +155,7 @@ def PPT_save_2d(fig, ax, name, dpi=600):
             print('Base + # exists')
 
 
-# Cosmic ray removal ##########################################################
+# Cosmic ray removal 
 def cos_ray_rem(data, λ, thres):
     cts_diff = np.pad(np.diff(cts), 3)
     data_proc = copy.copy(data)
@@ -178,9 +173,8 @@ def cos_ray_rem(data, λ, thres):
     return data_proc, ray_data, ray_λ
 
 
-##############################################################################
-# Do some stuff
-##############################################################################
+
+# %% Do some stuff
 # Specify results directory and change working directory to this location
 p0=(r'C:\Data\SCM\20210827\Spec Data')
 

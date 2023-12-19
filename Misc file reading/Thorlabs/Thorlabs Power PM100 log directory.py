@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from datetime import datetime
 
 
@@ -175,21 +176,54 @@ def slugify(value, allow_unicode=False):
 
 
 # %% stuff
-p0 = (r"G:\Shared drives\Projects\Innovate\LYRA\WP2 Test Harness Development"
-      r"\Data\QPhotonics Laser\Constant_LD_Current_Mode"
-      r"\ILD=10mA_t=10min_dt=0.1s_PM100D_monitoring.csv")
+path = (r"G:\Shared drives\Projects\Innovate\LYRA\WP2 Test Harness Development"
+      r"\Data\QPhotonics Laser\Constant_LD_Current_Mode")
+datafiles = glob.glob(path + r'\*.csv')
+datafiles.sort(key=os.path.getmtime)
+cmap = mpl.colormaps['plasma']
+for i0, v0 in enumerate(datafiles[:]):
+    # establish data
+    p0 = v0
+    ts, dts, Ps = PM100Dcsv(p0)
+    path = Path(p0)
+    # basic statistics
+    Ps_mean = np.mean(Ps)
+    Ps_std = np.std(Ps)
+    # histogram dataset
+    bin_n = 20
+    bin_k = 5
+    bin_cs = np.linspace(Ps_mean-bin_k*Ps_std,
+                         Ps_mean+bin_k*Ps_std,
+                         bin_n)
+    bin_w = bin_cs[1]-bin_cs[0]
+    bin_es = np.linspace(Ps_mean-bin_k*Ps_std - bin_w/2,
+                         Ps_mean+bin_k*Ps_std + bin_w/2,
+                         bin_n+1)
+    Ps_hist, __ = np.histogram(Ps, bin_es)
+    # plot figs
+    ax0, fig0 = set_figure('time vs power', 'time / s', 'power / μW', 2)
+    ax0.plot(dts, 1e6*np.asarray(Ps),
+            '.',
+            color=cmap(i0/len(datafiles))
+            )
+    fig0.tight_layout()
+    
+    ax1, fig1 = set_figure('power hist', 'power / μW', 'N / #', 2)
+    ax1.bar(bin_cs,Ps_hist, 
+            width=0.8*bin_w,
+            color=cmap(i0/len(datafiles)))
+    fig1.tight_layout()
 
-ts, dts, Ps = PM100Dcsv(p0)
-path = Path(p0)
+    ax2, fig2 = set_figure('composite', 'normalised power', 'N / #', 2)
+    ax2.bar((bin_cs/Ps_mean),Ps_hist, 
+            width=0.8*bin_w,
+            color=cmap(i0/len(datafiles)))
+    fig2.tight_layout()
 
-# %% plot figs
-ax0, fig0 = set_figure('time vs power', 'time / s', 'power / μW')
-ax0.plot(dts, 1e6*np.asarray(Ps),
-         '.',
-         color='xkcd:red')
-plt.tight_layout()
-plt.show()
-
-# %% save figure
-os.chdir(path.parent)
-PPT_save_plot(fig0, ax0, slugify(path.stem))
+    plt.show()
+    # %% save figure
+    os.chdir(path.parent)
+    # PPT_save_plot(fig0, ax0, str(slugify(path.stem)+'_timeseries'))
+    # PPT_save_plot(fig1, ax1, str(slugify(path.stem)+'_hist'))
+    fig0.clf()
+    fig1.clf()

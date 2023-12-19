@@ -1,4 +1,4 @@
-# %% imports
+# %% 0. imports
 import os
 import numpy as np
 from scipy import interpolate
@@ -6,7 +6,7 @@ from scipy import constants
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-# %% defs
+# %% 1. defs
 def ggplot_sansserif():
     """
     Set some parameters for ggplot
@@ -72,8 +72,8 @@ def set_figure(name: str = 'figure',
     return ax1, fig1
 
 
-def PPT_save_plot(fig, ax, name, dpi=600):
-    """ saves a plot as 'name'.png (unless .svg is specified in the name). 
+def PPT_save_plot(fig, ax, name, dpi=600, png=True, legend=True):
+    """ saves a plot as 'name'.png or an .svg depending on final boolean. 
     Iterates name (name_0, name_1, ...) if file already exists with that name.
 
     Args:
@@ -96,24 +96,41 @@ def PPT_save_plot(fig, ax, name, dpi=600):
         labelcolor='black',
         loc='upper left',
         framealpha=0)
-    ax.get_legend().remove()
+    if legend == False:
+        ax.get_legend().remove()
     fig.tight_layout()
 
     # Loop to check for file - appends filename with _# if name already exists
-    f_exist = True
-    app_no = 0
-    while f_exist is True:
-        if os.path.exists(name + '.png') is False:
-            ax.figure.savefig(name, dpi=dpi)
-            f_exist = False
-            print('Base exists')
-        elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
-            ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
-            f_exist = False
-            print(' # = ' + str(app_no))
-        else:
-            app_no = app_no + 1
-            print('Base + # exists')
+    if png == True:
+        f_exist = True
+        app_no = 0
+        while f_exist is True:
+            if os.path.exists(name + '.png') is False:
+                ax.figure.savefig(name, dpi=dpi)
+                f_exist = False
+                print('Base exists')
+            elif os.path.exists(name + '_' + str(app_no) + '.png') is False:
+                ax.figure.savefig(name + '_' + str(app_no), dpi=dpi)
+                f_exist = False
+                print(' # = ' + str(app_no))
+            else:
+                app_no = app_no + 1
+                print('Base + # exists')
+    else:
+        f_exist = True
+        app_no = 0
+        while f_exist is True:
+            if os.path.exists(name + '.svg') is False:
+                ax.figure.savefig(name + '.svg', dpi=dpi)
+                f_exist = False
+                print('Base exists')
+            elif os.path.exists(name + '_' + str(app_no) + '.svg') is False:
+                ax.figure.savefig(name + '_' + str(app_no) + '.svg', dpi=dpi)
+                f_exist = False
+                print(' # = ' + str(app_no))
+            else:
+                app_no = app_no + 1
+                print('Base + # exists')
 
 
 def mode_nu(n,L,g1,g2):
@@ -172,12 +189,11 @@ def linear(x, m, c):
     y = (m*x) + c
     return y
 
-# %% preamble 
+# %% 2. preamble 
 # Using unit of m & s, converting to MHz inline if needed
+# Cavity length
 L = 367e-6
-
-# L_offset = 0
-# including 15 micron increase for 1030 DBR
+# Radius of curvature
 R = 220e-6
 
 nu_1033 = 290215351403678.56
@@ -185,28 +201,30 @@ nu_1377_offset = 0
 nu_1377 = (nu_1033 * 3/4) + nu_1377_offset
 
 # Difference in length due to deposition
-L_offset = (constants.c/nu_1033)*(1/16)
+# - additional length in 1377 resonances experience 
+#  w.r.t length 1033 experiences:
+
+# L_offset = (constants.c/nu_1033)*(1/16)
 L_offset = 0
 
-# Set curved = true or false
+# Set curved = true or false. Uses planar approximation, or not
 curved = False
 
-# %% calculate mode frequencies
-L_min, L_max = 362e-6, 368e-6
-# L_min, L_max = 320e-6, 400e-6
-coarse_sensitivity = 20
-Ls = np.linspace(L_min,L_max, int((L_max - L_min)*1000e6))
+# %% 3. calculate mode frequencies
+# %% 3.1 course assessment to find dual resonant lengths
+L_min, L_max = 355e-6, 365e-6
+Ls = np.linspace(L_min,L_max, int((L_max - L_min)*1e9))
 L_lo_res = Ls[1]-Ls[0]
 Dnu_lo_res = constants.c*int(np.mean(Ls)/1033e-9)*(np.mean(Ls)**-2)*L_lo_res
-Window = Dnu_lo_res * coarse_sensitivity
+Window = Dnu_lo_res * 1.5
 
+# Pre-allocate result arrays and lists
 res_1033_GHz = np.zeros_like(Ls) 
 res_1377_GHz = np.zeros_like(Ls)
 res_both = np.zeros_like(Ls)
 ns_1033_GHz, ns_1377_GHz, ns_both_1033, ns_both_1377 = [], [], [], []
 nus_1033_GHz, nus_1377_GHz, nus_both_GHz = [], [], []
 Ls_1033_GHz, Ls_1377_GHz, Ls_both_GHz = [], [], []
-mode_map = []
 # supress weird unbound variable issue
 g1 = None
 g2 = None
@@ -259,21 +277,22 @@ for i0, v0 in enumerate(Ls[:]):
 ns_both_1033 = list(dict.fromkeys(ns_both_1033))
 ns_both_1377 = list(dict.fromkeys(ns_both_1377))
 res_both_GHz = res_1033_GHz * res_1377_GHz
-# %% assess dual resonance
+# %% 3.2 fine assessment of dual resonances to determine detunings
 peaks = []
 for i0, v0 in enumerate(Ls):
     if res_both_GHz[i0] == 1 and res_both_GHz[i0-1] == 0:
         peaks.append(Ls[i0])
 
-ax1, fig1 = set_figure('modes', 'ΔL / nm', 'Δν / PHz', 3)
+# ax1, fig1 = set_figure('modes', 'ΔL / nm', 'Δν / PHz', 3)
+
 dnu1 = []
 dnu2 = []
 dnu3 = []
 
 for i0, v0 in enumerate(peaks[0:]):
-    Ls_hi_res = np.linspace(v0 - 2*coarse_sensitivity*L_lo_res, 
-                            v0 + 2*coarse_sensitivity*L_lo_res, 
-                            10000)
+    Ls_hi_res = np.linspace(v0 - 3*L_lo_res, 
+                            v0 + 3*L_lo_res, 
+                            int(1e5))
     L_hi_res = Ls_hi_res[1] - Ls_hi_res[0]
     nus_1033_L = []
     nus_1377_L = []
@@ -282,13 +301,25 @@ for i0, v0 in enumerate(peaks[0:]):
         
         if curved == True:               
             # curved cavity formula
-            nus_1033_L.append(mode_nu(ns_both_1033[i0],v1, g1, g2)-nu_1033)
-            nus_1377_L.append(mode_nu(ns_both_1377[i0],v1+L_offset, g1, g2)-nu_1377)
+            nus_1033_L.append(mode_nu(ns_both_1033[i0],
+                                      v1, 
+                                      g1, 
+                                      g2)
+                                      - nu_1033)
+            nus_1377_L.append(mode_nu(ns_both_1377[i0],
+                                      v1+L_offset, 
+                                      g1, 
+                                      g2)
+                                      -nu_1377)
         
         else:        
             ## planar cavity formula
-            nus_1033_L.append((mode_nu_approx(ns_both_1033[i0],v1))-nu_1033)
-            nus_1377_L.append((mode_nu_approx(ns_both_1377[i0],v1+L_offset))-nu_1377)
+            nus_1033_L.append((mode_nu_approx(ns_both_1033[i0],
+                                              v1))
+                                              -nu_1033)
+            nus_1377_L.append((mode_nu_approx(ns_both_1377[i0],
+                                              v1+L_offset))
+                                              -nu_1377)
     
     ## curve fitting method
     # m0 = (nus_1377_L[1]-nus_1377_L[0])/(Ls_hi_res[1]-Ls_hi_res[0])
@@ -308,43 +339,20 @@ for i0, v0 in enumerate(peaks[0:]):
     ## planar cavity formula
     # dnu3.append(mode_nu_approx(ns_both_1033[i0],interp_1377(0))-nu_1033)
     ## curved cavity formula
-    dnu3.append(mode_nu(ns_both_1033[i0],interp_1377(0), g1, g2)-nu_1033)
-    
-    # ax1.plot(1e9*(Ls_hi_res-v0),
-    #      np.array(nus_1033_L)*1e-9,
-    #      '.',
-    #      color='xkcd:blue',
-    #      )
+    if curved == True:
+        dnu3.append(mode_nu(ns_both_1033[i0],
+                            interp_1377(0), 
+                            g1, 
+                            g2)
+                            -nu_1033)
+    else:
+        dnu3.append(mode_nu_approx(ns_both_1033[i0],
+                                   interp_1377(0))
+                                   -nu_1033)
 
-    # ax1.plot(1e9*(Ls_hi_res-v0),
-    #      np.array(nus_1377_L)*1e-9,
-    #      '.',
-    #      color='xkcd:red'
-    #      )
-    
-    # ax1.plot(1e9*(L_1377_res-v0),0,
-    #          'o',
-    #          mfc='none',
-    #          color='xkcd:dark red',
-    #          )
-    
-    # ax1.plot(1e9*(L_1377_res-v0),
-
-    #          1e-9*(L_1377_res_1033_nu-nu_1033),
-    #          'o',
-    #          mfc='none',
-    #          color='xkcd:dark blue',
-    #          )
-
-    # ax1.set_xlim([10,15])
-
-    # ax1.set_ylim([-3,3])
-
-plt.show()
-
-# %% plots
+# %% 4. plots
 ax0, fig0 = set_figure('modes', 'L / μm', 'y', 3)
-ax0.plot(1e6*Ls,2*res_1033_GHz,
+ax0.plot(1e6*Ls,res_1033_GHz,
          '-',
          color='xkcd:blue',
          lw=0.5,
@@ -380,23 +388,26 @@ ax0.plot(1e6*Ls,res_both_GHz,
 for i0, v0 in enumerate(peaks):
     ax0.text(1e6*v0, 0.6, 
             str(int(ns_both_1033[i0])),
-            size=6)
+            size=8,
+            # color='xkcd:blue',
+            )
     ax0.text(1e6*v0, 0.5, 
             str(int(ns_both_1377[i0])),
-            size=6,
+            size=8,
+            # color='xkcd:red',
             )
     
-# ax0.legend(edgecolor='xkcd:black',
-#            loc='upper right'
-#            )
-# fig0.tight_layout()
+ax0.legend(edgecolor='xkcd:black',
+           loc='upper right'
+           )
+fig0.tight_layout()
 # ax0.set_xlim([362,368])
 
-ax2, fig2 = set_figure('dls', 'L / μm', 'dν / MHz', 3)
-ax2.plot(np.array(peaks)*1e6,
-         np.asarray(dnu3)*1e-6,
-         '.',
-         color='green')
+# ax2, fig2 = set_figure('dls', 'L / μm', 'dν / MHz', 3)
+# ax2.plot(np.array(peaks)*1e6,
+#          np.asarray(dnu3)*1e-6,
+#          '.',
+#          color='green')
 # ax2.set_ylim([-0.1,1.5])
 # ax2.set_xlim([362,368])
 
@@ -433,7 +444,8 @@ ax2.plot(np.array(peaks)*1e6,
 # ax3a.set_ylim([1e9*constants.c/(1e12*216.5),1e9*constants.c/(1e12*218.5)])
 
 plt.show()
-# %% save plot
-PPT_save_plot(fig0, ax0, 'cav spec')
+# %% 5. save plot
+os.chdir(r"G:\My Drive\Plots")
+PPT_save_plot(fig0, ax0, 'cav spec', 600, False)
 # PPT_save_plot(fig1, ax1, 'fine detuning plot')
-PPT_save_plot(fig2, ax2, 'large range detunings')
+# PPT_save_plot(fig2, ax2, 'large range detunings')

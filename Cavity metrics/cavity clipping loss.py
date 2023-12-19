@@ -137,11 +137,21 @@ def Gaussian_beam(z, r, z0, w0, λ, I0=0):
     zR = np.pi * w0**2 / λ
     w_z = w0 * np.sqrt(1 + ((z - z0) / zR)**2)
     R_z = (z - z0) * (1 + (zR / (z - z0))**2)
+    Guoy_z = np.arctan(z/zR)
     if I0 == 0:
         I0 = 2/(np.pi * w0 ** 2)
 
-    I_rz = I0 * (w0 / w_z)**2 * np.exp((-2 * r**2) / (w_z**2))
-    return I_rz
+    E0 = np.sqrt(I0)
+
+    I_rz = (I0 
+            * (w0 / w_z)**2 
+            * np.exp((-2 * r**2) / (w_z**2)))
+    E_rz = np.real((E0 
+            * (w0 / w_z) 
+            * np.exp((-2 * r**2) / (w_z**2)) 
+            * np.exp(-1j * (k*z + (k * r**2 / (2*R_z)) - Guoy_z))))
+    
+    return I_rz, E_rz
 
 
 def extents(f):
@@ -257,10 +267,10 @@ wavelength_m = 780e-9
 
 # initially work in mirror coords - (0,0) bottom centre of m0
 # this is the tilt of mirror 1 w.r.t mirror 0
-theta1 = 0.25
+theta1 = 0.0
 
 # coordinates of mirror 1 centre of RoC
-r1_c = -2e-6
+r1_c = 0
 z1_c = L-R
 
 # coordinates of mirror 0 centre of RoC (x0_c must = 0)
@@ -345,27 +355,27 @@ Rcoords0 = rbytheta(coords0[0], coords0[1], theta2)
 Rcoords1 = rbytheta(coords1[0], coords1[1], theta2)
 
 # calculate the irradiance in each rotated coord system
-G = Gaussian_beam(Rcoords[0], Rcoords[1] - r1_c, (L/2), w0, l, 1)
-G_0 = Gaussian_beam(Rcoords0[0], Rcoords0[1] - r1_c, (L/2), w0, l, 1)
-G_1 = Gaussian_beam(Rcoords1[0], Rcoords1[1] - r1_c, (L/2), w0, l, 1)
+GI, GE = Gaussian_beam(Rcoords[0], Rcoords[1] - r1_c, (L/2), w0, l, 1)
+GI_0, GE_0 = Gaussian_beam(Rcoords0[0], Rcoords0[1] - r1_c, (L/2), w0, l, 1)
+GI_1, GE_1 = Gaussian_beam(Rcoords1[0], Rcoords1[1] - r1_c, (L/2), w0, l, 1)
 
 RC0_z, RC0_r = rbytheta(C0_z, C0_r, theta2)
 RC1_z, RC1_r = rbytheta(C1_z, C1_r, theta2)
-I_m0 = Gaussian_beam(RC0_z, RC0_r - r1_c, L/2, w0, l, 1)
-I_m1 = Gaussian_beam(RC1_z, RC1_r - r1_c, L/2, w0, l, 1)
+GI_m0, _ = Gaussian_beam(RC0_z, RC0_r - r1_c, L/2, w0, l, 1)
+GI_m1, _ = Gaussian_beam(RC1_z, RC1_r - r1_c, L/2, w0, l, 1)
 
-popt0, cov0 = curve_fit(Gaussian_1D, C0_r, I_m0,
-                        p0=[np.max(I_m0), r0_c, wm])
+popt0, cov0 = curve_fit(Gaussian_1D, C0_r, GI_m0,
+                        p0=[np.max(GI_m0), r0_c, wm])
 
-popt1, cov1 = curve_fit(Gaussian_1D, C1_r-r1_c_act, I_m1,
-                        p0=[np.max(I_m0), -r1_c_act, wm])
+popt1, cov1 = curve_fit(Gaussian_1D, C1_r-r1_c_act, GI_m1,
+                        p0=[np.max(GI_m0), -r1_c_act, wm])
 
 dx0 = popt0[1]
 dx1 = popt1[1]
 
-I_0 = G_0[:, np.argmin(np.abs(zs-0))]
-I_L = G_1[:, np.argmin(np.abs(zs-L))]
-I_waist = G[:, np.argmin(np.abs(zs-L/2))]
+I_0 = GI_0[:, np.argmin(np.abs(zs-0))]
+I_L = GI_1[:, np.argmin(np.abs(zs-L))]
+I_waist = GI[:, np.argmin(np.abs(zs-L/2))]
 
 # PLOTS!
 # this is to add new colormaps with some transparency to the list
@@ -373,17 +383,16 @@ ncolors = 256
 GnBu_t0 = plt.get_cmap('GnBu')(range(ncolors))
 GnBu_t0[:, -1] = np.linspace(0, 1, ncolors)
 map_object = LinearSegmentedColormap.from_list(name='GnBu_t0', colors=GnBu_t0)
-# plt.colormaps.register(map_object)
 
 # full mode picture
 ax1, fig1 = set_figure('mirror arrangement',
                        'r / μm',
                        'z / μm')
 
-img = ax1.imshow(np.transpose(G),
+img = ax1.imshow(np.transpose(GI/np.max(GI)),
                  extent=extents(1e6*rs) + extents(1e6*zs),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
-                 cmap='GnBu_t0',
+                 cmap=map_object,
                  origin='lower',
                  )
 # img = ax1.imshow(np.transpose(G_alt),
@@ -448,7 +457,7 @@ ax2.plot([0, 0], [0, np.max(I_waist)],
          color='xkcd:black',
          alpha=0.1,
          )
-ax2.plot(1e6*C0_r, I_m0,
+ax2.plot(1e6*C0_r, GI_m0,
          '-',
          alpha=1,
          color='xkcd:red')
@@ -456,7 +465,7 @@ ax2.plot(1e6*rs, I_0,
          ':',
          alpha=1,
          color='xkcd:red')
-ax2.plot(1e6*(C1_r-r1_c_act), I_m1,
+ax2.plot(1e6*(C1_r-r1_c_act), GI_m1,
          '-',
          alpha=1,
          color='xkcd:blue')
@@ -464,10 +473,10 @@ ax2.plot(1e6*(rs-r1_c_act), I_L,
          ':',
          alpha=1,
          color='xkcd:blue')
-ax2.text(2*dx0, 1.2*np.max(I_m0),
+ax2.text(2*dx0, 1.2*np.max(GI_m0),
          ('Δx$_0$ =' + str(np.round(1e6*dx0, 1))),
          color='xkcd:black')
-ax2.text(2*dx1-L*np.tan(theta1), 1.05*np.max(I_m1),
+ax2.text(2*dx1-L*np.tan(theta1), 1.05*np.max(GI_m1),
          ('Δx$_1$ =' + str(np.round(1e6*dx1, 1))),
          color='xkcd:black')
 ax2.text(1e6*w0/2, 0.75*np.max(I_waist),
@@ -490,7 +499,7 @@ ax2.plot([1e6*d/2, 1e6*d/2], [0, 1], ':',
 ax3, fig3 = set_figure('mirror 0',
                        'x / μm',
                        'y / μm')
-img = ax3.imshow(np.transpose(G_0),
+img = ax3.imshow(np.transpose(GI_0),
                  extent=extents(1e6*rs)+extents(1e6*zs_0),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
                  cmap='viridis',
@@ -512,7 +521,7 @@ ax3.set_aspect('auto')
 ax4, fig4 = set_figure('mirror 1',
                        'x / μm',
                        'y / μm')
-img = ax4.imshow(np.transpose(G_1),
+img = ax4.imshow(np.transpose(GI_1),
                  extent=extents(1e6*rs)+extents(1e6*zs_1),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
                  cmap='viridis',
