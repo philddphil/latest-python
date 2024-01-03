@@ -197,7 +197,7 @@ L = 367e-6
 R = 220e-6
 
 nu_1033 = 290215351403678.56
-nu_1377_offset = 0
+nu_1377_offset = 104e9
 nu_1377 = (nu_1033 * 3/4) + nu_1377_offset
 
 # Difference in length due to deposition
@@ -212,11 +212,12 @@ curved = False
 
 # %% 3. calculate mode frequencies
 # %% 3.1 course assessment to find dual resonant lengths
-L_min, L_max = 355e-6, 365e-6
+L_min, L_max = 335e-6, 395e-6
 Ls = np.linspace(L_min,L_max, int((L_max - L_min)*1e9))
 L_lo_res = Ls[1]-Ls[0]
 Dnu_lo_res = constants.c*int(np.mean(Ls)/1033e-9)*(np.mean(Ls)**-2)*L_lo_res
-Window = Dnu_lo_res * 1.5
+Window_range = 7
+Window = Dnu_lo_res * Window_range
 
 # Pre-allocate result arrays and lists
 res_1033_GHz = np.zeros_like(Ls) 
@@ -283,16 +284,14 @@ for i0, v0 in enumerate(Ls):
     if res_both_GHz[i0] == 1 and res_both_GHz[i0-1] == 0:
         peaks.append(Ls[i0])
 
-# ax1, fig1 = set_figure('modes', 'ΔL / nm', 'Δν / PHz', 3)
-
 dnu1 = []
 dnu2 = []
 dnu3 = []
 
 for i0, v0 in enumerate(peaks[0:]):
-    Ls_hi_res = np.linspace(v0 - 3*L_lo_res, 
-                            v0 + 3*L_lo_res, 
-                            int(1e5))
+    Ls_hi_res = np.linspace(v0 - 2*Window_range*L_lo_res, 
+                            v0 + 2*Window_range*L_lo_res, 
+                            int(1e4))
     L_hi_res = Ls_hi_res[1] - Ls_hi_res[0]
     nus_1033_L = []
     nus_1377_L = []
@@ -336,9 +335,6 @@ for i0, v0 in enumerate(peaks[0:]):
 
     ## interp1d method
     interp_1377 = interpolate.interp1d(nus_1377_L, Ls_hi_res)
-    ## planar cavity formula
-    # dnu3.append(mode_nu_approx(ns_both_1033[i0],interp_1377(0))-nu_1033)
-    ## curved cavity formula
     if curved == True:
         dnu3.append(mode_nu(ns_both_1033[i0],
                             interp_1377(0), 
@@ -349,6 +345,32 @@ for i0, v0 in enumerate(peaks[0:]):
         dnu3.append(mode_nu_approx(ns_both_1033[i0],
                                    interp_1377(0))
                                    -nu_1033)
+        
+    # ax1, fig1 = set_figure('modes', 'ΔL / nm', 'Δν / GHz', 2)
+    # ax1.plot(1e9*(Ls_hi_res-v0),
+    #      np.array(nus_1033_L)*1e-9,
+    #     #  '.',
+    #      color='xkcd:blue',
+    #      label='Δν of λ$_{ion}$'
+    #      )
+
+    # ax1.plot(1e9*(Ls_hi_res-v0),
+    #      np.array(nus_1377_L)*1e-9,
+    #     #  '.',
+    #      color='xkcd:red',
+    #      label='Δν of λ$_{lock}$'
+    #      )
+    
+    # ax1.plot(1e9*(Ls_hi_res-v0), np.zeros_like(Ls_hi_res),
+    #      ':',
+    #      color='xkcd:black',
+    #      lw=0.5,
+    #      label='resonance')
+    
+    # ax1.legend(edgecolor='xkcd:black',
+    #        loc='upper right'
+    #        )
+    # fig1.tight_layout()
 
 # %% 4. plots
 ax0, fig0 = set_figure('modes', 'L / μm', 'y', 3)
@@ -368,23 +390,6 @@ ax0.plot(1e6*Ls,res_both_GHz,
          lw=0.5,
          label='both')
 
-# for i0, v0 in enumerate(Ls_1033_GHz):
-#     if int(i0)%2 ==0:
-#         ax0.text(1e6*v0, (2*i0)/(len(Ls_1033_GHz)), 
-#                 int(ns_1033_GHz[i0]),
-#                 size=6)
-
-# for i0, v0 in enumerate(Ls_1033_GHz):
-
-#     ax0.text(1e6*v0, 1.5, 
-#             int(ns_1033_GHz[i0]),
-#             size=6)
-
-# for i0, v0 in enumerate(Ls_1377_GHz):
-#     ax0.text(1e6*v0, 0.5, 
-#             int(ns_1377_GHz[i0]),
-#             size=6)
-
 for i0, v0 in enumerate(peaks):
     ax0.text(1e6*v0, 0.6, 
             str(int(ns_both_1033[i0])),
@@ -403,11 +408,11 @@ ax0.legend(edgecolor='xkcd:black',
 fig0.tight_layout()
 # ax0.set_xlim([362,368])
 
-# ax2, fig2 = set_figure('dls', 'L / μm', 'dν / MHz', 3)
-# ax2.plot(np.array(peaks)*1e6,
-#          np.asarray(dnu3)*1e-6,
-#          '.',
-#          color='green')
+ax2, fig2 = set_figure('dls', 'L / μm', 'dν / MHz', 3)
+ax2.plot(np.array(peaks)*1e6,
+         np.asarray(dnu3)*1e-6,
+         '.',
+         color='green')
 # ax2.set_ylim([-0.1,1.5])
 # ax2.set_xlim([362,368])
 
@@ -446,6 +451,6 @@ fig0.tight_layout()
 plt.show()
 # %% 5. save plot
 os.chdir(r"G:\My Drive\Plots")
-PPT_save_plot(fig0, ax0, 'cav spec', 600, False)
-# PPT_save_plot(fig1, ax1, 'fine detuning plot')
-# PPT_save_plot(fig2, ax2, 'large range detunings')
+# PPT_save_plot(fig0, ax0, 'cav spec', 600, False)
+# PPT_save_plot(fig1, ax1, 'fine detuning plot', 600, False)
+PPT_save_plot(fig2, ax2, 'detunings with length', 600, False)

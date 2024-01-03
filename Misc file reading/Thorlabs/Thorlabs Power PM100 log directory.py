@@ -192,12 +192,12 @@ for i0, v0 in enumerate(datafiles[:]):
     # histogram dataset
     bin_n = 20
     bin_k = 5
-    bin_cs = np.linspace(Ps_mean-bin_k*Ps_std,
-                         Ps_mean+bin_k*Ps_std,
+    bin_cs = np.linspace(Ps_mean-bin_k*Ps_std, # type: ignore
+                         Ps_mean+bin_k*Ps_std, # type: ignore
                          bin_n)
     bin_w = bin_cs[1]-bin_cs[0]
-    bin_es = np.linspace(Ps_mean-bin_k*Ps_std - bin_w/2,
-                         Ps_mean+bin_k*Ps_std + bin_w/2,
+    bin_es = np.linspace(Ps_mean-bin_k*Ps_std - bin_w/2, # type: ignore
+                         Ps_mean+bin_k*Ps_std + bin_w/2, # type: ignore
                          bin_n+1)
     Ps_hist, __ = np.histogram(Ps, bin_es)
     # plot figs
