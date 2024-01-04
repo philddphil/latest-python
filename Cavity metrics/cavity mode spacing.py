@@ -197,7 +197,7 @@ L = 367e-6
 R = 220e-6
 
 nu_1033 = 290215351403678.56
-nu_1377_offset = 104e9
+nu_1377_offset = 0e9
 nu_1377 = (nu_1033 * 3/4) + nu_1377_offset
 
 # Difference in length due to deposition
@@ -205,7 +205,7 @@ nu_1377 = (nu_1033 * 3/4) + nu_1377_offset
 #  w.r.t length 1033 experiences:
 
 # L_offset = (constants.c/nu_1033)*(1/16)
-L_offset = 0
+L_offset = 1e-9
 
 # Set curved = true or false. Uses planar approximation, or not
 curved = False
@@ -215,7 +215,7 @@ curved = False
 L_min, L_max = 335e-6, 395e-6
 Ls = np.linspace(L_min,L_max, int((L_max - L_min)*1e9))
 L_lo_res = Ls[1]-Ls[0]
-Dnu_lo_res = constants.c*int(np.mean(Ls)/1033e-9)*(np.mean(Ls)**-2)*L_lo_res
+Dnu_lo_res = constants.c*int(np.mean(Ls)/1033e-9)*(np.mean(Ls)**-2)*L_lo_res # type: ignore
 Window_range = 7
 Window = Dnu_lo_res * Window_range
 

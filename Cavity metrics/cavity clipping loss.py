@@ -1,7 +1,7 @@
 # purpose of code
 # calculate optimal alignment of cavities given
 # angular mis-alignment
-# %% imports
+# %% 0. imports
 import os
 import numpy as np
 import scipy as sp
@@ -12,7 +12,7 @@ from matplotlib.colors import LogNorm
 from scipy.optimize import curve_fit
 from matplotlib.colors import LinearSegmentedColormap
 
-# %% defs
+# %% 1. defs
 def ggplot_sansserif():
     """
     Set some parameters for ggplot
@@ -213,7 +213,7 @@ def Gaussian_1D(x, A, x_c, x_w, bkg=0, N=1):
 
 
 def cart2pol(x, y):
-    """convert x y coords to rho phi coords
+    """convert x y coords to cylindrical polar coords
 
     Args:
         x (array): x coords
@@ -228,11 +228,11 @@ def cart2pol(x, y):
 
 
 def pol2cart(rho, phi):
-    """_summary_
+    """convert cylindrical polar values to cartesian
 
     Args:
-        rho (_type_): _description_
-        phi (_type_): _description_
+        rho (array): radial displacement in cylindrical coords
+        phi (array): angle in cylindrical coords
 
     Returns:
         x, y (tuple, (array, array)): x y coords
@@ -243,10 +243,10 @@ def pol2cart(rho, phi):
 
 
 def rbytheta(x, y, theta):
-    """_summary_
+    """rotate a set of x & y coords by angle theta 
 
     Args:
-        x (array): x coords
+        x (array): x coords 
         y (array): y coords
         theta (float): angular rotation (theta = 0 is positive y direction, positive = c.w.)
 
@@ -258,8 +258,8 @@ def rbytheta(x, y, theta):
     return (Rx, Ry)
 
 
-# %% stuff
-# cavity parameters
+# %% 2. preamble
+# cavity parameters - units of m 
 L = 20e-6
 R = 20e-6
 d = 12e-6
@@ -267,24 +267,25 @@ wavelength_m = 780e-9
 
 # initially work in mirror coords - (0,0) bottom centre of m0
 # this is the tilt of mirror 1 w.r.t mirror 0
-theta1 = 0.0
+theta1 = 0 # <----- Change this one
 
 # coordinates of mirror 1 centre of RoC
-r1_c = 0
-z1_c = L-R
+r1_c = -5e-6 # <----- Change this one
+z1_c = (L-R)*np.cos(theta1)
 
-# coordinates of mirror 0 centre of RoC (x0_c must = 0)
+# coordinates of mirror 0 centre of RoC (r0_c must = 0 for now)
 r0_c = 0
 z0_c = R
 
 r1_c_act = L*np.tan(theta1) + r1_c
-
+print('offset of m1 from 0 = ', np.round(1e6*r1_c_act,2), ' μm')
 # simulation region and resolution
 r_range = 0.8*R
 z_range = 1.1*L
 r_points = 1000
 z_points = 2000
 
+# %% 3. set up mirrors
 # height/depth of feature
 h = R - np.sqrt(R**2 - (d**2/4))
 
@@ -330,10 +331,11 @@ C1_r, C1_z = pol2cart(S1_r, S1_phi)
 C1_r = C1_r + r1_c
 
 # Generate some new regions based on the mirror feature locations
-zs_0 = np.linspace(-h, 3*h, z_points)
-zs_1 = np.linspace(np.min(C1_z) - h, h + np.max(C1_z), z_points)
+zs0 = np.linspace(-h, 3*h, z_points)
+zs1 = np.linspace(np.min(C1_z) - h, h + np.max(C1_z), z_points)
 
-# calc G00 mode - NOTE symmetric cavity assumed (RoC of faces are the same)
+# %% 4. Gaussian beam calcs
+# calc 'normal' TEM00 mode parameters - NOTE symmetric cavity assumed (RoC of faces are the same)
 # Gaussian beam parameters (see wikipedia)
 zR = np.sqrt((R/(L/2)-1))*(L/2)
 n = np.floor(L/wavelength_m)
@@ -346,15 +348,15 @@ print('beam waist on mirror = ', np.round(1e6*wm, 3), ' μm')
 # Coords normal to mirror 0
 coords = np.meshgrid(zs, rs)
 # Sub regions around each feature
-coords0 = np.meshgrid(zs_0, rs)
-coords1 = np.meshgrid(zs_1, rs)
+coords0 = np.meshgrid(zs0, rs)
+coords1 = np.meshgrid(zs1, rs)
 
 # rotate each coordinate grid for irradiance calculations
 Rcoords = rbytheta(coords[0], coords[1], theta2)
 Rcoords0 = rbytheta(coords0[0], coords0[1], theta2)
 Rcoords1 = rbytheta(coords1[0], coords1[1], theta2)
 
-# calculate the irradiance in each rotated coord system
+# calculate the irradiance & field in each rotated coord system
 GI, GE = Gaussian_beam(Rcoords[0], Rcoords[1] - r1_c, (L/2), w0, l, 1)
 GI_0, GE_0 = Gaussian_beam(Rcoords0[0], Rcoords0[1] - r1_c, (L/2), w0, l, 1)
 GI_1, GE_1 = Gaussian_beam(Rcoords1[0], Rcoords1[1] - r1_c, (L/2), w0, l, 1)
@@ -363,6 +365,7 @@ RC0_z, RC0_r = rbytheta(C0_z, C0_r, theta2)
 RC1_z, RC1_r = rbytheta(C1_z, C1_r, theta2)
 GI_m0, _ = Gaussian_beam(RC0_z, RC0_r - r1_c, L/2, w0, l, 1)
 GI_m1, _ = Gaussian_beam(RC1_z, RC1_r - r1_c, L/2, w0, l, 1)
+
 
 popt0, cov0 = curve_fit(Gaussian_1D, C0_r, GI_m0,
                         p0=[np.max(GI_m0), r0_c, wm])
@@ -377,12 +380,12 @@ I_0 = GI_0[:, np.argmin(np.abs(zs-0))]
 I_L = GI_1[:, np.argmin(np.abs(zs-L))]
 I_waist = GI[:, np.argmin(np.abs(zs-L/2))]
 
-# PLOTS!
+# %% 5. PLOTS!
 # this is to add new colormaps with some transparency to the list
 ncolors = 256
-GnBu_t0 = plt.get_cmap('GnBu')(range(ncolors))
+GnBu_t0 = plt.get_cmap('plasma')(range(ncolors))
 GnBu_t0[:, -1] = np.linspace(0, 1, ncolors)
-map_object = LinearSegmentedColormap.from_list(name='GnBu_t0', colors=GnBu_t0)
+map_object = LinearSegmentedColormap.from_list(name='plasma_t0', colors=GnBu_t0)
 
 # full mode picture
 ax1, fig1 = set_figure('mirror arrangement',
@@ -392,7 +395,7 @@ ax1, fig1 = set_figure('mirror arrangement',
 img = ax1.imshow(np.transpose(GI/np.max(GI)),
                  extent=extents(1e6*rs) + extents(1e6*zs),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
-                 cmap=map_object,
+                 cmap= 'plasma',
                  origin='lower',
                  )
 # img = ax1.imshow(np.transpose(G_alt),
@@ -437,8 +440,8 @@ ax1.plot(1e6*rs[int(0.1*r_points):int(0.9*r_points)],
          ':',
          color='xkcd:red',
          )
-ax1.plot(1e6*rs,
-         1e6*C1_z_semi,
+ax1.plot(1e6*rs[int(0.1*r_points):int(0.9*r_points)],
+         1e6*C1_z_semi[int(0.1*r_points):int(0.9*r_points)],
          ':',
          color='xkcd:blue',
          )
@@ -461,22 +464,14 @@ ax2.plot(1e6*C0_r, GI_m0,
          '-',
          alpha=1,
          color='xkcd:red')
-ax2.plot(1e6*rs, I_0,
-         ':',
-         alpha=1,
-         color='xkcd:red')
 ax2.plot(1e6*(C1_r-r1_c_act), GI_m1,
          '-',
-         alpha=1,
-         color='xkcd:blue')
-ax2.plot(1e6*(rs-r1_c_act), I_L,
-         ':',
          alpha=1,
          color='xkcd:blue')
 ax2.text(2*dx0, 1.2*np.max(GI_m0),
          ('Δx$_0$ =' + str(np.round(1e6*dx0, 1))),
          color='xkcd:black')
-ax2.text(2*dx1-L*np.tan(theta1), 1.05*np.max(GI_m1),
+ax2.text(2e6*dx1, 1.05*np.max(GI_m1),
          ('Δx$_1$ =' + str(np.round(1e6*dx1, 1))),
          color='xkcd:black')
 ax2.text(1e6*w0/2, 0.75*np.max(I_waist),
@@ -500,9 +495,9 @@ ax3, fig3 = set_figure('mirror 0',
                        'x / μm',
                        'y / μm')
 img = ax3.imshow(np.transpose(GI_0),
-                 extent=extents(1e6*rs)+extents(1e6*zs_0),
+                 extent=extents(1e6*rs)+extents(1e6*zs0),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
-                 cmap='viridis',
+                 cmap='plasma',
                  origin='lower',
                  )
 divider = make_axes_locatable(ax3)
@@ -522,9 +517,9 @@ ax4, fig4 = set_figure('mirror 1',
                        'x / μm',
                        'y / μm')
 img = ax4.imshow(np.transpose(GI_1),
-                 extent=extents(1e6*rs)+extents(1e6*zs_1),
+                 extent=extents(1e6*rs)+extents(1e6*zs1),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
-                 cmap='viridis',
+                 cmap='plasma',
                  origin='lower',
                  )
 divider = make_axes_locatable(ax4)
@@ -556,15 +551,13 @@ M1 = Gaussian_2D(np.meshgrid(rs, rs), 1, dx1, 0, popt1[2], popt1[2], 0, 0)
 M1 = np.reshape(M1, np.shape(np.meshgrid(rs, rs)[0]))
 ax5, fig5 = set_figure('Mirror 0 2d', 'x', 'y')
 ax5.plot(a, b,
-         color='xkcd:black')
+         '-',
+         color='xkcd:red')
 ax5.set_xlim((-d, d))
 ax5.set_ylim((-d, d))
 ax6, fig6 = set_figure('Mirror 1 2d', 'x', 'y')
 ax6.plot(a, b,
-         color='xkcd:black')
-ax5.plot(a, b,
-         ':',
-         color='xkcd:black')
+         color='xkcd:blue')
 ax6.set_xlim((-d, d))
 ax6.set_ylim((-d, d))
 
@@ -577,18 +570,14 @@ for i0, v0 in enumerate(rs):
             Mask[i0, i1] = 0
 
 ax5.imshow(np.multiply(M0, Mask), extent=extents(rs)+extents(rs),
-           cmap='Reds',
+           cmap=map_object,
            alpha=1)
 
 ax6.imshow(np.multiply(M1, Mask), extent=extents(rs)+extents(rs),
-           cmap='Blues',
+           cmap=map_object,
            alpha=1)
 A0m = np.sum(np.multiply(M0, Mask))
 A1m = np.sum(np.multiply(M1, Mask))
-ax2.plot(1e6*rs, 0.5*np.multiply(M1, Mask)[500, :], color='xkcd:dark blue')
-ax2.plot(1e6*rs, 0.5*np.multiply(M0, Mask)[500, :], color='xkcd:dark red')
-# ax2.set_yscale('log')
-ax2.set_ylim(1e-10, 1)
 A_0_PPM_2d = 1e6*(1 - A0m/A0)
 A_L_PPM_2d = 1e6*(1 - A1m/A1)
 ax5.text(0, 0.7*d,
@@ -597,6 +586,6 @@ ax6.text(0, 0.7*d,
          (' loss = ' + str(np.round(A_L_PPM_2d, 1)) + ' ppm'))
 plt.show()
 
-# %% save plots
+# %% 6. save plots
 os.chdir(r'G:\My Drive\Plots')
-PPT_save_plot(fig1, ax1, 'mode.svg')
+# PPT_save_plot(fig1, ax1, 'mode.svg')
