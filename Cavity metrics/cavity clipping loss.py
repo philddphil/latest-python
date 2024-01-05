@@ -267,25 +267,25 @@ wavelength_m = 780e-9
 
 # initially work in mirror coords - (0,0) bottom centre of m0
 # this is the tilt of mirror 1 w.r.t mirror 0
-theta1 = 0 # <----- Change this one
+theta1 = 0.2 # <----- Change this one
 
 # coordinates of mirror 1 centre of RoC
-r1_c = -5e-6 # <----- Change this one
-z1_c = (L-R)*np.cos(theta1)
+r1_c = 0 # <----- Change this one
+z1_c = L-R*np.cos(theta1)
 
 # coordinates of mirror 0 centre of RoC (r0_c must = 0 for now)
 r0_c = 0
 z0_c = R
-
 r1_c_act = L*np.tan(theta1) + r1_c
 print('offset of m1 from 0 = ', np.round(1e6*r1_c_act,2), ' μm')
+
 # simulation region and resolution
 r_range = 0.8*R
-z_range = 1.1*L
+z_range = 1.5*L
 r_points = 1000
 z_points = 2000
 
-# %% 3. set up mirrors
+# % 3. set up mirrors
 # height/depth of feature
 h = R - np.sqrt(R**2 - (d**2/4))
 
@@ -327,14 +327,16 @@ S1_r, S1_phi = cart2pol(rs[idx1[0]:idx1[-1]]-r1_c, C1_z_semi[idx1[0]:idx1[-1]])
 S1_phi = S1_phi - theta1
 # Reconvert cavity feature back to xy
 C1_r, C1_z = pol2cart(S1_r, S1_phi)
+C2_r, C2_z = rbytheta(rs[idx1[0]:idx1[-1]],C1_z_semi[idx1[0]:idx1[-1]],theta1)
 # Shift back from x=0 after rotation
 C1_r = C1_r + r1_c
-
+print(1e6*(np.abs(C1_r[0]-C1_r[-1])))
+print(1e6*(np.abs(C2_r[0]-C2_r[-1])))
 # Generate some new regions based on the mirror feature locations
 zs0 = np.linspace(-h, 3*h, z_points)
 zs1 = np.linspace(np.min(C1_z) - h, h + np.max(C1_z), z_points)
 
-# %% 4. Gaussian beam calcs
+# % 4. Gaussian beam calcs
 # calc 'normal' TEM00 mode parameters - NOTE symmetric cavity assumed (RoC of faces are the same)
 # Gaussian beam parameters (see wikipedia)
 zR = np.sqrt((R/(L/2)-1))*(L/2)
@@ -380,7 +382,7 @@ I_0 = GI_0[:, np.argmin(np.abs(zs-0))]
 I_L = GI_1[:, np.argmin(np.abs(zs-L))]
 I_waist = GI[:, np.argmin(np.abs(zs-L/2))]
 
-# %% 5. PLOTS!
+# % 5. PLOTS!
 # this is to add new colormaps with some transparency to the list
 ncolors = 256
 GnBu_t0 = plt.get_cmap('plasma')(range(ncolors))
@@ -395,7 +397,7 @@ ax1, fig1 = set_figure('mirror arrangement',
 img = ax1.imshow(np.transpose(GI/np.max(GI)),
                  extent=extents(1e6*rs) + extents(1e6*zs),
                  #    norm=LogNorm(vmin=1e-6, vmax=1e6),
-                 cmap= 'plasma',
+                 cmap= 'Pastel2',
                  origin='lower',
                  )
 # img = ax1.imshow(np.transpose(G_alt),
@@ -570,11 +572,11 @@ for i0, v0 in enumerate(rs):
             Mask[i0, i1] = 0
 
 ax5.imshow(np.multiply(M0, Mask), extent=extents(rs)+extents(rs),
-           cmap=map_object,
+           cmap='plasma',
            alpha=1)
 
 ax6.imshow(np.multiply(M1, Mask), extent=extents(rs)+extents(rs),
-           cmap=map_object,
+           cmap='plasma',
            alpha=1)
 A0m = np.sum(np.multiply(M0, Mask))
 A1m = np.sum(np.multiply(M1, Mask))
