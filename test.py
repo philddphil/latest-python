@@ -120,10 +120,55 @@ def ggplot_sansserif():
     plt.rcParams['axes.titlepad'] = 6
 
 
+def Gaussian_beam(z, r, z0, w0, λ, I0=0):
+    """ see "Gaussian beam" wikipedia
+
+    Args:
+        z (array): z coords
+        r (array): r coords
+        z0 (float): beam waist z
+        w0 (float): beam waist
+        I0 (int, optional): Intensity. Defaults to 0, corresponding to unity power.
+    """
+
+    k = 2 * np.pi / λ
+    zR = np.pi * w0**2 / λ
+    w_z = w0 * np.sqrt(1 + ((z - z0) / zR)**2)
+    R_z = (z - z0) * (1 + (zR / (z - z0))**2)
+    Guoy_z = np.arctan(z/zR)
+    if I0 == 0:
+        I0 = 2/(np.pi * w0 ** 2)
+
+    E0 = np.sqrt(I0)
+
+    I_rz = (I0 
+            * (w0 / w_z)**2 
+            * np.exp((-2 * r**2) / (w_z**2)))
+    E_rz = np.real((E0 
+            * (w0 / w_z) 
+            * np.exp((-2 * r**2) / (w_z**2)) 
+            * np.exp(-1j * (k*z + (k * r**2 / (2*R_z)) - Guoy_z))))
+    
+    return I_rz, E_rz
+
+def extents(f):
+    """ calculates and returns suitable values for imshow's extent from axis array
+
+    Args:
+        f (array): axis array
+
+    Returns:
+        extents : tuple for extent in imshow
+    """
+    delta = f[1] - f[0]
+    return f[0] - delta / 2, f[-1] + delta / 2
+
+
 # %% 2. tests
 L = 30e-6
 R = 20e-6
-d = 15e-6
+d = 10e-6
+wavelength_m = 780e-9
 
 # simulation region and resolution
 r_range = 0.8*R
@@ -133,8 +178,8 @@ z_points = 2000
 
 # initially work in mirror coords - (0,0) bottom centre of m0
 # this is the tilt of mirror 1 w.r.t mirror 0
-theta1 = 0
-theta1 = np.pi/6 # <----- Change this one
+theta1 = 0.1
+# theta1 = np.pi/50 # <----- Change this one
 
 # coordinates of mirror 1 centre of RoC
 r1_c = 5e-6 # <----- Change this one
@@ -182,12 +227,34 @@ C2_dr = C1_r[0]-C1_r[-1]
 C2_dz = C1_z[0]-C1_z[-1]
 C2_chord = np.sqrt(C2_dr**2 + C2_dz**2)
 
+# % 4. Gaussian beam calcs
+# calc 'normal' TEM00 mode parameters - NOTE symmetric cavity assumed (RoC of faces are the same)
+# Gaussian beam parameters (see wikipedia)
+zR = np.sqrt((R/(L/2)-1))*(L/2)
+n = np.floor(L/wavelength_m)
+l = L/n
+w0 = np.sqrt((zR * l) / (np.pi))
+wm = w0 * np.sqrt(1+(L/(2*zR))**2)
+kx = (zs-L/2)*np.tan(theta2)+r1_c/2
+mode_c_r = (r1_c - r0_c)/2
+mode_c_z = L/2
+
+coords = np.meshgrid(zs, rs)
+# rotate each coordinate grid for irradiance calculations
+Rcoords = rbytheta(coords[0]-z1_c, coords[1]-r1_c, 0, 0, theta1)
+# calculate the irradiance & field in each rotated coord system
+GI, GE = Gaussian_beam(Rcoords[0], Rcoords[1], 0, w0, l, 1)
 
 # Plots
 ax1, fig1 = set_figure('mirror arrangement',
                        'r / μm',
                        'z / μm')
-
+img = ax1.imshow(np.transpose(GI/np.max(GI)),
+                 extent=extents(1e6*rs) + extents(1e6*zs),
+                 #    norm=LogNorm(vmin=1e-6, vmax=1e6),
+                 cmap= 'Pastel2',
+                 origin='lower',
+                 )
 ax1.plot(1e6*C1_r,
          1e6*C1_z,
          '-',
@@ -198,6 +265,8 @@ ax1.plot(1e6*C1R_r, 1e6*C1R_z,
          ':',
          color='xkcd:red',
          label='m1')
-
+ax1.plot(1e6*rs,1e6*mode_c_z*np.ones_like(rs),
+         '-',
+         color='xkcd:black')
 ax1.set_ylim(bottom=0)
 ax1.set_aspect('equal')
