@@ -47,7 +47,7 @@ e = constants.e
 h = constants.h
 pi = np.pi
 
-photon_rate_cps = 3e6
+photon_flux_cps = 1.3e16
 wavelength_nm = 1033
 dfreq_GHz = 0.02
 
@@ -79,8 +79,29 @@ life_time_ns = 1e9/(2*pi*dfreq_Hz)
 
 # Photon energy metrics
 photon_J = h * freq_Hz
-photon_flux_W = photon_J * photon_rate_cps
+
+photon_flux_kps = 1e-3 * photon_flux_cps
+photon_flux_Mps = 1e-6 * photon_flux_cps
+photon_flux_Gps = 1e-9 * photon_flux_cps
+
+photon_std_cps = np.sqrt(photon_flux_cps)
+photon_std_kcps = 1e-3*np.sqrt(photon_flux_cps)
+photon_std_Mcps = 1e-6*np.sqrt(photon_flux_cps)
+photon_std_Gcps = 1e-9*np.sqrt(photon_flux_cps)
+
+photon_flux_W = photon_J * photon_flux_cps
+photon_flux_mW = 1e3 * photon_flux_W
+photon_flux_uW = 1e6 * photon_flux_W
+photon_flux_nW = 1e9 * photon_flux_W
 photon_flux_pW = 1e12 * photon_flux_W
+
+photon_std_W = 1.923e-19 * photon_std_cps
+photon_std_mW = 1e3 * 1.923e-19 * photon_std_cps
+photon_std_uW = 1e6 * 1.923e-19 * photon_std_cps
+photon_std_nW = 1e9 * 1.923e-19 * photon_std_cps
+photon_std_pW = 1e12 * 1.923e-19 * photon_std_cps
+
+shot_noise_CE = 100*photon_std_W/photon_flux_W
 
 # Cavity metrics
 l = 360e-6
