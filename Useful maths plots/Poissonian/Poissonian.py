@@ -1,69 +1,26 @@
-##############################################################################
-# Import some libraries
-##############################################################################
+
+#%% Import some libraries
 import os
 import sys
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
+from scipy import math
 
 
-##############################################################################
-# Some defs
-##############################################################################
-# Custom palette for plotting ################################################
-def palette():
-    colours = {'mnk_purple': [145 / 255, 125 / 255, 240 / 255],
-               'mnk_dgrey': [39 / 255, 40 / 255, 34 / 255],
-               'mnk_lgrey': [96 / 255, 96 / 255, 84 / 255],
-               'mnk_green': [95 / 255, 164 / 255, 44 / 255],
-               'mnk_yellow': [229 / 255, 220 / 255, 90 / 255],
-               'mnk_blue': [75 / 255, 179 / 255, 232 / 255],
-               'mnk_orange': [224 / 255, 134 / 255, 31 / 255],
-               'mnk_pink': [180 / 255, 38 / 255, 86 / 255],
-               ####
-               'rmp_dblue': [12 / 255, 35 / 255, 218 / 255],
-               'rmp_lblue': [46 / 255, 38 / 255, 86 / 255],
-               'rmp_pink': [210 / 255, 76 / 255, 197 / 255],
-               'rmp_green': [90 / 255, 166 / 255, 60 / 255],
-               ####
-               'fibre9l_1': [234 / 255, 170 / 255, 255 / 255],
-               'fibre9l_2': [255 / 255, 108 / 255, 134 / 255],
-               'fibre9l_3': [255 / 255, 182 / 255, 100 / 255],
-               'fibre9l_4': [180 / 255, 151 / 255, 255 / 255],
-               'fibre9l_6': [248 / 255, 255 / 255, 136 / 255],
-               'fibre9l_7': [136 / 255, 172 / 255, 255 / 255],
-               'fibre9l_8': [133 / 255, 255 / 255, 226 / 255],
-               'fibre9l_9': [135 / 255, 255 / 255, 132 / 255],
-               'fibre9d_1': [95 / 255, 0 / 255, 125 / 255],
-               'fibre9d_2': [157 / 255, 0 / 255, 28 / 255],
-               'fibre9d_3': [155 / 255, 82 / 255, 0 / 255],
-               'fibre9d_4': [40 / 255, 0 / 255, 147 / 255],
-               'fibre9d_6': [119 / 255, 125 / 255, 0 / 255],
-               'fibre9d_7': [0 / 255, 39 / 255, 139 / 255],
-               'fibre9d_8': [0 / 255, 106 / 255, 85 / 255],
-               'fibre9d_9': [53 / 255, 119 / 255, 0 / 255],
-               ####
-               'ggred': [217 / 255, 83 / 255, 25 / 255],
-               'ggblue': [30 / 255, 144 / 255, 229 / 255],
-               'ggpurple': [145 / 255, 125 / 255, 240 / 255],
-               'ggyellow': [229 / 255, 220 / 255, 90 / 255],
-               'gglred': [237 / 255, 103 / 255, 55 / 255],
-               'gglblue': [20 / 255, 134 / 255, 209 / 255],
-               'gglpurple': [165 / 255, 145 / 255, 255 / 255],
-               'gglyellow': [249 / 255, 240 / 255, 110 / 255],
-               'ggdred': [197 / 255, 63 / 255, 5 / 255],
-               'ggdblue': [0 / 255, 94 / 255, 169 / 255],
-               'ggdpurple': [125 / 255, 105 / 255, 220 / 255],
-               'ggdyellow': [209 / 255, 200 / 255, 70 / 255],
-               }
-    return colours
 
-
-# set rcParams for nice plots ################################################
+# %% Some defs
 def ggplot_sansserif():
-    colours = palette()
-    # plt.style.use('ggplot')
+    """
+    Set some parameters for ggplot
+    Parameters
+    ----------
+    None
+    Returns
+    -------
+    None
+    """
+    plt.style.use('ggplot')
     plt.rcParams['font.size'] = 8
     plt.rcParams['font.family'] = 'sans-serif'
     plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
@@ -71,37 +28,63 @@ def ggplot_sansserif():
     plt.rcParams['axes.labelweight'] = 'normal'
     plt.rcParams['xtick.labelsize'] = 8
     plt.rcParams['ytick.labelsize'] = 8
-    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['legend.fontsize'] = 8
     plt.rcParams['figure.titlesize'] = 8
     plt.rcParams['lines.color'] = 'white'
-    plt.rcParams['text.color'] = colours['mnk_purple']
-    plt.rcParams['axes.labelcolor'] = colours['mnk_yellow']
-    plt.rcParams['xtick.color'] = colours['mnk_purple']
-    plt.rcParams['ytick.color'] = colours['mnk_purple']
-    plt.rcParams['axes.edgecolor'] = colours['mnk_lgrey']
-    plt.rcParams['savefig.edgecolor'] = colours['mnk_lgrey']
-    plt.rcParams['axes.facecolor'] = colours['mnk_dgrey']
-    plt.rcParams['savefig.facecolor'] = colours['mnk_dgrey']
-    plt.rcParams['grid.color'] = colours['mnk_lgrey']
-    plt.rcParams['grid.linestyle'] = ':'
+    plt.rcParams['text.color'] = 'xkcd:black'
+    plt.rcParams['axes.labelcolor'] = 'xkcd:black'
+    plt.rcParams['xtick.color'] = 'xkcd:black'
+    plt.rcParams['ytick.color'] = 'xkcd:black'
+    plt.rcParams['axes.edgecolor'] = 'xkcd:black'
+    plt.rcParams['savefig.edgecolor'] = 'xkcd:black'
+    plt.rcParams['axes.facecolor'] = 'xkcd:dark gray'
+    plt.rcParams['savefig.facecolor'] = 'xkcd:dark gray'
+    plt.rcParams['grid.color'] = 'xkcd:dark gray'
+    plt.rcParams['grid.linestyle'] = 'none'
     plt.rcParams['axes.titlepad'] = 6
 
 
-# Set up figure for plotting #################################################
-def set_figure(name='figure', xaxis='x axis', yaxis='y axis', size=3):
+def set_figure(name: str = 'figure',
+               xaxis='x axis',
+               yaxis='y axis',
+               size: float = 4,
+               ):
+    """
+    Set a figure up
+    Parameters
+    ----------
+    name : str
+        name of figure
+    xaxis : str
+       x axis label
+    yaxis : str
+       y axis label
+    size : float
+
+    Returns
+    -------
+    ax1 : axes._subplots.AxesSubplot
+    fig1 : figure.Figure
+    """
     ggplot_sansserif()
-    cs = palette()
     fig1 = plt.figure(name, figsize=(size * np.sqrt(2), size))
     ax1 = fig1.add_subplot(111)
-    fig1.patch.set_facecolor(cs['mnk_dgrey'])
+    fig1.patch.set_facecolor('xkcd:dark grey')
     ax1.set_xlabel(xaxis)
     ax1.set_ylabel(yaxis)
-    return ax1, fig1, cs
+    return ax1, fig1
 
 
-# Save 2d plot with a colourscheme suitable for ppt, as a png ################
-def PPT_save_2d(fig, ax, name, dpi=600):
+def PPT_save_plot(fig, ax, name, dpi=600, legend=True):
+    """ saves a plot as 'name'.png (unless .svg is specified in the name). 
+    Iterates name (name_0, name_1, ...) if file already exists with that name.
 
+    Args:
+        fig (plt.fig): figure pointer
+        ax (plt.ax): axis pointer
+        name (str): desired name of file. No extension produced .png with name. Add .svg as ext. if needed
+        dpi (int, optional): _description_. Defaults to 600.
+    """
     # Set plot colours
     plt.rcParams['text.color'] = 'xkcd:black'
     plt.rcParams['savefig.facecolor'] = ((1.0, 1.0, 1.0, 0.0))
@@ -110,6 +93,23 @@ def PPT_save_2d(fig, ax, name, dpi=600):
     ax.yaxis.label.set_color('xkcd:black')
     ax.tick_params(axis='x', colors='xkcd:black')
     ax.tick_params(axis='y', colors='xkcd:black')
+    # handle legends
+    if legend==True:
+        ax.legend(
+            fancybox=True,
+            facecolor=(1.0, 1.0, 1.0, 0.5),
+            labelcolor='black',
+            # loc='lower right',
+            # loc='upper right',
+            framealpha=1.0)
+
+    else: 
+        try:
+            ax.get_legend().remove()
+        except AttributeError:
+            pass
+
+    fig.tight_layout()
 
     # Loop to check for file - appends filename with _# if name already exists
     f_exist = True
@@ -133,19 +133,18 @@ def Poissonian_1D(k, λ):
     P = []
 
     for i0, j0 in enumerate(k):
-        P.append(np.exp(-λ) * (λ**j0) / sp.math.gamma(j0 + 1))
+        P.append(np.exp(-λ) * (λ**j0) / sp.special.gamma(j0 + 1))
 
     return P
 
 
 ##############################################################################
-# Do some stuff
-##############################################################################
+# %% Do some stuff
 n_max = 5
 res = n_max + 1
 
-n_bar1 = 0.5
-n_bar2 = 3
+n_bar1 = 1
+n_bar2 = 1
 
 n_ints = np.linspace(0, 10, 11)
 n_cont = np.linspace(0, 10, 1024)
@@ -158,9 +157,8 @@ P_cont2 = Poissonian_1D(n_cont, n_bar2)
 
 
 ##############################################################################
-# Plot some figures
-##############################################################################
-plot_path = r"D:\Python\Plots\\"
+# %% Plot some figures 
+plot_path = r"C:\Plots\\"
 # fig1 = plt.figure('fig1', figsize=(5, 5))
 # ax1 = fig1.add_subplot(1, 1, 1)
 # fig1.patch.set_facecolor(cs['mnk_dgrey'])
@@ -175,9 +173,9 @@ x_c = n_cont
 # y_c1 = P_cont1
 y_c2 = P_cont2
 
-ax2, fig2, cs = set_figure('figure', r'$\langle n \rangle$', 'Probability', 2.5)
+ax2, fig2 = set_figure('figure', r'$\langle n \rangle$', 'Probability', 2.5)
 
-plt.plot(x_c, y_c2, alpha=0.8, color=cs['gglred'], label=r'$\mathbb{N}$')
+plt.plot(x_c, y_c2, alpha=0.8, color='xkcd:red', label=r'$\mathbb{N}$')
 
 # plt.bar(0, 1,
 #         alpha=1,
@@ -196,7 +194,7 @@ plt.plot(x_c, y_c2, alpha=0.8, color=cs['gglred'], label=r'$\mathbb{N}$')
 
 plt.bar(x_d, y_d2,
         alpha=1,
-        color=cs['gglred'],
+        color='xkcd:red',
         label=r'|α$_{}\rangle$')
 
 # plt.bar(x_d, y_d2, alpha=0.5, color=cs['gglblue'], label=r'|α$_{3}\rangle$')
