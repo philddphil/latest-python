@@ -149,71 +149,58 @@ n_bar2 = 1
 n_ints = np.linspace(0, 10, 11)
 n_cont = np.linspace(0, 10, 1024)
 
-# P_ints1 = Poissonian_1D(n_ints, n_bar1)
-# P_cont1 = Poissonian_1D(n_cont, n_bar1)
-
 P_ints2 = Poissonian_1D(n_ints, n_bar2)
 P_cont2 = Poissonian_1D(n_cont, n_bar2)
 
-
-##############################################################################
-# %% Plot some figures 
 plot_path = r"C:\Plots\\"
-# fig1 = plt.figure('fig1', figsize=(5, 5))
-# ax1 = fig1.add_subplot(1, 1, 1)
-# fig1.patch.set_facecolor(cs['mnk_dgrey'])
-# ax1.set_xlabel('x axis')
-# ax1.set_ylabel('y axis')
-# plt.imshow(im, extent=prd.extents(x) + prd.extents(y))
 x_d = n_ints
-# y_d1 = P_ints1
 y_d2 = P_ints2
 
 x_c = n_cont
 # y_c1 = P_cont1
 y_c2 = P_cont2
 
-ax2, fig2 = set_figure('figure', r'$\langle n \rangle$', 'Probability', 2.5)
 
-plt.plot(x_c, y_c2, alpha=0.8, color='xkcd:red', label=r'$\mathbb{N}$')
+ax0, fig0 = set_figure('figure0', r'$\langle n \rangle$', 'Probability', 2.5)
 
-# plt.bar(0, 1,
-#         alpha=1,
-#         color=cs['ggred'],
-#         label=r'|0$\rangle$')
+ax0.bar([0,1],[0.5, 0.5],
+        alpha=1,
+        color='xkcd:green',
+        label=r'|$\psi\rangle$')
+ax0.legend()
+ax0.set_xlim(-0.5, 10.5)
+ax0.set_ylim(0, 1.1)
 
-# plt.bar(1, 1,
-#         alpha=1,
-#         color=cs['ggblue'],
-#         label=r'|1$\rangle$')
+ax1, fig1 = set_figure('figure1', r'$\langle n \rangle$', 'Probability', 2.5)
+ax1.bar(1, 1,
+        alpha=1,
+        color='xkcd:blue',
+        label=r'|1$\rangle$')
+ax1.legend()
+ax1.set_xlim(-0.5, 10.5)    
+ax1.set_ylim(0, 1.1)
 
-# plt.bar(2, 1,
-#         alpha=1,
-#         color=cs['ggpurple'],
-#         label=r'|2$\rangle$')
+ax2, fig2 = set_figure('figure2', r'$\langle n \rangle$', 'Probability', 2.5)
 
-plt.bar(x_d, y_d2,
+ax2.plot(x_c, y_c2, 
+         alpha=0.8, 
+         color='xkcd:dark red', 
+         label=r'$\mathbb{N}$')
+
+ax2.bar(x_d, y_d2,
         alpha=1,
         color='xkcd:red',
         label=r'|α$_{}\rangle$')
+ax2.legend()
+ax2.set_xlim(-0.5, 10.5)
+ax2.set_ylim(0, 1.1)
 
-# plt.bar(x_d, y_d2, alpha=0.5, color=cs['gglblue'], label=r'|α$_{3}\rangle$')
-# plt.plot(x1, y1, alpha=1, color=cs['ggdred'], lw=0.5, label='decay')
-# plt.plot(x2, y2, '.', alpha=0.4, color=cs['gglblue'], label='')
-# plt.plot(x_c, y_c2, alpha=1, color=cs['ggblue'], lw=0.5)
-
-# plt.plot(x_c, y_c1,
-#          alpha=1,
-#          color=cs['ggred'],
-#          lw=1,
-#          label=r'$\mathbb{R}$')
-
-ax2.legend(loc='upper right', fancybox=True, framealpha=0.5)
-# ax2.set_yscale('log')
-# ax2.set_xlim(-0.5, 5.5)
-# ax2.set_ylim(0, 1.1)
-# os.chdir(p0)
+os.chdir(plot_path)
 plt.tight_layout()
 plt.show()
-ax2.legend(loc='upper right', fancybox=True, facecolor=(1.0, 1.0, 1.0, 0.0))
-PPT_save_2d(fig2, ax2, 'plot')
+
+# %% Save the plots
+PPT_save_plot(fig0, ax0, 'plot0')
+PPT_save_plot(fig1, ax1, 'plot1')
+PPT_save_plot(fig2, ax2, 'plot2')
+
