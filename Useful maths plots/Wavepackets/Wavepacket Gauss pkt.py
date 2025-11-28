@@ -157,58 +157,47 @@ def Gaussian_1D(x, A, x_c, x_w, bkg=0, N=1):
 π = np.pi
 phi = 0.1
 ts = np.linspace(-6 * π, 6 * π, 1000)
+
 Es0 = Gaussian_1D(ts, 1, 0, 2 * π, 0, 4) * np.cos(ts*2)
 Es1 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π/4)
 Es2 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π/3)
-Es3 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π/2)
+Es3 = Gaussian_1D(ts, 1, 0, 2 * π, 0, 4) * np.cos(ts*2+π/2)
 Es4 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+2*π/3)
 Es5 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+3*π/4)
-Es6 = Gaussian_1D(ts, 1, 0, 2 * π, 0) * np.cos(ts*2+π)
+Es6 = Gaussian_1D(ts, 1, 0, 2 * π, 0, 4) * np.cos(ts*2+π)
 
 
 #  Plot some figures
-
-
-
-
-ax1, fig1 = set_figure('wavepacket', 'x', 'y')
+ax1, fig1 = set_figure('I', 'x', 'y')
 ax1.plot(ts, Es0**2, 
          '-',
-         color='#ff652a',
+         color='xkcd:red',
          alpha=1,
          )
-# ax1.plot(ts, Es1, 
-#          '-',
-#          color='#00bdcd7f',
-#          alpha=0.4,
-#          )
-# ax1.plot(ts, Es2, 
-#          '-',
-#          color='#00bdcd7f',
-#          alpha=0.45,
-#          )
-# ax1.plot(ts, Es3, 
-#          '-',
-#          color='#00bdcd7f',
-#          alpha=0.5,
-#          )
-# ax1.plot(ts, Es4, 
-#          '-',
-#          color='#00bdcd7f',
-#          alpha=0.45,
-#          )
-# ax1.plot(ts, Es5, 
-#          '-',
-#          color='#00bdcd7f',
-#          alpha=0.4,
-#          )
-# ax1.plot(ts, Es6, 
-#          '-',
-#          color='#00bdcd7f',
-#          alpha=0.3,
-#          )
 fig1.tight_layout()
 ax1.axis('off')
+
+ax2, fig2 = set_figure('E', 'x', 'y')
+ax2.plot(ts, Es3, 
+         '-',
+         color='xkcd:blue',
+         alpha=1,
+         )
+
+ax2.plot(ts, Es0, 
+         '--',
+         color='xkcd:red',
+         alpha=1,
+         )
+
+ax2.plot(ts, Es0+Es3, 
+         '-',
+         color='xkcd:purple',
+         alpha=1,
+         )
+
+fig2.tight_layout()
+ax2.axis('off')
 # Save plot
-os.chdir(r"G:\My Drive\Plots")
-PPT_save_plot(fig1, ax1, 'wavepacket.svg')
+os.chdir(r"C:\Plots")
+PPT_save_plot(fig2, ax2, 'wavepacket.svg')

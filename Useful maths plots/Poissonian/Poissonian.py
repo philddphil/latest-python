@@ -5,9 +5,6 @@ import sys
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-from scipy import math
-
-
 
 # %% Some defs
 def ggplot_sansserif():
