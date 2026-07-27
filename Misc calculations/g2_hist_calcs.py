@@ -7,7 +7,8 @@ Bin_pop = (1/(Error_req_percent/100))**2
 
 print('Target Bin population:', 2 * Bin_pop)
 
-f = 2e4
+
+f = 58e3
 mean_photon_number = 0.01
 
 D1_cps = f * mean_photon_number
@@ -21,3 +22,5 @@ print('Time to fill histogram:', T, ' sec')
 print('Time to fill histogram:', T/60, ' min')
 print('Time to fill histogram:', T/(60*60), ' hrs')
 print('Time to fill histogram:', T/(60*60*24), ' days')
+
+# %%
